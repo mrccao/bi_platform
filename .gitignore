@@ -209,6 +209,7 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/windows,macos,python,visualstudiocode,textmate,pycharm
 
+app/settings.py
 app/public/static/js/*
 app/public/static/css/*
 packages
