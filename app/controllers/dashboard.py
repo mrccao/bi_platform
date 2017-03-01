@@ -21,40 +21,46 @@ def index():
 @dashboard.route("/dashboard/visualization/summary_data", methods=["GET"])
 @login_required
 def visualization_summary_data():
-    now = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
-    index_time = current_time().replace(days=-2).format('YYYY-MM-DD')
+    now = current_time().to(app.config['APP_TIMEZONE'])
 
-    new_registration = db.engine.execute(text("SELECT COUNT(*) FROM bi_user WHERE DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) = :now"), now=now).scalar()
-    revenue = db.engine.execute(text("SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :now"), now=now).scalar()
+    if request.args.get('day') and request.args.get('day') == 'yday':
+        day = now.replace(days=-1).format('YYYY-MM-DD')
+    else:
+        day = now.format('YYYY-MM-DD')
+
+    index_time = now.replace(days=-2).format('YYYY-MM-DD')
+
+    new_registration = db.engine.execute(text("SELECT COUNT(*) FROM bi_user WHERE DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) = :day"), day=day).scalar()
+    revenue = db.engine.execute(text("SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day"), day=day).scalar()
     # game_dau = db.engine.execute(text("""
     #                                   SELECT Count(DISTINCT user_id)
     #                                   FROM   bi_user_currency
     #                                   WHERE  created_at > :index_time
     #                                          AND transaction_type NOT IN :transaction_type
-    #                                          AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :now 
-    #                                   """), now=now, index_time=index_time, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
+    #                                          AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day 
+    #                                   """), day=day, index_time=index_time, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
     # new_registration_game_dau = db.engine.execute(text("""
     #                                                    SELECT COUNT(DISTINCT uc.user_id)
     #                                                    FROM   bi_user u
     #                                                           LEFT JOIN bi_user_currency uc
     #                                                             ON u.user_id = uc.user_id
     #                                                    WHERE  uc.transaction_type NOT IN :transaction_type
-    #                                                           AND DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :now 
-    #                                                    """), now=now, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
+    #                                                           AND DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day 
+    #                                                    """), day=day, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
 
     game_dau = db.engine.execute(text("""
                                       SELECT Count(DISTINCT user_id)
                                       FROM   bi_user_currency
                                       WHERE  created_at > :index_time
-                                             AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :now 
-                                      """), now=now, index_time=index_time).scalar()
+                                             AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day 
+                                      """), day=day, index_time=index_time).scalar()
     new_registration_game_dau = db.engine.execute(text("""
                                                        SELECT COUNT(DISTINCT uc.user_id)
                                                        FROM   bi_user u
                                                               LEFT JOIN bi_user_currency uc
                                                                 ON u.user_id = uc.user_id
-                                                       WHERE  DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :now 
-                                                       """), now=now).scalar()
+                                                       WHERE  DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day 
+                                                       """), day=day).scalar()
 
     payload = {
         'new_registration': new_registration,

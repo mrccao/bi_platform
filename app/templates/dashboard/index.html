@@ -16,7 +16,7 @@
         <!-- small box -->
         <div class="small-box bg-yellow summary-box">
           <div class="inner">
-            <h3><span class="recent-sparkline" id="recent-new-registration"></span><span id="summary-new-registration">--</span></h3>
+            <h3><span class="recent-sparkline" id="recent-new-registration"></span><span id="summary-new-registration">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-yday" title="Yesterday">--</span></h3>
             <p>New Registration</p>
           </div>
           <div class="icon">
@@ -29,7 +29,7 @@
         <!-- small box -->
         <div class="small-box bg-aqua summary-box">
           <div class="inner">
-            <h3><span class="recent-sparkline" id="recent-revenue"></span><span id="summary-revenue">--</span></h3>
+            <h3><span class="recent-sparkline" id="recent-revenue"></span><span id="summary-revenue">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-revenue-yday" title="Yesterday">--</span></h3>
             <p>Revenue</p>
           </div>
           <div class="icon">
@@ -42,7 +42,7 @@
         <!-- small box -->
         <div class="small-box bg-green summary-box">
           <div class="inner">
-            <h3><span class="recent-sparkline" id="recent-game-dau"></span><span id="summary-game-dau">--</span></h3>
+            <h3><span class="recent-sparkline" id="recent-game-dau"></span><span id="summary-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-game-dau-yday" title="Yesterday">--</span></h3>
             <p>Game DAU</p>
           </div>
           <div class="icon" style="top: -8px;">
@@ -55,7 +55,7 @@
         <!-- small box -->
         <div class="small-box bg-teal summary-box">
           <div class="inner">
-            <h3><span class="recent-sparkline" id="recent-new-registration-game-dau"></span><span id="summary-new-registration-game-dau">--</span></h3>
+            <h3><span class="recent-sparkline" id="recent-new-registration-game-dau"></span><span id="summary-new-registration-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-game-dau-yday" title="Yesterday">--</span></h3>
             <p>New Reg Game DAU</p>
           </div>
           <div class="icon">
@@ -204,24 +204,32 @@
 
       ////////////////////
 
-      function getSummaryData() {
+      function getSummaryData(day) {
         $.ajax({
             type: 'GET',
             url: '/dashboard/visualization/summary_data',
+            data: { day: day },
             dataType: "json",
             success: function(result) {
-              console.log(result);
-              $('#summary-new-registration').text(result.new_registration);
-              $('#summary-revenue').text(result.revenue);
-              $('#summary-game-dau').text(result.game_dau);
-              $('#summary-new-registration-game-dau').text(result.new_registration_game_dau);
+              if (day == 'today') {
+                $('#summary-new-registration').text(result.new_registration);
+                $('#summary-revenue').text(result.revenue);
+                $('#summary-game-dau').text(result.game_dau);
+                $('#summary-new-registration-game-dau').text(result.new_registration_game_dau);
+              } else if (day == 'yday') {
+                $('#summary-new-registration-yday').text(result.new_registration);
+                $('#summary-revenue-yday').text(result.revenue);
+                $('#summary-game-dau-yday').text(result.game_dau);
+                $('#summary-new-registration-game-dau-yday').text(result.new_registration_game_dau);
+              }
             },
             error: function(xhr) {
 
             }
         });
       }
-      getSummaryData();
+      getSummaryData('today');
+      getSummaryData('yday');
 
       ////////////////////
 
