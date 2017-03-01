@@ -1196,7 +1196,7 @@ def process_user_mall_order_newly_added_records():
                                                          ON op.ProductId = p.Id
                                                   LEFT JOIN Mall_tCurrency c
                                                          ON o.CurrencyCode = c.CurrencyCode
-                                           WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41
+                                           WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND o.PaymentMode = 1
                                            GROUP  BY o.UserId
                                            ORDER  BY max_createtime ASC
                                            """))
@@ -1290,7 +1290,7 @@ def process_user_mall_order_newly_added_records():
                                                      ON op.ProductId = p.Id
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
-                                       WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41
+                                       WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND o.PaymentMode = 1
                                               AND o.UserId IN (SELECT DISTINCT userid
                                                                FROM   Mall_tOrder
                                                                WHERE  cdate >= :add_time)
@@ -1467,7 +1467,7 @@ def process_user_mall_order_newly_updated_records():
                                                          ON op.ProductId = p.Id
                                                   LEFT JOIN Mall_tCurrency c
                                                          ON o.CurrencyCode = c.CurrencyCode
-                                           WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND o.udate IS NOT NULL
+                                           WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND o.PaymentMode = 1 AND o.udate IS NOT NULL
                                            GROUP  BY o.UserId
                                            ORDER  BY max_updatetime ASC
                                            """))
@@ -1561,7 +1561,7 @@ def process_user_mall_order_newly_updated_records():
                                                      ON op.ProductId = p.Id
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
-                                       WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41
+                                       WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND o.PaymentMode = 1
                                               AND o.UserId IN (SELECT DISTINCT userid
                                                                FROM   Mall_tOrder
                                                                WHERE  uDate >= :update_time)

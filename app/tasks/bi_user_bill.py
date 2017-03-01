@@ -73,6 +73,7 @@ def process_user_mall_bill_newly_added_records():
                                                          ON g.Id = op.GoodsId
                                            WHERE  o.OrderStatus != 1
                                                   AND o.OrderStatus != 41
+                                                  AND o.PaymentMode = 1
                                            ORDER BY o.OrderId ASC
                                            """))
         return connection.execute(text("""
@@ -106,6 +107,7 @@ def process_user_mall_bill_newly_added_records():
                                                          ON g.Id = op.GoodsId
                                        WHERE  o.OrderStatus != 1
                                               AND o.OrderStatus != 41
+                                              AND o.PaymentMode = 1
                                               AND o.OrderId > :order_id
                                        ORDER BY o.OrderId ASC
                                        """), order_id=config_value)
@@ -204,6 +206,7 @@ def process_user_mall_bill_newly_updated_records():
                                                          ON g.Id = op.GoodsId
                                            WHERE  o.OrderStatus != 1
                                                   AND o.OrderStatus != 41
+                                                  AND o.PaymentMode = 1
                                            ORDER BY o.UDate ASC
                                            """))
         return connection.execute(text("""
@@ -237,6 +240,7 @@ def process_user_mall_bill_newly_updated_records():
                                                          ON g.Id = op.GoodsId
                                        WHERE  o.OrderStatus != 1
                                               AND o.OrderStatus != 41
+                                              AND o.PaymentMode = 1
                                               AND o.UDate IS NOT NULL AND o.UDate >= :update_time
                                        ORDER BY o.UDate ASC
                                        """), update_time=config_value)
