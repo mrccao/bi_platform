@@ -1,0 +1,210 @@
+{% extends 'admin/master.html' %}
+{% import 'admin/lib.html' as lib with context %}
+
+{% block main_content %}
+    <section class="content-header">
+        <h1>{{ model }} <small>{{ model.user_id }}</small></h1>
+
+        {% block breadcrumb %}
+            <ol class="breadcrumb">
+                <li><a href="{{ admin_view.admin.index_view.url }}"><i class="fa fa-home"></i>{{ _gettext('Home') }}</a></li>
+                <li><a href="{{ admin_view.url }}"><i class="fa fa-list"></i>{{ admin_view.name }} {{ _gettext('List') }}</a></li>
+                <li class="active">{{ model }}</li>
+            </ol>
+        {% endblock %}
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-6">
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <h3 class="box-title">User Detail</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                    <table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>Column</th>
+                          <th>Value</th>
+                        </tr>
+                        {% for item in attribute_pairs %}
+                        <tr>
+                          <td>
+                            {% if item[0] == 'Count Of Dollar Exchanged For Gold' %}
+                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Gold" target="_blank">{{ item[0] }}</a>
+                            {% elif item[0] == 'Count Of Dollar Exchanged For Silver' %}
+                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Silver+Coins" target="_blank">{{ item[0] }}</a>
+                            {% elif item[0] == 'Count Of Dollar Exchanged For Lucky Spin' or item[0] == 'Count Of Dollar Exchanged For Spin Purchase' or item[0] == 'Count Of Dollar Exchanged For Spin Ticket' or item[0] == 'Count Of Dollar Exchanged For Spin Booster' %}
+                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Lucky+Spin+Set" target="_blank">{{ item[0] }}</a>
+                            {% else %}
+                              {{ item[0] }}
+                            {% endif %}
+                            </td>
+                          <td>
+                            {{ item[-1] }}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="col-md-6">
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <div class="pull-right">
+                    <a href="/data/user_login_log/?flt0_0={{ model.user_id }}" target="_blank">Show more</a>
+                  </div>
+                  <h3 class="box-title">Login Logs</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                    <table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>DateTime</th>
+                          <th>Ip</th>
+                          <th>Result</th>
+                          <th>Reason</th>
+                        </tr>
+                        {% for log in login_logs %}
+                        <tr>
+                          <td>{{ log.login_time }}</td>
+                          <td>{{ log.login_ip }}</td>
+                          <td>{{ log.login_result_type() }}</td>
+                          <td>{{ log.login_result_text() }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                </div>
+              </div>
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <div class="pull-right">
+                    <a href="/data/bi_user_currency/?flt1_0={{ model.user_id }}&flt2_1=Gold&flt4_3=20132001,999998301,925011306,925011307,925011410,925011411,30007777,925011311,999998302" target="_blank">Show more</a>
+                  </div>
+                  <h3 class="box-title">Gold - Free Currency</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                  <div class="text-center">Temporary disabled, please click 'Show more'</div>
+                    <!--<table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>DateTime</th>
+                          <th>Transaction Type</th>
+                          <th>Transaction Amount</th>
+                          <th>Balance</th>
+                        </tr>
+                        {% for currency in gold_free_currency %}
+                        <tr>
+                          <td>{{ currency.created_at }}</td>
+                          <td>{{ currency.transaction_type_display() }}</td>
+                          <td>{{ currency.transaction_amount }}</td>
+                          <td>{{ currency.balance }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>-->
+                </div>
+              </div>
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <div class="pull-right">
+                    <a href="/data/bi_user_currency/?flt1_0={{ model.user_id }}&flt2_1=Gold" target="_blank">Show more</a>
+                  </div>
+                  <h3 class="box-title">Gold - Activity Logs</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                  <div class="text-center">Temporary disabled, please click 'Show more'</div>
+                    <!--<table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>DateTime</th>
+                          <th>Transaction Type</th>
+                          <th>Transaction Amount</th>
+                          <th>Balance</th>
+                        </tr>
+                        {% for activity in gold_activities %}
+                        <tr>
+                          <td>{{ activity.created_at }}</td>
+                          <td>{{ activity.transaction_type_display() }}</td>
+                          <td>{{ activity.transaction_amount }}</td>
+                          <td>{{ activity.balance }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>-->
+                </div>
+              </div>
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <div class="pull-right">
+                    <a href="/data/bi_user_currency/?flt1_0={{ model.user_id }}&flt2_1=Silver&flt4_3=923118301,923118302,923118303,923118304,923118311,923118312,923118313,923118314" target="_blank">Show more</a>
+                  </div>
+                  <h3 class="box-title">Silver - Free Currency</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                  <div class="text-center">Temporary disabled, please click 'Show more'</div>
+                    <!--<table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>DateTime</th>
+                          <th>Transaction Type</th>
+                          <th>Transaction Amount</th>
+                          <th>Balance</th>
+                        </tr>
+                        {% for currency in silver_free_currency %}
+                        <tr>
+                          <td>{{ currency.created_at }}</td>
+                          <td>{{ currency.transaction_type_display() }}</td>
+                          <td>{{ currency.transaction_amount }}</td>
+                          <td>{{ currency.balance }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>-->
+                </div>
+              </div>
+
+              <div class="box box-primary">
+                <div class="box-header">
+                  <div class="pull-right">
+                    <a href="/data/bi_user_currency/?flt1_0={{ model.user_id }}&flt2_1=Silver" target="_blank">Show more</a>
+                  </div>
+                  <h3 class="box-title">Silver - Activity Logs</h3>
+                </div>
+                <div class="box-body pad table-responsive">
+                    <div class="text-center">Temporary disabled, please click 'Show more'</div>
+                    <!--<table class="table table-hover">
+                      <tbody>
+                        <tr>
+                          <th>DateTime</th>
+                          <th>Transaction Type</th>
+                          <th>Transaction Amount</th>
+                          <th>Balance</th>
+                        </tr>
+                        {% for activity in silver_activities %}
+                        <tr>
+                          <td>{{ activity.created_at }}</td>
+                          <td>{{ activity.transaction_type_display() }}</td>
+                          <td>{{ activity.transaction_amount }}</td>
+                          <td>{{ activity.balance }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>-->
+                </div>
+              </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

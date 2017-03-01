@@ -1,0 +1,212 @@
+{% import 'admin/layout.html' as layout with context -%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block page_title %}{% endblock %} - WPT Data Warehouse</title>
+        
+        {% block head_meta %}
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        {% endblock %}
+
+        {% block head_css %}
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/AdminLTE.min.css">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/skins/_all-skins.min.css">
+        {% endblock %}
+
+        {% assets "common_css" %}
+            <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+        {% endassets %}
+  
+        {% block head %}{% endblock %}
+        {% block head_tail %}{% endblock %}
+    </head>
+
+    <body class="{{ body_class }} hold-transition skin-blue sidebar-mini">
+        {% block html_body %}
+            <div class="wrapper">
+                <header class="main-header">
+                    <a href="#" class="logo">
+                        <span class="logo-mini">DWH</span>
+                        <span class="logo-lg"><b>WPT</b> Data Warehouse</span>
+                    </a>
+                    <nav class="navbar navbar-static-top">
+                        <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                            <span class="sr-only">Toggle navigation</span>
+                        </a>
+                        <div class="navbar-custom-menu">
+                          <ul class="nav navbar-nav">
+                            <li>
+                              <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                            </li>
+                          </ul>
+                        </div>
+                    </nav>
+                </header>
+                <aside class="main-sidebar">
+                    <section class="sidebar">
+                        <div class="user-panel">
+                          <div class="pull-left image">
+                            <img src="{{ current_user.email | gravatar(size=60, default='mm', use_ssl=True) }}" class="img-circle">
+                          </div>
+                          <div class="pull-left info">
+                            <p>{{ current_user.name }}</p>
+                            <a href="javascript:void(0);">{{ current_user.email }}</a>
+                          </div>
+                        </div>
+                        <ul class="sidebar-menu">
+                           <li class="header">MAIN NAVIGATION</li>
+                           <li class="{{ ' active' if request.path == '/' else ''}}">
+                             <a href="{{ url_for('dashboard.index') }}">
+                               <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                             </a>
+                           </li>
+                           <li class="{{ ' active' if request.path.startswith('/sql_lab') else ''}}">
+                             <a href="{{ url_for('sql_lab.index') }}">
+                               <i class="fa fa-laptop"></i> <span>SQL Lab</span>
+                             </a>
+                           </li>
+                           <li class="treeview">
+                             <a href="#">
+                               <i class="fa fa-pie-chart"></i>
+                               <span>Visual Reports</span>
+                               <span class="pull-right-container">
+                                 <i class="fa fa-angle-left pull-right"></i>
+                               </span>
+                             </a>
+                             <ul class="treeview-menu">
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 1</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 2</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 3</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 4</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 5</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 6</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 7</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 8</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 9</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 10</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 11</a></li>
+                               <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 12</a></li>
+                             </ul>
+                           </li>
+                           <!--<li class="treeview{{ ' active' if request.path.startswith('/tool') else ''}}">
+                             <a href="#">
+                               <i class="fa fa-rocket"></i> <span>Promotion Tools</span>
+                               <span class="pull-right-container">
+                                 <i class="fa fa-angle-left pull-right"></i>
+                               </span>
+                             </a>
+                             <ul class="treeview-menu">
+                                 <li><a href="{{ url_for('tool.facebook_notification') }}"><i class="fa fa-circle-o"></i>Facebook Notification</a></li>
+                             </ul>
+                           </li>-->
+                           <li class="treeview{{ ' active' if request.path.startswith('/data') else ''}}">
+                             <a href="#">
+                               <i class="fa fa-table"></i> <span>Data</span>
+                               <span class="pull-right-container">
+                                 <i class="fa fa-angle-left pull-right"></i>
+                               </span>
+                             </a>
+                             <ul class="treeview-menu">
+                               {% if admin_view %}
+                                 {{ layout.sublevel_menu() }}
+                               {% else %}
+                                 <li><a href="/data/admin_user/"><i class="fa fa-circle-o"></i>Admin User</a></li>
+                                 <li><a href="/data/bi_user/"><i class="fa fa-circle-o"></i>BI User</a></li>
+                                 <li><a href="/data/bi_user_currency/"><i class="fa fa-circle-o"></i>BI User Currency</a></li>
+                                 <li><a href="/data/bi_user_bill/"><i class="fa fa-circle-o"></i>BI User Bill</a></li>
+                                 <li><a href="/data/bi_clubwpt_user/"><i class="fa fa-circle-o"></i>BI ClubWPT User</a></li>
+                               {% endif %}
+                             </ul>
+                           </li>
+                        </ul>
+
+                        {% block main_menu %}{% endblock %}
+                    </section>
+                    <div class="sidebar-footer">
+                      <b>EST</b>
+                      <time class="world-time" datetime="{{ display_current_time('EST') | safe }}"></time>
+                      <br />
+                      <b>PST</b>
+                      <time class="world-time" datetime="{{ display_current_time('Pacific/Pitcairn') | safe }}"></time>
+                      <br />
+                      <b>GMT-8</b>
+                      <time class="world-time" datetime="{{ display_current_time('Asia/Hong_Kong') | safe }}"></time>
+                    </div>
+                </aside>
+                <div class="content-wrapper">
+                    {% block messages %}
+                      {{ layout.messages() }}
+                    {% endblock %}
+                    {% block main_content %}{% endblock %}
+                </div>
+                <footer class="main-footer">
+                    <div class="pull-right hidden-xs">
+                        <a href="{{ url_for('page.changelog') }}">CHANGELOG</a>
+                    </div>
+                    <strong>Copyright © 2016-2017</strong> All rights reserved.
+                </footer>
+
+                <aside class="control-sidebar control-sidebar-dark">
+                  <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+                    <li><a href="#control-sidebar-user-tab" data-toggle="tab"><i class="fa fa-user"></i></a></li>
+                    <li class="active"><a href="#control-sidebar-options-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane" id="control-sidebar-user-tab">
+                      <br />
+                      <a class="btn btn-block btn-sm btn-danger" href="{{ url_for('account.sign_out') }}">
+                          Sign out
+                      </a>
+                    </div>
+                    <div class="tab-pane active" id="control-sidebar-options-tab"></div>
+                  </div>
+                </aside>
+                <div class="control-sidebar-bg"></div>
+            </div>
+        {% endblock %}
+
+        {% block body_js %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js" type="text/javascript"></script>
+            
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/mode/sql/sql.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/sql-hint.min.js" type="text/javascript"></script>
+            
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js" type="text/javascript"></script>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/js/app.min.js" type="text/javascript"></script>
+        {% endblock %}
+
+        {% assets "common_js" %}
+            <script src="{{ ASSET_URL }}" type="text/javascript"></script>   
+        {% endassets %}
+
+        <script type="text/javascript">
+        $(document).ready(function() {
+            function updateWorldTime() {
+                $('time.world-time').each(function(i, e) {
+                    var time = moment($(e).attr('datetime')).format('lll');
+                    $(this).html(time);
+                });
+            }
+            updateWorldTime();
+            setInterval(function(){
+               updateWorldTime();
+            }, 30 * 1000);
+        });
+        </script>
+        {% block body_tail %}{% endblock %}
+    </body>
+</html>

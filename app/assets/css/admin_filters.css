@@ -1,0 +1,31 @@
+/* flash admin filters */
+.field-filters li a {
+    padding: 3px 14px;
+}
+
+#filter_form table.filters a.select2-choice {
+    height: 34px;
+}
+
+#filter_form table.filters a.select2-choice span.select2-chosen, #filter_form table.filters a.select2-choice span.select2-arrow {
+    padding-top: 2px;
+}
+
+#filter_form table.filters tbody {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#filter_form table.filters td {
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+
+#filter_form table.filters tr:last-child td {
+    padding-right: 10px;
+    padding-bottom: 20px;
+}
+
+#filter_form table.filters td input {
+    min-width: 180px;
+}

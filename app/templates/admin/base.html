@@ -1,0 +1,3 @@
+{% extends "layout/app.html" %}
+
+{% block page_title %}{% if admin_view.category %}{{ admin_view.category }} - {% endif %}{{ admin_view.name }}{% endblock %}

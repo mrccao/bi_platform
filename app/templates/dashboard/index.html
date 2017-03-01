@@ -1,0 +1,386 @@
+{% extends "layout/app.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block head_tail %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block main_content %}
+<section class="content-header">
+  <h1>Dashboard</h1>
+</section>
+<section class="content">
+  <div class="row">
+      <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-yellow summary-box">
+          <div class="inner">
+            <h3><span class="recent-sparkline" id="recent-new-registration"></span><span id="summary-new-registration">--</span></h3>
+            <p>New Registration</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-person-add"></i>
+          </div>
+        </div>
+      </div>
+      <!-- ./col -->
+      <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-aqua summary-box">
+          <div class="inner">
+            <h3><span class="recent-sparkline" id="recent-revenue"></span><span id="summary-revenue">--</span></h3>
+            <p>Revenue</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-cash"></i>
+          </div>
+        </div>
+      </div>
+      <!-- ./col -->
+      <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-green summary-box">
+          <div class="inner">
+            <h3><span class="recent-sparkline" id="recent-game-dau"></span><span id="summary-game-dau">--</span></h3>
+            <p>Game DAU</p>
+          </div>
+          <div class="icon" style="top: -8px;">
+            <i class="fa fa-gamepad"></i>
+          </div>
+        </div>
+      </div>
+      <!-- ./col -->
+      <div class="col-lg-3 col-xs-6">
+        <!-- small box -->
+        <div class="small-box bg-teal summary-box">
+          <div class="inner">
+            <h3><span class="recent-sparkline" id="recent-new-registration-game-dau"></span><span id="summary-new-registration-game-dau">--</span></h3>
+            <p>New Reg Game DAU</p>
+          </div>
+          <div class="icon">
+            <i class="ion ion-pie-graph"></i>
+          </div>
+        </div>
+      </div>
+      <!-- ./col -->
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+          <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="false">Executive</a></li>
+              <li><a href="#tab_2" data-toggle="tab" aria-expanded="false">Marketing</a></li>
+              <li><a href="#tab_3" data-toggle="tab" aria-expanded="true">Financial</a></li>
+              <li><a href="#tab_4" data-toggle="tab" aria-expanded="true">Operational</a></li>
+              <li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="tab_1">
+                <div class="row">
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Date range</label>
+                      <div class="input-group">
+                        <div class="input-group-addon">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" class="form-control pull-right" id="executive-date-range">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Game</label>
+                      <select class="form-control select2" style="width: 100%;" id="executive-game">
+                        <option selected="selected">All Game</option>
+                        <option>Poker</option>
+                        <option>TimeSlots</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Platform</label>
+                      <select class="form-control select2" style="width: 100%;" id="executive-platform">
+                        <option selected="selected">All Platform</option>
+                        <option>Web</option>
+                        <option>iOS</option>
+                        <option>Android</option>
+                        <option>Facebook Game</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Report type</label>
+                      <select class="form-control select2" style="width: 100%;" id="executive-report-type">
+                        <option selected="selected">New Registration</option>
+                        <option>Game DAU</option>
+                        <option>New Reg Game DAU</option>
+                        <!--<option>WAU</option>-->
+                        <!--<option>MAU</option>-->
+                        <option>Revenue</option>
+                        <!--<option>avg Revenue Per DAU</option>
+                        <option>avg Revenue Per User</option>
+                        <option>avg Revenue Per Paid User</option>-->
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <div style="margin-top: 24px;">
+                        <button type="button" class="btn btn-success" id="btn-executive-apply">Apply</button>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12">
+                    <div>
+                      <canvas id="executive-chart" width="100%" height="42%"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              <div class="tab-pane" id="tab_2">
+                Marketing
+              </div>
+              <div class="tab-pane" id="tab_3">
+                Financial
+              </div>
+              <div class="tab-pane" id="tab_4">
+                Operational
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block body_tail %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+
+      $(".select2").select2();
+
+      $('#executive-date-range').daterangepicker({
+          opens: 'right',
+          showDropdowns: true,
+          autoApply: true,
+          locale: {
+            format: 'YYYY-MM-DD',
+            separator: '  -  '
+          },
+          ranges: {
+            // 'Today': [moment(), moment()],
+            // 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Week': [moment().startOf('week'), moment().endOf('week')],
+            'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+          },
+          startDate: moment().subtract(14, 'days'),
+          endDate: moment(),
+          minDate: moment().subtract(6, 'month'),
+          maxDate: moment()
+      });
+
+      ////////////////////
+
+      function getSummaryData() {
+        $.ajax({
+            type: 'GET',
+            url: '/dashboard/visualization/summary_data',
+            dataType: "json",
+            success: function(result) {
+              console.log(result);
+              $('#summary-new-registration').text(result.new_registration);
+              $('#summary-revenue').text(result.revenue);
+              $('#summary-game-dau').text(result.game_dau);
+              $('#summary-new-registration-game-dau').text(result.new_registration_game_dau);
+            },
+            error: function(xhr) {
+
+            }
+        });
+      }
+      getSummaryData();
+
+      ////////////////////
+
+      var chartColors = {
+      	red: 'rgb(255, 99, 132)',
+      	orange: 'rgb(255, 159, 64)',
+      	yellow: '#f39c12',
+        aqua: '#00c0ef',
+      	green: '#00a65a',
+        teal: '#39cccc',
+      	blue: 'rgb(54, 162, 235)',
+      	purple: 'rgb(153, 102, 255)',
+      	grey: 'rgb(231,233,237)'
+      };
+
+      var chartOptions = {
+          responsive: true,
+          title:{
+              display: false
+          }
+      }
+
+        var executiveChartConfig = {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    fill: false,
+                }]
+            },
+            options: chartOptions
+        };
+
+      var executiveChart = new Chart($('#executive-chart'), executiveChartConfig);
+
+      ////////////////////
+
+      var loadingOverlayConfig = {
+          image       : '',
+          fontawesome : 'fa fa-spinner fa-spin',
+          maxSize     : "16px",
+          minSize     : "16px"
+      }
+      
+      function startRequestLoading() {
+          $('#btn-executive-apply').LoadingOverlay('show', loadingOverlayConfig);
+      }
+      
+      function stopRequestLoading() {
+          $('#btn-executive-apply').LoadingOverlay('hide', true);
+      }
+
+      function getExecutiveData(date_range, game, platform, report_type) {
+        startRequestLoading();
+
+        $.ajax({
+            type: 'GET',
+            url: '/dashboard/visualization/executive_data',
+            data: { 
+              date_range: date_range, 
+              game: game,
+              platform: platform,
+              report_type: report_type
+            },
+            dataType: 'json',
+            success: function(result) {
+              stopRequestLoading();
+
+              executiveChartConfig.data.labels = result.labels;
+              executiveChartConfig.data.datasets[0].data = result.data;
+              executiveChartConfig.data.datasets[0].label = result.game + ' - ' + result.platform + ' - ' + report_type;
+
+              $('#executive-game').val(result.game).trigger('change');
+              $('#executive-platform').val(result.platform).trigger('change');
+
+              if (report_type == 'New Registration') {
+                executiveChartConfig.data.datasets[0].backgroundColor = chartColors.yellow;
+                executiveChartConfig.data.datasets[0].borderColor = chartColors.yellow;
+              } else if (report_type == 'Game DAU') {
+                executiveChartConfig.data.datasets[0].backgroundColor = chartColors.green;
+                executiveChartConfig.data.datasets[0].borderColor = chartColors.green;
+              } else if (report_type == 'New Reg Game DAU') {
+                executiveChartConfig.data.datasets[0].backgroundColor = chartColors.teal;
+                executiveChartConfig.data.datasets[0].borderColor = chartColors.teal;
+              } else if (report_type == 'Revenue') {
+                executiveChartConfig.data.datasets[0].backgroundColor = chartColors.aqua;
+                executiveChartConfig.data.datasets[0].borderColor = chartColors.aqua;
+              }
+              executiveChart.update();
+            },
+            error: function(xhr) {
+              stopRequestLoading();
+            }
+        });
+      }
+
+      $('#btn-executive-apply').click(function() {
+        var date_range = $('#executive-date-range').val();
+        var game = $('#executive-game').val();
+        var platform = $('#executive-platform').val();
+        var report_type = $('#executive-report-type').val();
+
+        getExecutiveData(date_range, game, platform, report_type);
+      });
+      $('#btn-executive-apply').trigger('click');
+
+      ////////////////////
+
+      var summarySparklineOption = { 
+        type: 'bar', 
+        height: '25px', 
+        chartRangeMin: 10, 
+        chartRangeMax: 10, 
+        barColor: 'white', 
+        barWidth: '5px',
+        tooltipFormat: $.spformat('\{\{value:values\}\}  -  \{\{value\}\}', 'sparkline-tooltip'), 
+        tooltipValueLookups: {
+          // values: $.range_map({ '412': '3/2/2017', '512': '4/2/2017', '613': '5/2/2017' })
+        }
+      };
+
+      function getSummarySparklineData(days_ago, report_type) {
+        $.ajax({
+            type: 'GET',
+            url: '/dashboard/visualization/executive_data',
+            data: { 
+              days_ago: 7, 
+              report_type: report_type
+            },
+            dataType: 'json',
+            success: function(result) {
+
+              var sparklineTooltipValues = {};
+              var resultData = result.data;
+              jQuery.each(result.labels, function(index, item) {
+                sparklineTooltipValues[resultData[index]] = item;
+              });
+              summarySparklineOption.tooltipValueLookups = {values: $.range_map(sparklineTooltipValues)};
+              
+              if (report_type == 'New Registration') {
+                $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
+              } else if (report_type == 'Game DAU') {
+                $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
+              } else if (report_type == 'New Reg Game DAU') {
+                $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
+              } else if (report_type == 'Revenue') {
+                $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
+              }
+
+            },
+            error: function(xhr) {
+            }
+        });
+      }
+
+      // var queryTypes = ["New Registration", "Revenue", "New Reg Game DAU", "Game DAU"];
+      // jQuery.each(queryTypes, function(index, item) {
+      //   getSummarySparklineData(7, item);
+      // });
+    });
+</script>
+{% endblock %}

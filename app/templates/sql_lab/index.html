@@ -1,0 +1,468 @@
+{% extends "layout/app.html" %}
+
+{% block page_title %}SQL Lab{% endblock %}
+
+{% block main_content %}
+    <section class="content-header">
+        <h1>SQL Lab</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary" id="sql-editor-box">
+                    <div class="box-header" style="padding-bottom: 2px;">
+                        <div class="btn-group" style="margin-right: 5px;">
+                          <button type="button" class="btn btn-success" id="btn-execute-sql"><i class="fa fa-toggle-right"></i> Run</button>
+                          <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="javascript:void(0);" id="btn-execute-sql-in-menu">Run</a></li>
+                            <li><a href="javascript:void(0);" id="btn-execute-sql-in-menu-email">Run and email result</a></li>
+                            <li><a href="javascript:void(0);" id="btn-execute-sql-in-menu-download">Run and download result</a></li>
+                          </ul>
+                        </div>
+                        <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-format-sql">
+                            <i class="fa fa-indent"></i> Format
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <form>
+                          <div class="form-group" style="margin-bottom: 8px;">
+                            <textarea id="sql-editor" class="form-control" rows="8" placeholder="Enter your query"></textarea>
+                          </div>
+                        </form>
+                        <p class="text-muted" style="margin-bottom: 0;">
+                            <span style="display: inline-block; margin-right: 20px;">
+                                <i class="fa fa-clock-o"></i> Run time: <b><span id="sql-run-time">--</span></b>
+                            </span>
+                            <span style="display: inline-block;">
+                                <i class="fa fa-list-alt"></i> Rows: <b><span id="sql-rows">--</span></b>
+                            </span>
+                        </p>
+                    </div>
+                    <!--<div class="box-footer clearfix">
+                    </div>-->
+                </div>
+
+                <div class="nav-tabs-custom" id="tabs-box">
+                  <ul class="nav nav-tabs">
+                    <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a></li>
+                    <li><a href="#tab-result" data-toggle="tab" aria-expanded="true"> Result </a></li>
+                    <!--<li class="dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                        Export <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Export to CSV</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Export to Excel</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Email to me</a></li>
+                      </ul>
+                    </li>
+                    <li class="dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                        Visual <span class="caret"></span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Visual 1</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Visual 2</a></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Visual 3</a></li>
+                      </ul>
+                    </li>-->
+                    <!--<li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>-->
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane active table-responsive" id="tab-history">
+                        <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
+                            <thead>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td colspan="999">
+                                    <div class="text-center">
+                                        There are no items in the result table.
+                                    </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane table-responsive" id="tab-result">
+                        <table id="result-table" class="table table-bordered table-striped table-hover dataTable">
+                            <thead>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td colspan="999">
+                                    <div class="text-center">
+                                        There are no items in the result table.
+                                    </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                  </div>
+                  <!-- /.tab-content -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <iframe style="display:none;" id="hiddenIframe"></iframe>
+{% endblock %}
+
+
+{% block head_tail %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
+{% endblock %}
+
+
+{% block body_tail %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/mode/sql/sql.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/sql-hint.min.js" type="text/javascript"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
+
+    <script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+
+        var resultDataTable = null;
+        var historyTableColumns = ['sql', 'status', 'run_time', 'rows', 'error_message', 'created_at'];
+
+        var editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
+            mode: 'text/x-mysql',
+            lineNumbers: true,
+            matchBrackets : true,
+            autofocus: true,
+            indentUnit: 4,
+            extraKeys: {"Ctrl": "autocomplete"},
+            hint: CodeMirror.hint.sql,
+            hintOptions: {
+                tables: {
+                    bi_user_currency: ['user_id', 'og_account', 'game_id', 'currency_type', 'transaction_type', 'transaction_amount', 'balance', 'created_at'],
+                    bi_user: ['user_id',
+                              'username',
+                              'og_account',
+                              'first_name',
+                              'middle_name',
+                              'last_name',
+                              'address',
+                              'city',
+                              'state',
+                              'country',
+                              'zip_code',
+                              'phone',
+                              'billing_contact',
+                              'billing_address',
+                              'billing_city',
+                              'billing_state',
+                              'billing_country',
+                              'billing_zip_code',
+                              'email',
+                              'email_validate_time',
+                              'email_promotion_allowed',
+                              'reg_ip',
+                              'reg_time',
+                              'reg_source',
+                              'reg_platform',
+                              'reg_facebook_connect',
+                              'reg_type_orig',
+                              'reg_platform_orig',
+                              'reg_device_orig',
+                              'reg_affiliate',
+                              'reg_affiliate_orig',
+                              'reg_campaign',
+                              'reg_campaign_orig',
+                              'last_login_ip',
+                              'last_login_time',
+                              'birthday',
+                              'gender',
+                              'gender_orig',
+                              'account_status',
+                              'account_status_orig',
+                              'gold_balance',
+                              'silver_balance',
+                              'first_poker_time',
+                              'first_slots_time',
+                              'last_poker_time',
+                              'last_slots_time',
+                              'reward_level',
+                              'reward_xp',
+                              'reward_point',
+                              'dollar_paid_amount',
+                              'dollar_paid_count',
+                              'count_of_masterpoint_exchanged_for_gold',
+                              'amount_of_masterpoint_exchanged_for_gold',
+                              'count_of_dollar_exchanged_for_gold',
+                              'amount_of_dollar_exchanged_for_gold',
+                              'count_of_gold_exchanged_for_silver',
+                              'amount_of_gold_exchanged_for_silver',
+                              'count_of_dollar_exchanged_for_silver',
+                              'amount_of_dollar_exchanged_for_silver',
+                              'count_of_dollar_exchanged_for_lucky_spin',
+                              'amount_of_dollar_exchanged_for_lucky_spin',
+                              'count_of_gold_exchanged_for_lucky_charm',
+                              'amount_of_gold_exchanged_for_lucky_charm',
+                              'count_of_gold_exchanged_for_avatar',
+                              'amount_of_gold_exchanged_for_avatar',
+                              'count_of_gold_exchanged_for_emoji',
+                              'amount_of_gold_exchanged_for_emoji',
+                              'count_of_dollar_exchanged_for_spin_purchase',
+                              'amount_of_dollar_exchanged_for_spin_purchase',
+                              'count_of_dollar_exchanged_for_spin_ticket',
+                              'amount_of_dollar_exchanged_for_spin_ticket',
+                              'count_of_dollar_exchanged_for_spin_booster',
+                              'amount_of_dollar_exchanged_for_spin_booster']
+                }
+            }
+        });
+
+        var loadingOverlayConfig = {
+            image       : '',
+            fontawesome : 'fa fa-spinner fa-spin',
+            maxSize     : "26px",
+            minSize     : "26px"
+        }
+
+        function startRequestLoading() {
+            $('#sql-editor-box').LoadingOverlay('show', loadingOverlayConfig);
+            $('#tabs-box').LoadingOverlay('show', loadingOverlayConfig);
+        }
+
+        function stopRequestLoading() {
+            $('#sql-editor-box').LoadingOverlay('hide', true);
+            $('#tabs-box').LoadingOverlay('hide', true);
+        }
+
+        function getQueryHistories() {
+            $.ajax({
+                type: 'GET',
+                url: '/sql_lab/query_histories',
+                dataType: "json",
+                success: function(result) {
+                    var headers = []
+                    headers.push('<tr>')
+                    for (var i in historyTableColumns) {
+                        var column = historyTableColumns[i];
+                        if (column === 'run_time') {
+                            column = 'run_time(ms)';
+                        }
+                        headers.push('<th>' + column + '</th>')
+                    }
+                    headers.push('<th style="width: 188px;"></th>');
+                    headers.push('</tr>');
+                    $('#history-table thead').html(headers.join());
+
+                    var rows = [];
+                    for (var j in result.data) {
+                        var row = result.data[j];
+                        var id = row['id'];
+                        rows.push('<tr>')
+                        for (var i in historyTableColumns) {
+                            var column = historyTableColumns[i];
+                            if (column === 'sql') {
+                                rows.push('<td><pre>' + row[column] + '</pre></td>');
+                            } else {
+                                rows.push('<td>' + row[column] + '</td>');
+                            }
+                        }
+
+                        var btnGroup = '<td>' + 
+                                        '<div class="btn-group">' + 
+                                        '  <button type="button" class="btn btn-sm btn-success history-execute-sql"><i class="fa fa-toggle-right"></i> Run</button>' +
+                                        '  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' + 
+                                        '    <span class="caret"></span>' +
+                                        '  </button>' +
+                                        '  <ul class="dropdown-menu" role="menu" style="">' +
+                                        '    <li><a href="javascript:void(0);" class="history-execute-sql-in-menu">Run</a></li>' +
+                                        '    <li><a href="javascript:void(0);" class="history-execute-sql-in-menu-email">Run and email result</a></li>' +
+                                        '    <li><a href="javascript:void(0);" class="history-execute-sql-in-menu-download">Run and download result</a></li>' +
+                                        '  </ul>' +
+                                        '</div>' +
+                                        '</td>';
+
+                        rows.push(btnGroup);
+                        rows.push('</tr>');
+                    }
+                    $('#history-table tbody').html(rows.join());
+                },
+                error: function(xhr) {
+                    
+                }
+            });
+        }
+
+        getQueryHistories();
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            var target = $(e.target).attr("href");
+            if (target === '#tab-history') {
+                getQueryHistories();
+            }
+        });
+
+        ////////////////////
+
+        $('#history-table').on('click', '.history-execute-sql, .history-execute-sql-in-menu', function() {
+            var sql = $(this).closest('tr').find('pre').html();
+
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = sql;
+            var decodedSql = tempDiv.innerText;
+            tempDiv = null;
+
+            editor.setValue(decodedSql);
+            $('#btn-execute-sql').trigger('click');
+        });
+
+        $('#history-table').on('click', '.history-execute-sql-in-menu-email', function() {
+            var sql = $(this).closest('tr').find('pre').html();
+
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = sql;
+            var decodedSql = tempDiv.innerText;
+            tempDiv = null;
+
+            editor.setValue(decodedSql);
+            $('#btn-execute-sql-in-menu-email').trigger('click');
+        });
+
+        $('#history-table').on('click', '.history-execute-sql-in-menu-download', function() {
+            var sql = $(this).closest('tr').find('pre').html();
+
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = sql;
+            var decodedSql = tempDiv.innerText;
+            tempDiv = null;
+
+            editor.setValue(decodedSql);
+            $('#btn-execute-sql-in-menu-download').trigger('click');
+        });
+
+        ////////////////////
+
+        $('#btn-format-sql').on('click', function() {
+            if (editor.getValue().length === 0) return;
+
+            startRequestLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/sql_lab/format_sql',
+                data: { sql: editor.getValue() },
+                dataType: "json",
+                success: function(result) {
+                    stopRequestLoading(true);
+                    editor.setValue(result.data);
+                },
+                error: function(xhr) {
+                    stopRequestLoading();
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            });
+        });
+
+        ////////////////////
+
+        $('#btn-execute-sql, #btn-execute-sql-in-menu').on('click', function() {
+            if (editor.getValue().length === 0) return;
+
+            startRequestLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/sql_lab/execute_sql',
+                data: { sql: editor.getValue(), strategy: 'render_json' },
+                dataType: "json",
+                success: function(result) {
+                    stopRequestLoading(true);
+
+                    $('.nav-tabs a[href="#tab-result"]').tab('show')
+
+                    // count
+                    $('#sql-rows').text(result.rows);
+
+                    // runtime
+                    $('#sql-run-time').text(result.run_time + 'ms');
+
+                    // prepare columns
+                    
+                    // hack, Reload a full table, including columns.
+                    if (resultDataTable !== null) {
+                        resultDataTable.destroy();
+                        $('#result-table').empty();
+                    }
+                    resultDataTable = $('#result-table').DataTable({
+                        retrieve: true,
+                        searching: true,
+                        iDisplayLength: 10,
+                        lengthChange: true,
+                        scrollX: true,
+                        data: result.data,
+                        columns: result.columns
+                    });
+                },
+                error: function(xhr) {
+                    stopRequestLoading();
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            });
+        });
+
+        $('#btn-execute-sql-in-menu-email').on('click', function() {
+            if (editor.getValue().length === 0) return;
+
+            startRequestLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/sql_lab/execute_sql',
+                data: { sql: editor.getValue(), strategy: 'send_to_mail' },
+                dataType: "json",
+                success: function(result) {
+                    stopRequestLoading(true);
+
+                    alert('Your query has executed successfully. Please check your email inbox for an email with CSV file attached.');
+                },
+                error: function(xhr) {
+                    stopRequestLoading();
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            });
+        });
+
+        $('#btn-execute-sql-in-menu-download').on('click', function() {
+            if (editor.getValue().length === 0) return;
+
+            startRequestLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/sql_lab/execute_sql',
+                data: { sql: editor.getValue(), strategy: 'generate_download_link' },
+                dataType: "json",
+                success: function(result) {
+                    stopRequestLoading(true);
+
+                    alert('Your query has executed successfully. BI System will bring you to download link shortly.');
+
+                    var temp = document.createElement('a');
+                    temp.href = result.download_link;
+                    temp.target = 'hiddenIframe';
+                    temp.click();
+                },
+                error: function(xhr) {
+                    stopRequestLoading();
+                    alert('Error: ' + JSON.parse(xhr.responseText).error);
+                }
+            });
+        });
+
+        ////////////////////
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+/* flash message */
+#flash-message-wrapper {
+    padding: 20px 20px 0;
+}
+
+/* time display */
+.main-sidebar .sidebar-footer {
+    bottom: 0px; 
+    clear: both; 
+    display: block; 
+    padding: 14px 20px; 
+    position: fixed; 
+    width: 230px; 
+    background-color: #1a2226; 
+    color: #8aa4af; 
+    height: 88px;
+}
+.main-sidebar .sidebar-footer b {
+    display: inline-block; 
+    width: 58px;
+}
+.sidebar-mini.sidebar-collapse .sidebar-footer {
+    display: none;
+}
+
+/* select2 */
+.select2-container .selection .select2-selection {
+    height: 34px;
+}
+
+.select2-container .selection .select2-selection .select2-selection__rendered {
+    padding-left: 0px;
+}
+
+/*dashboard*/
+span.recent-sparkline {
+    display: inline-block;
+    height: 30px;
+}
+span.recent-sparkline canvas {
+    margin-top: 7px;
+    margin-right: 10px;
+}
+.sparkline-tooltip {
+    font-size: 13px;
+}
+.summary-box h3 span {
+    font-weight: normal;
+    font-size: 36px;
+}
+.summary-box p {
+    font-size: 14px;
+}
+.summary-box.small-box .icon, .summary-box.small-box:hover .icon {
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none;
+    font-size: 70px;
+    top: 0px;
+}

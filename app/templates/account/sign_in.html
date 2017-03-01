@@ -1,0 +1,35 @@
+{% extends "layout/app.html" %}
+
+{% block page_title %}Login{% endblock %}
+{% set body_class = 'login-page' %}
+
+{% block html_body %}
+<div class="login-box">
+  <div class="login-logo">
+    <b>WPT</b> Data Warehouse
+  </div>
+  <div class="login-box-body">
+    <p class="login-box-msg">Sign in to start your session</p>
+
+    <form action="{{ url_for('account.sign_in') }}" method="post">
+      {{ form.hidden_tag() }}
+
+      <div class="form-group has-feedback">
+        {{ form.email(class_="form-control", placeholder="Email") }}
+        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+      </div>
+      <div class="form-group has-feedback">
+         {{ form.password(class_="form-control", placeholder="Password") }}
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+        </div>
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Login</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
