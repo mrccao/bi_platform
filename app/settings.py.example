@@ -57,8 +57,8 @@ class ProdConfig(Config):
     MAIL_SUBJECT_PREFIX = '[BI System] '
     MAIL_SERVER = '192.168.1.122'
     MAIL_PORT = 25
-    MAIL_USERNAME = 'wpt_report'
-    MAIL_PASSWORD = 'eo9ee3It9EWf3CG867Tc'
+    MAIL_USERNAME = 'x'
+    MAIL_PASSWORD = 'x'
     MAIL_DEFAULT_SENDER = 'WPT Report <wpt_report@ourgame.com>'
 
     CACHE_TYPE = 'simple'
