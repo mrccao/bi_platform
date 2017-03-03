@@ -110,6 +110,7 @@ def process_user_newly_added_records():
                                                       ELSE NULL
                                                     end )           AS final_email,
                                                   aff.email         AS reg_affiliate,
+                                                  pu.pu_id          AS facebook_id,
                                                   com.compaign_desc AS reg_compaign
                                            FROM   tb_user_base u
                                                   LEFT JOIN tb_platform_info p
@@ -130,6 +131,7 @@ def process_user_newly_added_records():
                                                   ELSE NULL
                                                 end )             AS final_email,
                                                 aff.email         AS reg_affiliate,
+                                                pu.pu_id          AS facebook_id,
                                                 com.compaign_desc AS reg_compaign
                                        FROM   tb_user_base u
                                               LEFT JOIN tb_platform_info p
@@ -149,6 +151,7 @@ def process_user_newly_added_records():
     rows = [{
         'user_id': row['u_id'],
         'email': row['final_email'],
+        'facebook_id': row['facebook_id'],
         'email_validate_time': row['email_validate_time'],
         'email_promotion_allowed': row['is_promotion'],
         'reg_ip': row['reg_ip'],

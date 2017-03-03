@@ -97,6 +97,8 @@ class BIUser(db.Model):
     reg_platform = db.Column(db.String(255), index=True)
     reg_facebook_connect = db.Column(db.Boolean)
 
+    facebook_id = db.Column(db.String(255))
+
     reg_type_orig = db.Column(db.Integer)
     reg_platform_orig = db.Column(db.Integer)
     reg_device_orig = db.Column(db.Integer)
