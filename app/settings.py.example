@@ -46,11 +46,16 @@ class ProdConfig(Config):
         'app.tasks.bi_clubwpt_user',
         'app.tasks.scheduled',
         'app.tasks.sql_lab',
+        'app.tasks.promotion',
     )
     CELERYBEAT_SCHEDULE = {
-        'process_scheduled': {
+        'process_scheduled_bi': {
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
+        },
+        'process_scheduled_promotion_push': {
+            'task': 'app.tasks.scheduled.process_promotion_push',
+            'schedule': timedelta(seconds=6 * 60)
         }
     }
 
@@ -100,11 +105,16 @@ class DevConfig(Config):
         'app.tasks.bi_clubwpt_user',
         'app.tasks.scheduled',
         'app.tasks.sql_lab',
+        'app.tasks.promotion',
     )
     CELERYBEAT_SCHEDULE = {
-        'process_scheduled': {
+        'process_scheduled_bi': {
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
+        },
+        'process_scheduled_promotion_push': {
+            'task': 'app.tasks.scheduled.process_promotion_push',
+            'schedule': timedelta(seconds=6 * 60)
         }
     }
 
@@ -149,11 +159,16 @@ class TestConfig(Config):
         'app.tasks.bi_clubwpt_user',
         'app.tasks.scheduled',
         'app.tasks.sql_lab',
+        'app.tasks.promotion',
     )
     CELERYBEAT_SCHEDULE = {
-        'process_scheduled': {
+        'process_scheduled_bi': {
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
+        },
+        'process_scheduled_promotion_push': {
+            'task': 'app.tasks.scheduled.process_promotion_push',
+            'schedule': timedelta(seconds=6 * 60)
         }
     }
 

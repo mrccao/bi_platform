@@ -69,7 +69,12 @@
                         <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Visual 3</a></li>
                       </ul>
                     </li>-->
-                    <!--<li class="pull-right"><a href="#" class="text-muted"><i class="fa fa-gear"></i></a></li>-->
+                    <li id="promotion-tools" class="dropdown pull-right" style="display: none;">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" ><i class="fa fa-rocket"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a id="promoiton-tools-send-facebook-notification" target="_blank" href="{{ url_for('promotion.facebook_notification') }}">Send FB notification to result</a></li>
+                        </ul>
+                    </li>
                   </ul>
                   <div class="tab-content">
                     <div class="tab-pane active table-responsive" id="tab-history">
@@ -287,12 +292,24 @@
                                         '    <li><a href="javascript:void(0);" class="history-execute-sql-in-menu-download">Run and download result</a></li>' +
                                         '  </ul>' +
                                         '</div>' +
+                                        '<br />' +
+                                        '<div class="btn-group" style="margin-top: 6px;">' + 
+                                        '  <button type="button" class="btn btn-sm btn-success"><i class="fa fa-toggle-right"></i> Promotion tools</button>' +
+                                        '  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">' + 
+                                        '    <span class="caret"></span>' +
+                                        '  </button>' +
+                                        '  <ul class="dropdown-menu" role="menu" style="">' +
+                                        '    <li><a target="_blank" href="{{ url_for("promotion.facebook_notification") }}?based_query_id=' + id + '">Send FB notification to result</a></li>' +
+                                        '  </ul>' +
+                                        '</div>' +
                                         '</td>';
 
                         rows.push(btnGroup);
                         rows.push('</tr>');
                     }
-                    $('#history-table tbody').html(rows.join());
+                    if (rows.length > 0) {
+                        $('#history-table tbody').html(rows.join());
+                    }
                 },
                 error: function(xhr) {
                     
@@ -306,6 +323,9 @@
             var target = $(e.target).attr("href");
             if (target === '#tab-history') {
                 getQueryHistories();
+                $('#promotion-tools').hide();
+            } else {
+                $('#promotion-tools').show();
             }
         });
 
@@ -382,6 +402,8 @@
                 dataType: "json",
                 success: function(result) {
                     stopRequestLoading(true);
+
+                    $('#promoiton-tools-send-facebook-notification').attr('href', '{{ url_for("promotion.facebook_notification") }}?based_query_id=' + result.query_id);
 
                     $('.nav-tabs a[href="#tab-result"]').tab('show')
 

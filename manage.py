@@ -8,12 +8,14 @@ from flask_migrate import MigrateCommand
 from app import create_app
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
+from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.extensions import db
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
+from app.tasks.promotion import process_facebook_notification
 from app.tasks.scheduled import process_bi
 
 # default to dev config because no one should use this in
@@ -145,6 +147,17 @@ def reset_bi_admin():
 
 
 @manager.command
+def reset_bi_promotion():
+    """ ReCreate Database and Seed """
+
+    PromotionPush.__table__.drop(db.engine, checkfirst=True)
+    PromotionPushHistory.__table__.drop(db.engine, checkfirst=True)
+
+    PromotionPush.__table__.create(db.engine, checkfirst=True)
+    PromotionPushHistory.__table__.create(db.engine, checkfirst=True)
+
+
+@manager.command
 def reset_bi_user():
     """ ReCreate Database and Seed """
 
@@ -262,11 +275,19 @@ def sync_bi_statistic_for_yesterday():
 
 
 @manager.command
-def process_bi_statistic_for_today():
+def sync_bi_statistic_for_today():
     if app.config['ENV'] == 'prod':
         process_bi_statistic.delay('today')
     else:
         process_bi_statistic('today')
+
+
+@manager.command
+def process_promotion_push():
+    if app.config['ENV'] == 'prod':
+        process_facebook_notification.delay()
+    else:
+        process_facebook_notification()
 
 
 if __name__ == "__main__":

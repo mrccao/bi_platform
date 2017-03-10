@@ -88,16 +88,6 @@ class AdminUserActivity(db.Model):
     raw_data = db.Column(db.Text, nullable=False)
     created_at = db.Column(AwareDateTime, nullable=False, default=current_time, index=True)
 
-    def __init__(self, admin_user_id, action, raw_data):
-        self.admin_user_id = admin_user_id
-        self.action = action
-        self.raw_data = raw_data
-
-    @classmethod
-    def record(admin_user_id, action, raw_data):
-        db.session.add(AdminUserActivity(admin_user_id, action, raw_data))
-        db.session.commit()
-
 
 class AdminUserQuery(db.Model):
     id = db.Column(db.Integer, primary_key=True)

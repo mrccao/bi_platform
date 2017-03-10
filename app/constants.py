@@ -184,3 +184,15 @@ class SQL_RESULT_STRATEGIES(BaseEnum):
     RENDER_JSON = 'render_json'
     SEND_TO_MAIL = 'send_to_mail'
     GENERATE_DOWNLOAD_LINK = 'generate_download_link'
+
+class PROMOTION_PUSH_TYPES(BaseEnum):
+    FB_NOTIFICATION = 'fb_notification'
+    EMAIL = 'email'
+
+class PROMOTION_PUSH_HISTORY_STATUSES(BaseEnum):
+    CANCELLED = 'cancelled'
+    REQUEST_FAILED = 'request_failed'
+    FAILED = 'failed'
+    RUNNING = 'running'
+    SCHEDULED = 'scheduled'
+    SUCCESS = 'success'

@@ -17,7 +17,8 @@ class WPTPlatformUser(db.Model):
     __tablename__ = 'tb_platform_user_info'
 
     platform_id = db.Column('p_id', db.Integer, primary_key=True)
-    user_id = db.Column('u_id', db.Integer, primary_key=True)
+    user_id = db.Column('u_id', db.BIGINT)
+    platform_user_id = db.Column('pu_id')
 
 
 class WPTUser(db.Model):

@@ -19,6 +19,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
     """Executes the sql query returns the results."""
 
     query = db.session.query(AdminUserQuery).filter_by(id=query_id).one()
+    query_id = query.id
 
     def handle_error(msg):
         """Local method handling error while processing the SQL"""
@@ -68,6 +69,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
 
         if strategy == SQL_RESULT_STRATEGIES.RENDER_JSON.value:
             return {
+                'query_id': query_id,
                 'columns': result.columns if result else [],
                 'data': result.data if result else [],
                 'rows': query.rows,
@@ -97,6 +99,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
             print('%s/sql_lab/download?key=%s&ts=%s' % (app.config['APP_HOST'], sql_key, now.timestamp))
 
             return {
+                'query_id': query_id,
                 'download_link': '%s/sql_lab/download?key=%s&ts=%s' % (app.config['APP_HOST'], sql_key, now.timestamp)
             }
         return None

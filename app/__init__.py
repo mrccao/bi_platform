@@ -84,13 +84,13 @@ def register_blueprints(app):
     from app.controllers.dashboard import dashboard
     from app.controllers.sql_lab import sql_lab
     from app.controllers.page import page
-    from app.controllers.tool import tool
+    from app.controllers.promotion import promotion
 
     app.register_blueprint(account)
     app.register_blueprint(dashboard)
     app.register_blueprint(sql_lab)
     app.register_blueprint(page)
-    app.register_blueprint(tool)
+    app.register_blueprint(promotion)
 
     from app.libs.context_processor import global_processor
     app.context_processor(global_processor)

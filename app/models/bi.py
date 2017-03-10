@@ -1,6 +1,6 @@
 from sqlalchemy import text
 from sqlalchemy.orm import class_mapper
-from sqlalchemy.schema import UniqueConstraint, Index
+from sqlalchemy.schema import UniqueConstraint
 
 from app.extensions import db
 from app.utils import current_time
