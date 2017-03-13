@@ -2,6 +2,10 @@
 
 {% block page_title %}Facebook Notification{% endblock %}
 
+{% block head_tail %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block main_content %}
 <section class="content-header">
   <h1>
@@ -29,7 +33,13 @@
         <div class="col-xs-12">
             <div class="box box-primary" id="sql-editor-box">
                 <div class="box-header" style="padding-bottom: 2px;">
-                    <button type="button" class="btn btn-success" id="btn-send"><i class="fa fa-toggle-right"></i> Send</button>
+                    <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
+                      <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i> &nbsp;Scheduled at (EST)
+                      </div>
+                      <input type="text" class="form-control" id="send-scheduled-at">
+                    </div>
+                    <button type="button" class="btn btn-success" id="btn-send" style="margin-right: 5px;"><i class="fa fa-toggle-right"></i> Send</button>
                     <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i class="fa fa-indent"></i> Insert Facebook name</button>
                 </div>
                 <div class="box-body">
@@ -72,6 +82,8 @@
 {% endblock %}
 
 {% block body_tail %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+
     <script type="text/javascript">
 
     var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
@@ -114,6 +126,20 @@
 
     $(document).ready(function() {
 
+      $('#send-scheduled-at').daterangepicker({
+          opens: 'right',
+          showDropdowns: true,
+          autoApply: true,
+          singleDatePicker: true,
+          timePicker: true,
+          locale: {
+            format: 'YYYY-MM-DD hh:mm:ss',
+          },
+          minDate: moment()
+      });
+
+      ////////////////////
+
       $('#btn-insert-name').click(function() {
         insertAtCaret('notification-editor', ' @[name] ');
       });
@@ -138,7 +164,7 @@
           $.ajax({
               type: 'POST',
               url: '/promotion/facebook_notification/sender',
-              data: basedQueryId === null ? { message: $('#notification-editor').val() } : { message: $('#notification-editor').val(), based_query_id: basedQueryId },
+              data: basedQueryId === null ? { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#notification-editor').val() } : { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#notification-editor').val(), based_query_id: basedQueryId },
               dataType: "json",
               success: function(result) {
                   alert('Your request has submited successfully. Please wait background job to processing your request.');
