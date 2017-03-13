@@ -2,8 +2,8 @@ import hashlib
 import sqlparse
 import arrow
 import pandas as pd
-from random import randrange
 
+from flask import current_app as app
 from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import text
@@ -14,7 +14,7 @@ from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.models.orig_wpt import WPTPlatformUser
 from app.utils import error_msg_from_exception, current_time
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_TYPES
-from app.tasks.promotion import process_facebook_notification
+from app.tasks.promotion import process_facebook_notification_items, process_facebook_notification
 
 
 promotion = Blueprint('promotion', __name__)
@@ -100,22 +100,19 @@ def facebook_notification_sender():
                 df = pd.DataFrame(data, columns=column_names)
                 facebook_ids = df[df['facebook_id'].notnull()]['facebook_id'].tolist()
 
-                for facebook_id in facebook_ids:
-                    max_minutes = int(len(facebook_ids) / 1000) + 1
-                    scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
-                    db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=facebook_id, scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
-                db.session.commit()
+                if app.config['ENV'] == 'prod':
+                    process_facebook_notification_items.delay(push_id, scheduled_at, facebook_ids)
+                else:
+                    process_facebook_notification_items(push_id, scheduled_at, facebook_ids)
 
                 return jsonify(result='ok')
             else:
                 return jsonify(error="based query don't have column: facebook_id"), 500
         else:
-            facebook_ids = db.session.query(WPTPlatformUser.platform_user_id).all()
-            for row in facebook_ids:
-                max_minutes = int(len(facebook_ids) / 1000) + 1
-                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
-                db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=row[0], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
-            db.session.commit()
+            if app.config['ENV'] == 'prod':
+                process_facebook_notification_items.delay(push_id, scheduled_at)
+            else:
+                process_facebook_notification_items(push_id, scheduled_at)
 
             return jsonify(result='ok')
     except Exception as e:

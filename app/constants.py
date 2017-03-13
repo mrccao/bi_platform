@@ -192,5 +192,6 @@ class PROMOTION_PUSH_TYPES(BaseEnum):
 class PROMOTION_PUSH_HISTORY_STATUSES(BaseEnum):
     REQUEST_FAILED = 'request_failed'
     FAILED = 'failed'
+    RUNNING = 'running'
     SCHEDULED = 'scheduled'
     SUCCESS = 'success'

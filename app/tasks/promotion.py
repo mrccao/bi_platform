@@ -2,15 +2,32 @@ import requests
 import hashlib
 import json
 import urllib.parse
-
-from functools import partial
+import arrow
+from random import randrange
 
 from flask import current_app as app
 from app.extensions import db
 from app.tasks import celery
 from app.models.promotion import PromotionPush, PromotionPushHistory
+from app.models.orig_wpt import WPTPlatformUser
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_TYPES
 from app.utils import current_time
+
+@celery.task
+def process_facebook_notification_items(push_id, scheduled_at, facebook_ids=None):
+    if facebook_ids is None:
+        facebook_ids = db.session.query(WPTPlatformUser.platform_user_id).all()
+        for row in facebook_ids:
+            max_minutes = int(len(facebook_ids) / 1000) + 1
+            scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+            db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=row[0], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+        db.session.commit()
+    else:
+        for facebook_id in facebook_ids:
+            max_minutes = int(len(facebook_ids) / 1000) + 1
+            scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+            db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=facebook_id, scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+        db.session.commit()
 
 
 @celery.task
@@ -34,7 +51,10 @@ def process_facebook_notification(push_id=None):
 
     print('process_facebook_notification: start sending')
 
-    iter_step = 10
+    db.session.query(PromotionPushHistory).filter(PromotionPushHistory.id.in_([item.id for item in push_histories])).update({PromotionPushHistory.status: PROMOTION_PUSH_HISTORY_STATUSES.RUNNING.value}, synchronize_session=False)
+    db.session.commit()
+
+    iter_step = 100
     for i in range(0, len(push_histories), iter_step):
         group = push_histories[i:i+iter_step]
         push_history_ids = [item.id for item in group]

@@ -31,7 +31,7 @@
 <section class="content">
     <div class="row">
         <div class="col-xs-12">
-            <div class="box box-primary" id="sql-editor-box">
+            <div class="box box-primary" id="notification-editor-box">
                 <div class="box-header" style="padding-bottom: 2px;">
                     <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
                       <div class="input-group-addon">
@@ -83,6 +83,7 @@
 
 {% block body_tail %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js" type="text/javascript"></script>
 
     <script type="text/javascript">
 
@@ -132,11 +133,29 @@
           autoApply: true,
           singleDatePicker: true,
           timePicker: true,
+          timePicker24Hour: true,
           locale: {
-            format: 'YYYY-MM-DD hh:mm:ss',
+            format: 'YYYY-MM-DD HH:mm:ss',
           },
           minDate: moment()
       });
+
+      ////////////////////
+
+      var loadingOverlayConfig = {
+          image       : '',
+          fontawesome : 'fa fa-spinner fa-spin',
+          maxSize     : "26px",
+          minSize     : "26px"
+      }
+
+      function startRequestLoading() {
+          $('#notification-editor-box').LoadingOverlay('show', loadingOverlayConfig);
+      }
+
+      function stopRequestLoading() {
+          $('#notification-editor-box').LoadingOverlay('hide', true);
+      }
 
       ////////////////////
 
@@ -160,6 +179,8 @@
           if (!confirm(submitConfirmAlert)) {
               return;
           }
+
+          startRequestLoading();
         
           $.ajax({
               type: 'POST',
@@ -168,10 +189,12 @@
               dataType: "json",
               success: function(result) {
                   alert('Your request has submited successfully. Please wait background job to processing your request.');
+                  stopRequestLoading();
                   getPushHistories();
               },
               error: function(xhr) {
                   alert('Error: ' + JSON.parse(xhr.responseText).error);
+                  stopRequestLoading();
               }
           });
       });
