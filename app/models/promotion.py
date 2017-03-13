@@ -13,7 +13,7 @@ class PromotionPush(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_user_id = db.Column(db.Integer, nullable=False, index=True)
     based_query_id = db.Column(db.Integer)
-    push_type = db.Column(db.String(255), nullable=False, index=True)
+    push_type = db.Column(db.String(50), nullable=False, index=True)
     message = db.Column(db.Text, nullable=False)
     message_key = db.Column(db.String(255), nullable=False, index=True)
     updated_at = db.Column(AwareDateTime, onupdate=current_time, index=True)
@@ -65,11 +65,11 @@ class PromotionPush(db.Model):
 
 
 class PromotionPushHistory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.BIGINT, primary_key=True)
     push_id = db.Column(db.Integer, nullable=False, index=True)
-    push_type = db.Column(db.String(255), nullable=False)
+    push_type = db.Column(db.String(50), nullable=False)
     target = db.Column(db.String(255), nullable=False)
-    status = db.Column(db.String(255))
+    status = db.Column(db.String(50))
     error_message = db.Column(db.Text)
     scheduled_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
     created_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
