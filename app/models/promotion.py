@@ -41,7 +41,6 @@ class PromotionPush(db.Model):
 
     def to_dict(self):
         total_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id"), push_id=self.id).scalar()
-        running_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='running'"), push_id=self.id).scalar()
         successed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"), push_id=self.id).scalar()
         request_failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='request_failed'"), push_id=self.id).scalar()
         failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='failed'"), push_id=self.id).scalar()
@@ -56,7 +55,6 @@ class PromotionPush(db.Model):
             'scheduled_at': arrow.get(scheduled_at).to(app.config['APP_TIMEZONE']).format(),
             'status': {
                 'total_count': total_count,
-                'running_count': running_count,
                 'successed_count': successed_count,
                 'request_failed_count': request_failed_count,
                 'failed_count': failed_count

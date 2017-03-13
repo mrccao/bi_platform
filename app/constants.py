@@ -190,9 +190,7 @@ class PROMOTION_PUSH_TYPES(BaseEnum):
     EMAIL = 'email'
 
 class PROMOTION_PUSH_HISTORY_STATUSES(BaseEnum):
-    CANCELLED = 'cancelled'
     REQUEST_FAILED = 'request_failed'
     FAILED = 'failed'
-    RUNNING = 'running'
     SCHEDULED = 'scheduled'
     SUCCESS = 'success'

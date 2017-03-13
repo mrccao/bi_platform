@@ -101,7 +101,7 @@ def facebook_notification_sender():
                 facebook_ids = df[df['facebook_id'].notnull()]['facebook_id'].tolist()
 
                 for facebook_id in facebook_ids:
-                    max_minutes = (len(facebook_ids) % 200) + 1
+                    max_minutes = int(len(facebook_ids) / 1000) + 1
                     scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
                     db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=facebook_id, scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
                 db.session.commit()
@@ -112,7 +112,7 @@ def facebook_notification_sender():
         else:
             facebook_ids = db.session.query(WPTPlatformUser.platform_user_id).all()
             for row in facebook_ids:
-                max_minutes = (len(facebook_ids) % 200) + 1
+                max_minutes = int(len(facebook_ids) / 1000) + 1
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
                 db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=row[0], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
             db.session.commit()
