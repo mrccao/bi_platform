@@ -2,19 +2,20 @@
 
 import os
 
+from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
-from flask_migrate import MigrateCommand
+
 from app import create_app
-from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
-from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
-from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.extensions import db
+from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
+from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
+from app.models.promotion import PromotionPush, PromotionPushHistory
+from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
+from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.bi_statistic import process_bi_statistic
-from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
 from app.tasks.promotion import process_facebook_notification
 from app.tasks.scheduled import process_bi
 

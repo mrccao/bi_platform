@@ -3,11 +3,12 @@ from flask import current_app as app
 from sqlalchemy import text
 from sqlalchemy.schema import Index
 
+from app.constants import PROMOTION_PUSH_STATUSES
 from app.extensions import db
-from app.utils import current_time
-from app.constants import ADMIN_USER_QUERY_STATUSES, ADMIN_USER_ROLES, PROMOTION_PUSH_STATUSES
-from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime, OGReadableAwareDateTime
+from app.libs.datetime_type import AwareDateTime
 from app.models.main import AdminUser, AdminUserQuery
+from app.utils import current_time
+
 
 class PromotionPush(db.Model):
     id = db.Column(db.Integer, primary_key=True)

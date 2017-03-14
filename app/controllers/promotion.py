@@ -1,24 +1,23 @@
 import hashlib
-import sqlparse
+
 import arrow
 import pandas as pd
+import sqlparse
 from dateutil import tz
-
-from flask import current_app as app
 from flask import Blueprint, render_template, request, jsonify
+from flask import current_app as app
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
+from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.extensions import db
 from app.models.main import AdminUserQuery
-from app.models.promotion import PromotionPush, PromotionPushHistory
-from app.models.orig_wpt import WPTPlatformUser
-from app.utils import error_msg_from_exception, current_time
-from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
+from app.models.promotion import PromotionPush
 from app.tasks.promotion import process_facebook_notification_items, process_facebook_notification
-
+from app.utils import error_msg_from_exception, current_time
 
 promotion = Blueprint('promotion', __name__)
+
 
 @promotion.route("/promotion/facebook_notification", methods=["GET"])
 @login_required

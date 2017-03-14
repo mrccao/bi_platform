@@ -1,12 +1,12 @@
 from sqlalchemy import text
-from sqlalchemy.orm import class_mapper
 from sqlalchemy.schema import UniqueConstraint
 
-from app.extensions import db
-from app.utils import current_time
-from app.models.orig_wpt import WPTUserLoginLog
 from app.constants import TRANSACTION_TYPES, BI_USER_SORTED_COLUMNS, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
-from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime, OGReadableAwareDateTime
+from app.extensions import db
+from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime
+from app.models.orig_wpt import WPTUserLoginLog
+from app.utils import current_time
+
 
 class BIImportConfig(db.Model):
     __tablename__ = 'bi_import_config'

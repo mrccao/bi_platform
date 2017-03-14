@@ -1,14 +1,11 @@
 import arrow
-
-from flask import current_app as app
 from flask import Blueprint, render_template, request, jsonify
+from flask import current_app as app
 from flask_login import login_required
+from sqlalchemy import text
 
-from sqlalchemy import text, and_, or_
-
-from app.utils import current_time, get_last_day_of_prev_month
 from app.extensions import db
-from app.constants import FREE_TRANSACTION_TYPES
+from app.utils import current_time
 
 dashboard = Blueprint('dashboard', __name__)
 

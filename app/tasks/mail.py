@@ -1,9 +1,10 @@
-from flask import render_template
 from flask import current_app as app
-from app.tasks import celery
-from app.extensions import mail
-
+from flask import render_template
 from flask_mail import Message
+
+from app.extensions import mail
+from app.tasks import celery
+
 
 @celery.task
 def send_mail(to, subject, template, attachment=None, attachment_content_type=None, **kwargs):

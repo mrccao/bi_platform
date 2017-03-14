@@ -1,18 +1,18 @@
 import os
-import sqlparse
-import pandas as pd
 
+import pandas as pd
+import sqlparse
 from flask import current_app as app
 from sqlalchemy import text
-from sqlalchemy.sql.expression import bindparam
 
-from app.libs.dataframe import DataFrame
-from app.tasks import celery, get_config_value, set_config_value, with_db_context
-from app.tasks.mail import send_mail
-from app.extensions import db
-from app.models.main import AdminUser, AdminUserQuery
 from app.constants import ADMIN_USER_QUERY_STATUSES, SQL_RESULT_STRATEGIES
+from app.extensions import db
+from app.libs.dataframe import DataFrame
+from app.models.main import AdminUser, AdminUserQuery
+from app.tasks import celery
+from app.tasks.mail import send_mail
 from app.utils import current_time, current_time_as_float, error_msg_from_exception, dedup
+
 
 @celery.task
 def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):

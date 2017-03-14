@@ -1,9 +1,11 @@
-import numpy
 import decimal
 import uuid
-import arrow
-from flask.json import JSONEncoder
 from datetime import datetime
+
+import arrow
+import numpy
+from flask.json import JSONEncoder
+
 
 class FlaskJSONEncoder(JSONEncoder):
     def default(self, obj):

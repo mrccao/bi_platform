@@ -1,11 +1,11 @@
 from app.tasks import celery
-
+from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
+from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.bi_statistic import process_bi_statistic
-from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
 from app.tasks.promotion import process_facebook_notification
+
 
 @celery.task
 def process_bi():

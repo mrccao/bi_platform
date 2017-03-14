@@ -1,10 +1,11 @@
 from flask import current_app as app
-from app.tasks import celery, get_config_value, set_config_value, with_db_context, get_wpt_og_user_mapping
-from app.extensions import db
-from app.utils import current_time
-from app.models.bi import BIUser, BIStatistic, BIUserCurrency, BIUserBill
-from sqlalchemy import text, and_, or_
+from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
+
+from app.extensions import db
+from app.models.bi import BIStatistic
+from app.tasks import celery, with_db_context
+from app.utils import current_time
 
 
 @celery.task

@@ -1,17 +1,16 @@
-import requests
-import hashlib
 import json
 import urllib.parse
-import arrow
 from random import randrange
 
-from flask import current_app as app
-from app.extensions import db
-from app.tasks import celery
-from app.models.promotion import PromotionPush, PromotionPushHistory
-from app.models.orig_wpt import WPTPlatformUser
+import arrow
+import requests
+
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
-from app.utils import current_time
+from app.extensions import db
+from app.models.orig_wpt import WPTPlatformUser
+from app.models.promotion import PromotionPush, PromotionPushHistory
+from app.tasks import celery
+from app.utils import current_time, error_msg_from_exception
 
 
 @celery.task
@@ -37,6 +36,7 @@ def process_facebook_notification_items(push_id, scheduled_at, data=None):
         db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.SCHEDULED.value}, synchronize_session=False)
         db.session.commit()
     except Exception as e:
+        print('process_facebook_notification_items: ' + error_msg_from_exception(e))
         db.session.rollback()
 
         db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)

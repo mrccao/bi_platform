@@ -1,6 +1,7 @@
-from app.extensions import db
 from app.constants import TRANSACTION_TYPES
-from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime, OGReadableAwareDateTime
+from app.extensions import db
+from app.libs.datetime_type import OGReadableAwareDateTime
+
 
 class WPTODSGoldActivity(db.Model):
     __bind_key__ = 'orig_wpt_ods'
