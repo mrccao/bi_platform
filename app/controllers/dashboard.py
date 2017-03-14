@@ -26,20 +26,20 @@ def visualization_summary_data():
         day = now.format('YYYY-MM-DD')
 
     new_registration = db.engine.execute(text(
-        "SELECT new_registration FROM bi_statistic WHERE platform='All Platform' AND created_day= :day"),
+        "SELECT new_registration FROM bi_statistic WHERE platform='All Platform' AND _day= :day"),
         day=day).scalar()
 
     revenue = db.engine.execute(text(
-        "SELECT revenue FROM bi_statistic WHERE  created_day= :day"), day=day).scalar()
+        "SELECT revenue FROM bi_statistic WHERE  _day= :day"), day=day).scalar()
 
     game_dau = db.engine.execute(text("""
        SELECT dau FROM   bi_statistic WHERE game='All Game'
-       AND created_day = :day  """), day=day).scalar()
+       AND _day = :day  """), day=day).scalar()
 
     new_registration_game_dau = db.engine.execute(text("""
        SELECT new_registration_game_dau
        FROM   bi_statistic
-       WHERE  created_day= :day """), day=day).scalar()
+       WHERE  _day= :day """), day=day).scalar()
 
     payload = {
         'new_registration': new_registration,
@@ -71,16 +71,16 @@ def visualization_executive_data():
     if report_type == 'New Registration':
 
         proxy = db.engine.execute(text("""
-                                       SELECT created_day, new_registration
+                                       SELECT _day, new_registration
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game='All Game',
                                   platform=platform)
     elif report_type == 'Game DAU':
         proxy = db.engine.execute(text("""
-                                       SELECT created_day, dau
+                                       SELECT _day, dau
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game=game,
                                   platform='All Platform')
 
@@ -89,18 +89,18 @@ def visualization_executive_data():
     elif report_type == 'WAU':
 
         proxy = db.engine.execute(text("""
-                                       SELECT created_day, wau
+                                       SELECT _day, wau
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game=game,
                                   platform='All Platform')
 
     elif report_type == 'MAU':
 
         proxy = db.engine.execute(text("""
-                                       SELECT created_day, mau
+                                       SELECT _day, mau
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game=game,
                                   platform='All Platform')
 
@@ -108,16 +108,16 @@ def visualization_executive_data():
     elif report_type == 'New Reg Game DAU':
 
         proxy = db.engine.execute(text("""
-                                       SELECT created_day,new_registration_game_dau
+                                       SELECT _day,new_registration_game_dau
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game='All Game',
                                   platform='All Platform')
     elif report_type == 'Revenue':
         proxy = db.engine.execute(text("""
-                                       SELECT created_day,dollar_paid_amount
+                                       SELECT _day,dollar_paid_amount
                                        FROM   bi_statistic
-                                       WHERE  DATE(created_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
+                                       WHERE  DATE(_day) BETWEEN :start_time AND :end_time AND game = :game AND platform = :platform
                                         """), start_time=start_time, end_time=end_time, game='All Game',
                                   platform='All Platform')
 
