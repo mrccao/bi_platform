@@ -214,7 +214,7 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'Texas Poker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Facebook Game']:
-                db.session.add(BIStatistic(day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+                db.session.add(BIStatistic(_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
     db.session.commit()
 
 
