@@ -20,7 +20,7 @@ class BIStatistic(db.Model):
     __tablename__ = 'bi_statistic'
 
     id = db.Column(db.Integer, primary_key=True)
-    created_day = db.Column(NaiveDateTime, nullable=False, index=True)
+    _day = db.Column(NaiveDateTime, nullable=False, index=True)
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 

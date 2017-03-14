@@ -61,7 +61,7 @@ def process_bi_statistic_new_reg_dau(target):
     if rows:
         def sync_collection_new_registration_dau(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.created_day== bindparam('_on_day'),
+                BIStatistic.__table__.c._day== bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )

@@ -25,7 +25,7 @@ def process_bi_statistic_new_reg(target):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'unkonw'
+                                                    ELSE 'unknow'
                                                   END                                            AS platform,
                                                   COUNT(*)                                       AS sum
                                            FROM   bi_user
@@ -40,7 +40,7 @@ def process_bi_statistic_new_reg(target):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'unkonw'
+                                                    ELSE 'unknow'
                                                   END                                            AS platform,
                                                   COUNT(*)                                       AS sum
                                            FROM   bi_user
@@ -56,7 +56,7 @@ def process_bi_statistic_new_reg(target):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'unkonw'
+                                                    ELSE 'unknow'
                                                   END                                            AS platform,
                                                   COUNT(*)                                       AS sum
                                            FROM   bi_user
@@ -71,7 +71,7 @@ def process_bi_statistic_new_reg(target):
     if rows:
         def sync_collection_new_registration(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.created_day== bindparam('_on_day'),
+                BIStatistic.__table__.c._day== bindparam('_on_day'),
                 BIStatistic.__table__.c.platform == bindparam('_platform'),
                 BIStatistic.__table__.c.game == 'All Game'
             )

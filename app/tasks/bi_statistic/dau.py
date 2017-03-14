@@ -52,7 +52,7 @@ def process_bi_statistic_dau(target):
     if rows:
         def sync_collection_dau_all_games(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.created_day== bindparam('_on_day'),
+                BIStatistic.__table__.c._day == bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
@@ -82,7 +82,7 @@ def process_bi_statistic_dau(target):
                                                   CASE
                                                     WHEN game_id = 25011 THEN 'Texas Poker'
                                                     WHEN game_id = 35011 THEN 'TimeSlots'
-                                                    ELSE 'unkonw'
+                                                    ELSE 'unknow'
                                                   END                                              AS game,
                                                   COUNT(DISTINCT user_id)                          AS sum
                                            FROM   bi_user_currency
@@ -95,7 +95,7 @@ def process_bi_statistic_dau(target):
                                                           CASE
                                                             WHEN game_id = 25011 THEN 'Texas Poker'
                                                             WHEN game_id = 35011 THEN 'TimeSlots'
-                                                          ELSE 'unkonw'
+                                                          ELSE 'unknow'
                                                           END                                              AS game,
                                                           COUNT(DISTINCT user_id)                          AS sum
                                                    FROM   bi_user_currency
@@ -109,7 +109,7 @@ def process_bi_statistic_dau(target):
                                                           CASE
                                                             WHEN game_id = 25011 THEN 'Texas Poker'
                                                             WHEN game_id = 35011 THEN 'TimeSlots'
-                                                          ELSE 'unkonw'
+                                                          ELSE 'unknow'
                                                           END                                              AS game,
                                                           COUNT(DISTINCT user_id)                          AS sum
                                                    FROM   bi_user_currency
@@ -122,15 +122,15 @@ def process_bi_statistic_dau(target):
     if result_proxy is None:
         return
     rows = [{
-                    '_on_day': row['on_day'],
-                    '_game': row['game'],
-                    'sum': row['sum']
-                } for row in result_proxy]
+                '_on_day': row['on_day'],
+                '_game': row['game'],
+                'sum': row['sum']
+            } for row in result_proxy]
 
     if rows:
         def sync_collection_dau_every_game(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.created_day== bindparam('_on_day'),
+                BIStatistic.__table__.c._day == bindparam('_on_day'),
                 BIStatistic.__table__.c.game == bindparam('_game'),
                 BIStatistic.__table__.c.platform == 'All Platform'
             )

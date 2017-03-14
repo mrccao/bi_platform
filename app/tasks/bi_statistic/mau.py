@@ -111,7 +111,7 @@ def process_bi_statistic_mau(target):
     def sync_collection_mau_every_game(connection, transaction):
 
         where = and_(
-            BIStatistic.__table__.c.created_day == bindparam('_month'),
+            BIStatistic.__table__.c._day == bindparam('_month'),
             BIStatistic.__table__.c.game == bindparam('_game'),
             BIStatistic.__table__.c.platform == 'All Platform'
         )
@@ -165,7 +165,7 @@ def process_bi_statistic_mau(target):
     def sync_collection_mau_all_games(connection, transaction):
 
         where = and_(
-            BIStatistic.__table__.c.created_day == bindparam('_month'),
+            BIStatistic.__table__.c._day == bindparam('_month'),
             BIStatistic.__table__.c.game == 'All Game',
             BIStatistic.__table__.c.platform == 'All Platform'
         )

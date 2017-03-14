@@ -79,7 +79,7 @@ def process_bi_statistic_revenue(target):
     if rows:
         def sync_collection_revenue(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.created_day== bindparam('_on_day'),
+                BIStatistic.__table__.c._day== bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
