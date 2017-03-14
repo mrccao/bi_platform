@@ -20,14 +20,14 @@ class BIStatistic(db.Model):
     __tablename__ = 'bi_statistic'
 
     id = db.Column(db.Integer, primary_key=True)
-    day = db.Column(NaiveDateTime, nullable=False, index=True)
+    created_day = db.Column(NaiveDateTime, nullable=False, index=True)
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
     new_registration = db.Column(db.Integer, default=0)
     dau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
-    new_registration_dau = db.Column(db.Integer, default=0)
+    new_registration_game_dau = db.Column(db.Integer, default=0)
 
     dollar_paid_user_count = db.Column(db.Integer, default=0)
 
