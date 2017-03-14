@@ -2,6 +2,7 @@ import hashlib
 import sqlparse
 import arrow
 import pandas as pd
+from dateutil import tz
 
 from flask import current_app as app
 from flask import Blueprint, render_template, request, jsonify
@@ -13,7 +14,7 @@ from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.models.orig_wpt import WPTPlatformUser
 from app.utils import error_msg_from_exception, current_time
-from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_TYPES
+from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.tasks.promotion import process_facebook_notification_items, process_facebook_notification
 
 
@@ -56,7 +57,7 @@ def facebook_notification_sender():
 
     scheduled_at = request.form.get('scheduled_at')
     if scheduled_at:
-        scheduled_at = arrow.get(scheduled_at).replace(hours=+5) # from est to utc
+        scheduled_at = arrow.get(scheduled_at).replace(tzinfo=tz.gettz(app.config['APP_TIMEZONE'])).to('UTC') # from est to utc
     else:
         scheduled_at = current_time() # utc
 
@@ -71,7 +72,8 @@ def facebook_notification_sender():
             based_query_id=based_query_id,
             push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
             message=formatted_message,
-            message_key=message_key
+            message_key=message_key,
+            status=PROMOTION_PUSH_STATUSES.PENDING.value
         )
 
         db.session.add(push)
@@ -88,7 +90,7 @@ def facebook_notification_sender():
 
             stmt = sqlparse.parse(query.sql)[0]
             tokens = [str(item) for item in stmt.tokens]
-            tokens[2] = 'facebook_id'
+            tokens[2] = 'user_id, facebook_id'
             slim_sql = ''.join(tokens)
 
             result_proxy = db.engine.execute(text(slim_sql))
@@ -98,21 +100,21 @@ def facebook_notification_sender():
                 data = result_proxy.fetchall()
 
                 df = pd.DataFrame(data, columns=column_names)
-                facebook_ids = df[df['facebook_id'].notnull()]['facebook_id'].tolist()
+                data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if (row['user_id'] is not None and row['facebook_id'] is not None)]
 
                 if app.config['ENV'] == 'prod':
-                    process_facebook_notification_items.delay(push_id, scheduled_at, facebook_ids)
+                    process_facebook_notification_items.delay(push_id, scheduled_at.format(), data)
                 else:
-                    process_facebook_notification_items(push_id, scheduled_at, facebook_ids)
+                    process_facebook_notification_items(push_id, scheduled_at.format(), data)
 
                 return jsonify(result='ok')
             else:
-                return jsonify(error="based query don't have column: facebook_id"), 500
+                return jsonify(error="based query don't have column: user_id, facebook_id"), 500
         else:
             if app.config['ENV'] == 'prod':
-                process_facebook_notification_items.delay(push_id, scheduled_at)
+                process_facebook_notification_items.delay(push_id, scheduled_at.format())
             else:
-                process_facebook_notification_items(push_id, scheduled_at)
+                process_facebook_notification_items(push_id, scheduled_at.format())
 
             return jsonify(result='ok')
     except Exception as e:

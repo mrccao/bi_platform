@@ -19,7 +19,7 @@ class ProdConfig(Config):
     WTF_CSRF_ENABLED = True
 
     APP_HOST = 'https://bi.playwpt.com'
-    APP_TIMEZONE = 'EST'
+    APP_TIMEZONE = 'America/New_York'
 
     REPORT_FILE_EXTENSION = 'csv.gz'
     REPORT_FILE_COMPRESSION = 'gzip'
@@ -79,7 +79,7 @@ class DevConfig(Config):
     WTF_CSRF_ENABLED = True
 
     APP_HOST = 'http://localhost:5000'
-    APP_TIMEZONE = 'EST'
+    APP_TIMEZONE = 'America/New_York'
 
     REPORT_FILE_EXTENSION = 'csv.gz'
     REPORT_FILE_COMPRESSION = 'gzip'

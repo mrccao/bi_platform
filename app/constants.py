@@ -189,6 +189,12 @@ class PROMOTION_PUSH_TYPES(BaseEnum):
     FB_NOTIFICATION = 'fb_notification'
     EMAIL = 'email'
 
+class PROMOTION_PUSH_STATUSES(BaseEnum):
+    FAILED = 'failed'
+    PENDING = 'pending'
+    PREPARING = 'preparing'
+    SCHEDULED = 'scheduled'
+
 class PROMOTION_PUSH_HISTORY_STATUSES(BaseEnum):
     REQUEST_FAILED = 'request_failed'
     FAILED = 'failed'

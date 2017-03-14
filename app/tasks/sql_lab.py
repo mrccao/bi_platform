@@ -63,7 +63,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
 
         #########
 
-        now = current_time().to(app.config['APP_TIMEZONE'])
+        now = current_time(app.config['APP_TIMEZONE'])
         sql_key = query.sql_key
         current_user_id = query.admin_user_id
 

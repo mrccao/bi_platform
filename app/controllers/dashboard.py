@@ -21,7 +21,7 @@ def index():
 @dashboard.route("/dashboard/visualization/summary_data", methods=["GET"])
 @login_required
 def visualization_summary_data():
-    now = current_time().to(app.config['APP_TIMEZONE'])
+    now = current_time(app.config['APP_TIMEZONE'])
 
     if request.args.get('day') and request.args.get('day') == 'yday':
         day = now.replace(days=-1).format('YYYY-MM-DD')
@@ -78,7 +78,7 @@ def visualization_executive_data():
     if days_ago is None:
         start_time, end_time = request.args.get('date_range').split('  -  ')
     else:
-        now = current_time().to(app.config['APP_TIMEZONE'])
+        now = current_time(app.config['APP_TIMEZONE'])
         end_time = now.replace(days=-1).format('YYYY-MM-DD')
         start_time = now.replace(days=-int(days_ago)).format('YYYY-MM-DD')
 

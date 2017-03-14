@@ -28,6 +28,7 @@ def get_last_day_of_prev_month(timezone=None):
     prev_month = current_time(timezone).replace(months=-1)
     return arrow.get(prev_month.year, prev_month.month, monthrange(prev_month.year, prev_month.month)[1])
 
+
 class timeout(object):
     """
     To be used in a ``with`` block and timeout its content.

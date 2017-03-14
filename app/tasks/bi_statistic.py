@@ -10,8 +10,8 @@ from sqlalchemy.sql.expression import bindparam
 @celery.task
 def process_bi_statistic(target):
 
-    yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
+    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
     #
     # process_bi_statistic_for_lifetime new_registration

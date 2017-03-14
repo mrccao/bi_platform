@@ -255,12 +255,26 @@
                                     rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
                                 }
                             } else if (column === 'status') {
-                                rows.push('<td>' +
-                                            '<span>Total: ' + row[column].total_count + '</span><br />' + 
-                                            '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' + 
-                                            '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' + 
-                                            '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' + 
-                                          '</td>');
+                                if (row[column] === 'failed') {
+                                    rows.push('<td>' +
+                                                '<span class="text-red">Prepare failed</span><br />' + 
+                                              '</td>'); 
+                                } else if (row[column] === 'pending') {
+                                    rows.push('<td>' +
+                                                '<span class="text-muted">Pending</span><br />' + 
+                                              '</td>'); 
+                                } else if (row[column] === 'preparing') {
+                                    rows.push('<td>' +
+                                                '<span class="text-muted">Preparing</span><br />' + 
+                                              '</td>'); 
+                                } else {
+                                    rows.push('<td>' +
+                                                '<span>Total: ' + row[column].total_count + '</span><br />' + 
+                                                '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' + 
+                                                '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' + 
+                                                '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' + 
+                                              '</td>');    
+                                }
                             } else {
                                 rows.push('<td>' + row[column] + '</td>');
                             }

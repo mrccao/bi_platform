@@ -10,23 +10,36 @@ from app.extensions import db
 from app.tasks import celery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.models.orig_wpt import WPTPlatformUser
-from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_TYPES
+from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.utils import current_time
 
+
 @celery.task
-def process_facebook_notification_items(push_id, scheduled_at, facebook_ids=None):
-    if facebook_ids is None:
-        facebook_ids = db.session.query(WPTPlatformUser.platform_user_id).all()
-        for row in facebook_ids:
-            max_minutes = int(len(facebook_ids) / 1000) + 1
-            scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
-            db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=row[0], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+def process_facebook_notification_items(push_id, scheduled_at, data=None):
+    try:
+        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.PREPARING.value}, synchronize_session=False)
         db.session.commit()
-    else:
-        for facebook_id in facebook_ids:
-            max_minutes = int(len(facebook_ids) / 1000) + 1
-            scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
-            db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, target=facebook_id, scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+
+        scheduled_at = arrow.get(scheduled_at)
+        if data is None:
+            data = db.session.query(WPTPlatformUser.user_id, WPTPlatformUser.platform_user_id).all()
+            max_minutes = int(len(data) / 1000) + 1
+            for row in data:
+                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+                db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, user_id=row[0], target=row[1], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+        else:
+            max_minutes = int(len(data) / 1000) + 1
+            for row in data:
+                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+                db.session.add(PromotionPushHistory(push_id=push_id, push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value, user_id=row[0], target=row[1], scheduled_at=scheduled_time, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value))
+        db.session.commit()
+
+        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.SCHEDULED.value}, synchronize_session=False)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+
+        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
         db.session.commit()
 
 

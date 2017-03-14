@@ -96,7 +96,7 @@
                                <li><a href="javascript:void(0);"><i class="fa fa-circle-o"></i> Report collection 12</a></li>
                              </ul>
                            </li>
-                           <!--<li class="treeview{{ ' active' if request.path.startswith('/promotion') else ''}}">
+                           <li class="treeview{{ ' active' if request.path.startswith('/promotion') else ''}}">
                              <a href="#">
                                <i class="fa fa-rocket"></i> <span>Promotion Tools</span>
                                <span class="pull-right-container">
@@ -106,7 +106,7 @@
                              <ul class="treeview-menu">
                                  <li><a href="{{ url_for('promotion.facebook_notification') }}"><i class="fa fa-circle-o"></i>Facebook Notification</a></li>
                              </ul>
-                           </li>-->
+                           </li>
                            <li class="treeview{{ ' active' if request.path.startswith('/data') else ''}}">
                              <a href="#">
                                <i class="fa fa-table"></i> <span>Data</span>
@@ -132,10 +132,10 @@
                     </section>
                     <div class="sidebar-footer">
                       <b>EST</b>
-                      <time class="world-time" datetime="{{ display_current_time('EST') | safe }}"></time>
+                      <time class="world-time" datetime="{{ display_current_time('America/New_York') | safe }}"></time>
                       <br />
                       <b>PST</b>
-                      <time class="world-time" datetime="{{ display_current_time('Pacific/Pitcairn') | safe }}"></time>
+                      <time class="world-time" datetime="{{ display_current_time('America/Los_Angeles') | safe }}"></time>
                       <br />
                       <b>GMT-8</b>
                       <time class="world-time" datetime="{{ display_current_time('Asia/Hong_Kong') | safe }}"></time>
@@ -185,6 +185,7 @@
             
             <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js" type="text/javascript"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.11/moment-timezone.min.js" type="text/javascript"></script>
 
             <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/js/app.min.js" type="text/javascript"></script>
         {% endblock %}
@@ -195,6 +196,10 @@
 
         <script type="text/javascript">
         $(document).ready(function() {
+
+            moment.tz.add('America/New_York|EST EDT EWT EPT|50 40 40 40|01010101010101010101010101010101010101010101010102301010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-261t0 1nX0 11B0 1nX0 11B0 1qL0 1a10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 RB0 8x40 iv0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1qN0 WL0 1qN0 11z0 1o10 11z0 1o10 11z0 1o10 11z0 1o10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1cN0 1cL0 1cN0 1cL0 s10 1Vz0 LB0 1BX0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 1cN0 1fz0 1a10 1fz0 1cN0 1cL0 1cN0 1cL0 1cN0 1cL0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 14p0 1lb0 14p0 1lb0 14p0 1nX0 11B0 1nX0 11B0 1nX0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Rd0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0 Op0 1zb0|21e6');
+            moment.tz.setDefault("America/New_York");
+
             function updateWorldTime() {
                 $('time.world-time').each(function(i, e) {
                     var time = moment($(e).attr('datetime')).format('lll');
