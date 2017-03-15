@@ -46,7 +46,7 @@ def process_bi_statistic_dau(target,timezone_offset):
     if result_proxy is None:
         return
 
-    rows = [{'_on_day': row['on_day'], '_game': 'All Game', 'sum': row['sum']} for row in result_proxy]
+    rows = [{'_on_day': row['on_day'],  'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_dau_all_games(connection, transaction):

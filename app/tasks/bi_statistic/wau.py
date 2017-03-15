@@ -19,102 +19,102 @@ def process_bi_statistic_wau(target,timezone_offset):
 
         if target == 'lifetime':
             tmp_proxy = []
-            for month_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
-                every_month_result = connection.execute(text("""
-                                             SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+            for week_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+                every_week_result = connection.execute(text("""
+                                             SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                      CASE
                                                        WHEN game_id =25011 THEN 'Texas Poker'
                                                        WHEN game_id =35011 THEN 'TimeSlots'
                                                      END                                                       AS game,
                                                      COUNT(DISTINCT user_id)                                   AS sum
                                              FROM bi_user_currency
-                                             WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                   AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)), INTERVAL -7 DAY)
-                                             GROUP BY on_month, game
-                                             HAVING on_month =:month_day
-                               """), month_day=month_day.strftime("%Y-%m-%d"), timezone_offset=timezone_offset)
-                tmp_proxy.append(every_month_result)
+                                             WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                   AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)), INTERVAL -7 DAY)
+                                             GROUP BY on_week, game
+                                             HAVING on_week =:week_day
+                               """), week_day=week_day.strftime("%Y-%m-%d"), timezone_offset=timezone_offset)
+                tmp_proxy.append(every_week_result)
             return tmp_proxy
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                CASE
                                                     WHEN game_id =25011 THEN 'Texas Poker'
                                                     WHEN game_id =35011 THEN 'TimeSlots'
                                                END                                                               AS game,
                                                     COUNT(DISTINCT user_id)                                      AS sum
                                                FROM bi_user_currency
-                                               WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                      AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
-                                               GROUP BY on_month,game_id
-                                               HAVING on_month =:month_day
-                                               """), month_day=yesterday, timezone_offset=timezone_offset)
+                                               WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                      AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
+                                               GROUP BY on_week,game_id
+                                               HAVING on_week =:week_day
+                                               """), week_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                CASE
                                                     WHEN game_id =25011 THEN 'Texas Poker'
                                                     WHEN game_id =35011 THEN 'TimeSlots'
                                                END                                                               AS game,
                                                     COUNT(DISTINCT user_id)                                      AS sum
                                                FROM bi_user_currency
-                                               WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                      AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
-                                               GROUP BY on_month,game
-                                               HAVING on_month =:month_day
-                                               """), month_day=today,timezone_offset=timezone_offset)
+                                               WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                      AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
+                                               GROUP BY on_week,game
+                                               HAVING on_week =:week_day
+                                               """), week_day=today,timezone_offset=timezone_offset)
 
     def collection_wau_all_games(connection, transaction):
 
         if target == 'lifetime':
             tmp_proxy = []
-            for month_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+            for week_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
                 every_week_result = connection.execute(text("""
-                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                               SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                        COUNT(DISTINCT user_id)                                   AS sum
                                                FROM bi_user_currency
-                                               WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                      AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
-                                               GROUP BY on_month
-                                               HAVING on_month =:month_day
-                                               """), month_day=month_day.strftime("%Y-%m-%d"),timezone_offset=timezone_offset)
+                                               WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                      AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
+                                               GROUP BY on_week
+                                               HAVING on_week =:week_day
+                                               """), week_day=week_day.strftime("%Y-%m-%d"),timezone_offset=timezone_offset)
 
                 tmp_proxy.append(every_week_result)
             return tmp_proxy
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                              SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                              SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                       COUNT(DISTINCT user_id)                                   AS sum
                                               FROM bi_user_currency
-                                              WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                      AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
-                                              GROUP BY on_month
-                                              HAVING on_month =:month_day
-                                                   """), month_day=yesterday,timezone_offset=timezone_offset)
+                                              WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                      AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
+                                              GROUP BY on_week
+                                              HAVING on_week =:week_day
+                                                   """), week_day=yesterday,timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                              SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                              SELECT  DATE (convert_tz(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                       COUNT(DISTINCT user_id)                                   AS sum
                                               FROM bi_user_currency
-                                              WHERE created_at < date(convert_tz(:month_day, '+00:00', :timezone_offset))
-                                                      AND created_at >=date_add(date(convert_tz(:month_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
-                                              GROUP BY on_month
-                                              HAVING on_month =:month_day
-                                                   """), month_day=today, timezone_offset=timezone_offset)
+                                              WHERE created_at < date(convert_tz(:week_day, '+00:00', :timezone_offset))
+                                                      AND created_at >=date_add(date(convert_tz(:week_day, '+00:00', :timezone_offset)),INTERVAL -7 DAY)
+                                              GROUP BY on_week
+                                              HAVING on_week =:week_day
+                                                   """), week_day=today, timezone_offset=timezone_offset)
 
     def sync_collection_wau_every_game(connection, transaction):
 
         where = and_(
-            BIStatistic.__table__.c._day == bindparam('_on_month'),
+            BIStatistic.__table__.c._day == bindparam('_on_week'),
             BIStatistic.__table__.c.game == bindparam('_game'),
             BIStatistic.__table__.c.platform == 'All Platform'
         )
         values = {
-            'mau': bindparam('sum')
+            'wau': bindparam('sum')
         }
 
         if target == 'lifetime':
@@ -126,7 +126,7 @@ def process_bi_statistic_wau(target,timezone_offset):
 
             for result_proxy in result_total_proxy:
 
-                rows = [{'_on_month': row['on_month'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
+                rows = [{'_on_week': row['on_week'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
 
                 if rows:
                     try:
@@ -146,7 +146,7 @@ def process_bi_statistic_wau(target,timezone_offset):
             if result_proxy is None:
                 return
 
-            rows = [{'_on_month': row['on_month'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
+            rows = [{'_on_week': row['on_week'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
 
             if rows:
                 try:
@@ -162,12 +162,12 @@ def process_bi_statistic_wau(target,timezone_offset):
     def sync_collection_wau_all_games(connection, transaction):
 
         where = and_(
-            BIStatistic.__table__.c._day == bindparam('_on_month'),
+            BIStatistic.__table__.c._day == bindparam('_on_week'),
             BIStatistic.__table__.c.game == 'All Game',
             BIStatistic.__table__.c.platform == 'All Platform'
         )
         values = {
-            'mau': bindparam('sum')
+            'wau': bindparam('sum')
         }
         if target == 'lifetime':
 
@@ -178,7 +178,7 @@ def process_bi_statistic_wau(target,timezone_offset):
 
             for result_proxy in result_total_proxy:
 
-                rows = [{'_on_month': row['on_month'], 'sum': row['sum']} for row in result_proxy]
+                rows = [{'_on_week': row['on_week'], 'sum': row['sum']} for row in result_proxy]
 
                 if rows:
 
@@ -199,7 +199,7 @@ def process_bi_statistic_wau(target,timezone_offset):
             if result_proxy is None:
                 return
 
-            rows = [{'_on_month': row['on_month'], '_game': 'All Game', 'sum': row['sum']} for row in result_proxy]
+            rows = [{'_on_week': row['on_week'], '_game': 'All Game', 'sum': row['sum']} for row in result_proxy]
 
             if rows:
 
