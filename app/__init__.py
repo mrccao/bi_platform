@@ -1,17 +1,16 @@
 from flask import Flask, render_template
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 
 from app.assets import assets
-from app.libs.json_encoder import FlaskJSONEncoder
 from app.extensions import cache, db, debug_toolbar, login, gravatar, mail, migrate
-from app.models.main import AdminUser, AdminUserActivity
-from app.models.orig_wpt import WPTUserLoginLog
-from app.models.bi import (BIUser, 
+from app.libs.json_encoder import FlaskJSONEncoder
+from app.models.bi import (BIUser,
                            BIUserCurrency,
                            BIUserBill,
                            BIClubWPTUser,
                            WPTUserLoginLog)
+from app.models.main import AdminUser, AdminUserActivity
+from app.models.orig_wpt import WPTUserLoginLog
 from app.views import (AdminBaseIndexView,
                        AdminBaseModelView,
                        AdminUserModelView,

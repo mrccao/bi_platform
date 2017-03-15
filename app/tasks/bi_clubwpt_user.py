@@ -1,9 +1,10 @@
-from app.tasks import celery, get_config_value, set_config_value, with_db_context
+from sqlalchemy import text
+from sqlalchemy.sql.expression import bindparam
+
 from app.extensions import db
 from app.models.bi import BIClubWPTUser
+from app.tasks import celery, get_config_value, set_config_value, with_db_context
 from app.utils import current_time
-from sqlalchemy import text, and_, or_
-from sqlalchemy.sql.expression import bindparam
 
 
 def parse_email_or_username(content):

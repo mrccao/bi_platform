@@ -3,10 +3,10 @@ Wrapper around pandas.DataFrame.
 """
 
 import arrow
-import math
 import pandas as pd
 
 from flask import current_app as app
+
 
 class DataFrame(object):
     def __init__(self, df):

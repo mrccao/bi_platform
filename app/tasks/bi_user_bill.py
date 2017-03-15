@@ -1,8 +1,9 @@
-from app.tasks import celery, get_config_value, set_config_value, with_db_context, get_wpt_og_user_mapping
-from app.extensions import db
-from app.models.bi import BIUser, BIUserCurrency, BIUserBill
-from sqlalchemy import text, and_, or_
+from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
+
+from app.extensions import db
+from app.models.bi import BIUser, BIUserBill
+from app.tasks import celery, get_config_value, set_config_value, with_db_context
 
 
 def parse_user_mall_platform(platform, desc):

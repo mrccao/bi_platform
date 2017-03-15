@@ -1,29 +1,23 @@
-import numpy
-import decimal
-import uuid
-import pytz
-import signal
 import logging
+import signal
+from calendar import monthrange
+from datetime import datetime
+
 import arrow
 import pytz
-
-from datetime import datetime
-from calendar import monthrange
-
 from flask import current_app as app
-from datetime import datetime
+
 from app.exceptions import TimeoutException
 
 
-
 def is_dst_now_in(zonename):
-   """ According to the region to determine whether it is DST """
-   return bool (datetime.now(pytz.timezone( zonename )).dst())
+    """ According to the region to determine whether it is DST """
+    return bool(datetime.now(pytz.timezone(zonename)).dst())
+
 
 def get_db_timezone_offset():
-   """ get offset time of between DST and CST """
-   return '-04:00' if is_dst_now_in( app.config["APP_TIMEZONE"] ) else  '-05:00'
-
+    """ get offset time of between DST and CST """
+    return '-04:00' if is_dst_now_in(app.config["APP_TIMEZONE"]) else  '-05:00'
 
 
 # def nowfun():
@@ -50,10 +44,12 @@ def get_last_day_of_prev_month(timezone=None):
     prev_month = current_time(timezone).replace(months=-1)
     return arrow.get(prev_month.year, prev_month.month, monthrange(prev_month.year, prev_month.month)[1])
 
+
 class timeout(object):
     """
     To be used in a ``with`` block and timeout its content.
     """
+
     def __init__(self, seconds=1, error_message='Timeout'):
         self.seconds = seconds
         self.error_message = error_message
@@ -122,34 +118,34 @@ def dedup(l, suffix='__'):
     return new_l
 
 
-# def base_json_conv(obj):
-    
-#     if isinstance(obj, numpy.int64):
-#         return int(obj)
-#     elif isinstance(obj, set):
-#         return list(obj)
-#     elif isinstance(obj, decimal.Decimal):
-#         return float(obj)
-#     elif isinstance(obj, uuid.UUID):
-#         return str(obj)
+    # def base_json_conv(obj):
 
-# def json_iso_dttm_ser(obj):
-#     """
-#     json serializer that deals with dates
+    #     if isinstance(obj, numpy.int64):
+    #         return int(obj)
+    #     elif isinstance(obj, set):
+    #         return list(obj)
+    #     elif isinstance(obj, decimal.Decimal):
+    #         return float(obj)
+    #     elif isinstance(obj, uuid.UUID):
+    #         return str(obj)
 
-#     >>> dttm = datetime(1970, 1, 1)
-#     >>> json.dumps({'dttm': dttm}, default=json_iso_dttm_ser)
-#     '{"dttm": "1970-01-01T00:00:00"}'
-#     """
-#     val = base_json_conv(obj)
-#     if val is not None:
-#         return val
-#     if isinstance(obj, datetime):
-#         obj = obj.isoformat()
-#     elif isinstance(obj, date):
-#         obj = obj.isoformat()
-#     else:
-#         raise TypeError(
-#             "Unserializable object {} of type {}".format(obj, type(obj))
-#         )
-#     return obj
+    # def json_iso_dttm_ser(obj):
+    #     """
+    #     json serializer that deals with dates
+
+    #     >>> dttm = datetime(1970, 1, 1)
+    #     >>> json.dumps({'dttm': dttm}, default=json_iso_dttm_ser)
+    #     '{"dttm": "1970-01-01T00:00:00"}'
+    #     """
+    #     val = base_json_conv(obj)
+    #     if val is not None:
+    #         return val
+    #     if isinstance(obj, datetime):
+    #         obj = obj.isoformat()
+    #     elif isinstance(obj, date):
+    #         obj = obj.isoformat()
+    #     else:
+    #         raise TypeError(
+    #             "Unserializable object {} of type {}".format(obj, type(obj))
+    #         )
+    #     return obj

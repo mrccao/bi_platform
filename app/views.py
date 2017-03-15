@@ -1,24 +1,19 @@
-
 from flask import url_for, redirect, request, abort, flash
-from jinja2 import Markup
-
 from flask_admin import expose, AdminIndexView
-from flask_login import current_user
-from flask_admin.contrib.sqla import ModelView, filters
-from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual, FilterLike, FilterInList
-
-from wtforms import validators
-from wtforms import TextField, PasswordField, SelectField
-
-from app.models.bi import BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
-from app.models.orig_wpt import WPTUserLoginLog
-
-# for details_view_with_extra_func
+from flask_admin.babel import gettext
+from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla.filters import BaseSQLAFilter, FilterEqual
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.helpers import get_mdict_item_or_list
-from flask_admin.babel import gettext
+from flask_login import current_user
+from jinja2 import Markup
+from wtforms import TextField, PasswordField, SelectField
+from wtforms import validators
 
-from app.constants import ADMIN_USER_ROLES, TRANSACTION_TYPES
+from app.constants import ADMIN_USER_ROLES
+from app.models.bi import BIUser, BIUserCurrency, BIUserBill
+from app.models.orig_wpt import WPTUserLoginLog
+
 
 class FilterInStringList(BaseSQLAFilter):
     def __init__(self, column, name, options=None, data_type=None):

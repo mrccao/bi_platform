@@ -1,10 +1,9 @@
-import arrow
 from datetime import datetime
+
+import arrow
+from flask import current_app as app
 from sqlalchemy import types
 from sqlalchemy_utils import ArrowType
-
-from flask import current_app as app
-from flask_login import current_user
 
 
 class NaiveDateTime(types.TypeDecorator):

@@ -1,16 +1,15 @@
-import sqlparse
 import hashlib
-import os
 
+import sqlparse
 from flask import Blueprint, render_template, request, jsonify, send_from_directory
-from flask_login import login_required, current_user
 from flask import current_app as app
+from flask_login import login_required, current_user
 
-from app.tasks.sql_lab import get_sql_results
-from app.extensions import db
-from app.utils import error_msg_from_exception, timeout
-from app.models.main import AdminUserQuery
 from app.constants import ADMIN_USER_QUERY_STATUSES, SQL_RESULT_STRATEGIES, ADMIN_USER_ROLES
+from app.extensions import db
+from app.models.main import AdminUserQuery
+from app.tasks.sql_lab import get_sql_results
+from app.utils import error_msg_from_exception, timeout
 
 sql_lab = Blueprint('sql_lab', __name__)
 

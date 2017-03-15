@@ -4,7 +4,6 @@ from celery import Celery, Task
 from sqlalchemy import text
 
 from app import create_app
-from app.utils import current_time
 
 
 def get_engine(db_instance, bind=None):

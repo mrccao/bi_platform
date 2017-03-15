@@ -1,7 +1,8 @@
 from jinja2 import Markup
 
 from app.extensions import db
-from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime, OGReadableAwareDateTime
+from app.libs.datetime_type import NaiveDateTime, OGReadableAwareDateTime
+
 
 class WPTPlatform(db.Model):
     __bind_key__ = 'orig_wpt'

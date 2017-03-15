@@ -1,5 +1,6 @@
 from flask_assets import Bundle, Environment
 
+
 common_css = Bundle(
     '../assets/css/adminlte.css',
     filters='cssmin',
