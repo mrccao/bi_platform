@@ -44,7 +44,7 @@ class PromotionPush(db.Model):
         successed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"), push_id=self.id).scalar()
         request_failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='request_failed'"), push_id=self.id).scalar()
         failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='failed'"), push_id=self.id).scalar()
-        scheduled_at = db.engine.execute(text("SELECT CONVERT_TZ(scheduled_at, '+00:00', '-05:00') FROM promotion_push_history WHERE push_id = :push_id ORDER BY scheduled_at ASC LIMIT 1"), push_id=self.id).scalar()
+        scheduled_at = db.engine.execute(text("SELECT CONVERT_TZ(scheduled_at, '+00:00', timezone) FROM promotion_push_history WHERE push_id = :push_id ORDER BY scheduled_at ASC LIMIT 1"), push_id=self.id).scalar()
 
         return {
             'id': self.id,

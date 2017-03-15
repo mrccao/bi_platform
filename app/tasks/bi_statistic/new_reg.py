@@ -4,12 +4,11 @@ from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
-from app.tasks import with_db_context, celery
+from app.tasks import with_db_context
 from app.utils import current_time
 
 
-@celery.task
-def process_bi_statistic_new_reg(target):
+def process_bi_statistic_new_reg(target,timezone_offset):
     #
     # process_bi_statistic_for_lifetime new_registration
     #
@@ -19,50 +18,50 @@ def process_bi_statistic_new_reg(target):
     def collection_new_registration(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) AS on_day,
+                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
                                                     ELSE 'unknow'
-                                                  END                                            AS platform,
-                                                  COUNT(*)                                       AS sum
+                                                  END                                                  AS platform,
+                                                  COUNT(*)                                             AS sum
                                            FROM   bi_user
                                            GROUP  BY on_day, reg_source
-                                       """))
+                                            """), timezone_offset=timezone_offset)
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) AS on_day,
+                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
                                                     ELSE 'unknow'
-                                                  END                                            AS platform,
-                                                  COUNT(*)                                       AS sum
+                                                  END                                                   AS platform,
+                                                  COUNT(*)                                              AS sum
                                            FROM   bi_user
                                            GROUP  BY on_day, reg_source
                                            HAVING on_day = :on_day
-                                       """), on_day=yesterday)
+                                       """), on_day=yesterday,timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) AS on_day,
+                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
                                                     ELSE 'unknow'
-                                                  END                                            AS platform,
-                                                  COUNT(*)                                       AS sum
+                                                  END                                                   AS platform,
+                                                  COUNT(*)                                              AS sum
                                            FROM   bi_user
                                            GROUP  BY on_day, reg_source
                                            HAVING on_day = :on_day
-                                       """), on_day=today)
+                                       """), on_day=today,timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_registration)
 

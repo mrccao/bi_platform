@@ -4,69 +4,65 @@ from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
-from app.tasks import with_db_context, celery
+from app.tasks import with_db_context
 from app.utils import current_time
 
 
-@celery.task
-def process_bi_statistic_revenue(target):
+def process_bi_statistic_revenue(target,timezone_offset):
     yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
     today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
-    #
-    # process_bi_statistic_for_lifetime revenue
-    #
 
     def collection_revenue(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
-                                           SELECT Date(Convert_tz(createtime, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT u_id)                             AS dollar_paid_user_count,
+                                           SELECT Date(Convert_tz(createtime, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT u_id)                                     AS dollar_paid_user_count,
                                                   SUM(CASE
                                                         WHEN user_paylog_status_id = 3 THEN 1
                                                         ELSE 0
-                                                      END)                                         AS dollar_paid_count,
+                                                      END)                                                 AS dollar_paid_count,
                                                   ROUND(SUM(CASE
                                                               WHEN user_paylog_status_id = 3 THEN order_price
                                                               ELSE 0
-                                                            END) / 100, 2)                         AS dollar_paid_amount
+                                                            END) / 100, 2)                                 AS dollar_paid_amount
                                            FROM   user_paylog
                                            GROUP  BY on_day
-                                           """))
+                                           """), timezone_offset=timezone_offset)
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT Date(Convert_tz(createtime, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT u_id)                             AS dollar_paid_user_count,
+                                           SELECT Date(Convert_tz(createtime, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT u_id)                                     AS dollar_paid_user_count,
                                                   SUM(CASE
                                                         WHEN user_paylog_status_id = 3 THEN 1
                                                         ELSE 0
-                                                      END)                                         AS dollar_paid_count,
+                                                      END)                                                 AS dollar_paid_count,
                                                   ROUND(SUM(CASE
                                                               WHEN user_paylog_status_id = 3 THEN order_price
                                                               ELSE 0
-                                                            END) / 100, 2)                         AS dollar_paid_amount
+                                                            END) / 100, 2)                                 AS dollar_paid_amount
                                            FROM   user_paylog
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=yesterday)
+                                       """), on_day=yesterday , timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT Date(Convert_tz(createtime, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT u_id)                             AS dollar_paid_user_count,
+                                           SELECT Date(Convert_tz(createtime, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT u_id)                                     AS dollar_paid_user_count,
                                                   SUM(CASE
                                                         WHEN user_paylog_status_id = 3 THEN 1
                                                         ELSE 0
-                                                      END)                                         AS dollar_paid_count,
+                                                      END)                                                 AS dollar_paid_count,
                                                   ROUND(SUM(CASE
                                                               WHEN user_paylog_status_id = 3 THEN order_price
                                                               ELSE 0
-                                                            END) / 100, 2)                         AS dollar_paid_amount
+                                                            END) / 100, 2)                                AS dollar_paid_amount
                                            FROM   user_paylog
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=today)
+                                       """), on_day=today,timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_revenue, 'orig_wpt_payment')
 

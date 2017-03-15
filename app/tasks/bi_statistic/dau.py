@@ -4,12 +4,11 @@ from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
-from app.tasks import with_db_context, celery
+from app.tasks import with_db_context
 from app.utils import current_time
 
 
-@celery.task
-def process_bi_statistic_dau(target):
+def process_bi_statistic_dau(target,timezone_offset):
     # process_bi_statistic_for_lifetime dau_all_game
 
     yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
@@ -18,29 +17,29 @@ def process_bi_statistic_dau(target):
     def collection_dau_all_games(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT user_id)                          AS sum
+                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
                                            GROUP  BY on_day
-                                           """))
+                                           """), timezone_offset=timezone_offset)
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT user_id)                          AS sum
+                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=yesterday)
+                                           """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                  COUNT(DISTINCT user_id)                          AS sum
+                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                  COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=today)
+                                           """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_dau_all_games)
 
@@ -77,55 +76,52 @@ def process_bi_statistic_dau(target):
 
     def collection_dau_every_game(connection, transaction):
         if target == 'lifetime':
-            connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                  CASE
-                                                    WHEN game_id = 25011 THEN 'Texas Poker'
-                                                    WHEN game_id = 35011 THEN 'TimeSlots'
-                                                    ELSE 'unknow'
-                                                  END                                              AS game,
-                                                  COUNT(DISTINCT user_id)                          AS sum
-                                           FROM   bi_user_currency
-                                           GROUP  BY on_day,game
-                                           """))
+            return connection.execute(text("""
+                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                              CASE
+                                                WHEN game_id = 25011 THEN 'Texas Poker'
+                                                WHEN game_id = 35011 THEN 'TimeSlots'
+                                              ELSE 'unknow'
+                                              END                                                      AS game,
+                                              COUNT(DISTINCT user_id)                                  AS sum
+                                       FROM   bi_user_currency
+                                       GROUP  BY on_day,game
+                                    """), timezone_offset=timezone_offset)
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                                   SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                          CASE
-                                                            WHEN game_id = 25011 THEN 'Texas Poker'
-                                                            WHEN game_id = 35011 THEN 'TimeSlots'
-                                                          ELSE 'unknow'
-                                                          END                                              AS game,
-                                                          COUNT(DISTINCT user_id)                          AS sum
-                                                   FROM   bi_user_currency
-                                                   GROUP  BY on_day, game
-                                                   HAVING on_day = :on_day
-                                               """), on_day=yesterday)
+                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                              CASE
+                                                 WHEN game_id = 25011 THEN 'Texas Poker'
+                                                 WHEN game_id = 35011 THEN 'TimeSlots'
+                                              ELSE 'unknow'
+                                              END                                                      AS game,
+                                              COUNT(DISTINCT user_id)                                  AS sum
+                                       FROM   bi_user_currency
+                                       GROUP  BY on_day, game
+                                       HAVING on_day = :on_day
+                                           """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                                   SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
-                                                          CASE
-                                                            WHEN game_id = 25011 THEN 'Texas Poker'
-                                                            WHEN game_id = 35011 THEN 'TimeSlots'
-                                                          ELSE 'unknow'
-                                                          END                                              AS game,
-                                                          COUNT(DISTINCT user_id)                          AS sum
-                                                   FROM   bi_user_currency
-                                                   GROUP  BY on_day, game
-                                                   HAVING on_day = :on_day
-                                               """), on_day=today)
+                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                              CASE
+                                                 WHEN game_id = 25011 THEN 'Texas Poker'
+                                                 WHEN game_id = 35011 THEN 'TimeSlots'
+                                              ELSE 'unknow'
+                                              END                                                      AS game,
+                                              COUNT(DISTINCT user_id)                                  AS sum
+                                       FROM   bi_user_currency
+                                       GROUP  BY on_day, game
+                                       HAVING on_day = :on_day
+                                           """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_dau_every_game)
 
     if result_proxy is None:
         return
-    rows = [{
-                '_on_day': row['on_day'],
-                '_game': row['game'],
-                'sum': row['sum']
-            } for row in result_proxy]
+
+    rows = [{'_on_day': row['on_day'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_dau_every_game(connection, transaction):

@@ -4,59 +4,50 @@ from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
-from app.tasks import with_db_context, celery
+from app.tasks import with_db_context
 from app.utils import current_time
 
 
-@celery.task
-def process_bi_statistic_new_reg_dau(target):
+def process_bi_statistic_new_reg_dau(target,timezone_offset):
     yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
     today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
     def collection_new_registration_dau(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) AS on_day,
+                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(DISTINCT uc.user_id)                       AS sum
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
                                            GROUP  BY on_day, uc.game_id
-                                           """))
+                                           """),timezone_offset=timezone_offset)
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) AS on_day,
-                                                  # CASE
-                                                  #   WHEN uc.game_id = 25011 THEN 'Texas Poker'
-                                                  #   WHEN uc.game_id = 35011 THEN 'TimeSlots'
-                                                  # END                                              AS game,
+                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(DISTINCT uc.user_id)                       AS sum
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
                                            GROUP  BY on_day, uc.game_id
                                            HAVING on_day = :on_day
-                                       """), on_day=yesterday)
+                                       """), on_day=yesterday , timezone_offset= timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) AS on_day,
-                                                  CASE
-                                                    WHEN uc.game_id = 25011 THEN 'Texas Poker'
-                                                    WHEN uc.game_id = 35011 THEN 'TimeSlots'
-                                                  END                                              AS game,
+                                           SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(DISTINCT uc.user_id)                       AS sum
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
                                            GROUP  BY on_day, uc.game_id
                                            HAVING on_day = :on_day
-                                       """), on_day=today)
+                                       """), on_day=today , timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_registration_dau)
 
-    rows = [{'_on_day': row['on_day'], '_game': 'All Game', 'sum': row['sum']} for row in result_proxy]
+    rows = [{'_on_day': row['on_day'],  'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_registration_dau(connection, transaction):

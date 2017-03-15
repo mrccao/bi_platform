@@ -5,11 +5,33 @@ import pytz
 import signal
 import logging
 import arrow
+import pytz
 
 from datetime import datetime
 from calendar import monthrange
 
+from flask import current_app as app
+from datetime import datetime
 from app.exceptions import TimeoutException
+
+
+
+def is_dst_now_in(zonename):
+   """ According to the region to determine whether it is DST """
+   return bool (datetime.now(pytz.timezone( zonename )).dst())
+
+def get_db_timezone_offset():
+   """ get offset time of between DST and CST """
+   return '-04:00' if is_dst_now_in( app.config["APP_TIMEZONE"] ) else  '-05:00'
+
+
+
+# def nowfun():
+#     """ Determine local time for celery crontab """
+#     return datetime.now(pytz.timezone('America/New_York'))
+
+
+
 
 
 def current_time(timezone=None):
