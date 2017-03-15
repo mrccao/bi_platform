@@ -4,7 +4,7 @@ from flask_admin.contrib.sqla import ModelView
 
 from app.assets import assets
 from app.libs.json_encoder import FlaskJSONEncoder
-from app.extensions import cache, db, debug_toolbar, login, gravatar, mail
+from app.extensions import cache, db, debug_toolbar, login, gravatar, mail, migrate
 from app.models.main import AdminUser, AdminUserActivity
 from app.models.orig_wpt import WPTUserLoginLog
 from app.models.bi import (BIUser, 
@@ -53,6 +53,8 @@ def register_extensions(app):
     debug_toolbar.init_app(app)
 
     db.init_app(app)
+
+    migrate.init_app(app,db)
 
     mail.init_app(app)
 
