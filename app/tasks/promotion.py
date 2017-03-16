@@ -94,17 +94,20 @@ def process_promotion_facebook_notification(push_id=None):
     else:  # for scheduled
         now = current_time().format('YYYY-MM-DD HH:mm:ss')
         push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
-                                                                          status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value)\
-                                                               .filter(PromotionPushHistory.scheduled_at <= now)\
+                                                                          status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
+                                                               .filter(PromotionPushHistory.scheduled_at <= now) \
                                                                .all()
 
     if len(push_histories) == 0:
         print('process_promotion_facebook_notification: no data')
         return
 
+    fb_name_identifier = '@[fb_name]'
+
     push_ids = [item.push_id for item in push_histories]
     pushes = db.session.query(PromotionPush).filter(PromotionPush.id.in_(list(set(push_ids)))).all()
     id_to_message_mapping = {item.id: item.message for item in pushes}
+    id_to_fb_name_replace_mapping = {item.id: fb_name_identifier in item.message for item in pushes}
 
     print('process_promotion_facebook_notification: start sending')
     update_promotion_facebook_notification_status([{'_id': item.id} for item in push_histories],
@@ -122,7 +125,9 @@ def process_promotion_facebook_notification(push_id=None):
                                   'relative_url': 'v2.7/' + item.target + '/notifications',
                                   'body': urllib.parse.urlencode(
                                       {
-                                          'template': id_to_message_mapping[item.push_id]
+                                          'template': id_to_message_mapping[item.push_id].replace(fb_name_identifier, '@[%s]' % item.target) if
+                                          id_to_fb_name_replace_mapping[item.push_id] else
+                                          id_to_message_mapping[item.push_id]
                                       }
                                   )
                                  } for item in partitions])
