@@ -80,6 +80,11 @@ class ProdConfig(Config):
 
 
 class DevConfig(Config):
+
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
     ENV = 'dev'
     DEBUG = True
     ASSETS_DEBUG = False

@@ -61,13 +61,17 @@ def register_extensions(app):
 
     assets.init_app(app)
 
-    admin = Admin(app, index_view=AdminBaseIndexView(), url='/data')
-    admin.add_view(AdminUserModelView(AdminUser, db.session, menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='admin_user'))
-    admin.add_view(AdminBIUserModelView(BIUser, db.session, name='BI User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user'))
-    admin.add_view(AdminBIUserCurrencyModelView(BIUserCurrency, db.session, name='BI User Currency', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_currency'))
-    admin.add_view(AdminBIUserBillModelView(BIUserBill, db.session, name='BI User Bill', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_bill'))
-    admin.add_view(AdminBIClubWPTUserModelView(BIClubWPTUser, db.session, name='BI ClubWPT User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_clubwpt_user'))
-    admin.add_view(AdminWPTUserLoginLogModelView(WPTUserLoginLog, db.session, name='User Login Log', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='user_login_log'))
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
+        admin = Admin(app, index_view=AdminBaseIndexView(), url='/data')
+        admin.add_view(AdminUserModelView(AdminUser, db.session, menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='admin_user'))
+        admin.add_view(AdminBIUserModelView(BIUser, db.session, name='BI User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user'))
+        admin.add_view(AdminBIUserCurrencyModelView(BIUserCurrency, db.session, name='BI User Currency', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_currency'))
+        admin.add_view(AdminBIUserBillModelView(BIUserBill, db.session, name='BI User Bill', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_bill'))
+        admin.add_view(AdminBIClubWPTUserModelView(BIClubWPTUser, db.session, name='BI ClubWPT User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_clubwpt_user'))
+        admin.add_view(AdminWPTUserLoginLogModelView(WPTUserLoginLog, db.session, name='User Login Log', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='user_login_log'))
 
     login.init_app(app)
     login.login_view = "account.sign_in"
