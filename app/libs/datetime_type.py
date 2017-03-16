@@ -9,12 +9,14 @@ from sqlalchemy_utils import ArrowType
 class NaiveDateTime(types.TypeDecorator):
     impl = types.DateTime
 
+
 class AwareDateTime(types.TypeDecorator):
     impl = ArrowType
 
     def process_result_value(self, value, _):
         if value is not None:
             return value.to(app.config['APP_TIMEZONE'])
+
 
 class OGInsertableAwareDateTime(types.TypeDecorator):
     impl = ArrowType
@@ -33,6 +35,7 @@ class OGInsertableAwareDateTime(types.TypeDecorator):
     def process_result_value(self, value, _):
         if value is not None:
             return value.to(app.config['APP_TIMEZONE'])
+
 
 class OGReadableAwareDateTime(types.TypeDecorator):
     impl = ArrowType

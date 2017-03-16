@@ -39,8 +39,7 @@ def get_wpt_og_user_mapping(db, og_accounts):
     def func(connection, transaction):
         return connection.execute(text('SELECT user_id, og_account FROM bi_user WHERE og_account IN :og_accounts'), og_accounts=tuple(og_accounts))
     result_proxy = with_db_context(db, func)
-    data = {row['og_account']: row['user_id'] for row in result_proxy}
-    return data
+    return {row['og_account']: row['user_id'] for row in result_proxy}
 
 
 def create_celery_app(flask_app):

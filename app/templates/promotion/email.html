@@ -1,6 +1,6 @@
 {% extends "layout/app.html" %}
 
-{% block page_title %}Sending Facebook Notification{% endblock %}
+{% block page_title %}Sending Email{% endblock %}
 
 {% block head_tail %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
@@ -9,21 +9,21 @@
 {% block main_content %}
 <section class="content-header">
   <h1>
-    Sending Facebook Notification
+    Sending Email
   </h1>
 </section>
 
 {% if based_query %}
 <div class="pad margin no-print">
   <div class="callout callout-info" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4>Sending Facebook notification to users based query blew:</h4>
+    <h4>Sending email to users based query blew:</h4>
     <pre>{{ based_query.sql }}</pre>
   </div>
 </div>
 {% else %}
 <div class="pad margin no-print">
   <div class="callout callout-danger" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this screen.</h4>
+    <h4 style="margin-bottom: 0!important;">Sending email to ALL users in this screen.</h4>
   </div>
 </div>
 {% endif %}
@@ -165,10 +165,10 @@
 
       {% if based_query %}
         var basedQueryId = {{ based_query.id }};
-        var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
+        var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';
       {% else %}
         var basedQueryId = null;
-        var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';
+        var submitConfirmAlert = 'Do you want to send email to ALL users?';
       {% endif %}
 
       var retryConfirmAlert = 'Do you want to retry?';
@@ -181,10 +181,10 @@
           }
 
           startRequestLoading();
-        
+
           $.ajax({
               type: 'POST',
-              url: '/promotion/facebook_notification/sender',
+              url: '/promotion/email/sender',
               data: basedQueryId === null ? { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val() } : { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val(), based_query_id: basedQueryId },
               dataType: "json",
               success: function(result) {
@@ -208,7 +208,7 @@
         
           $.ajax({
               type: 'POST',
-              url: '/promotion/facebook_notification/retry',
+              url: '/promotion/email/retry',
               data: { push_id: pushId },
               dataType: "json",
               success: function(result) {
@@ -224,7 +224,7 @@
       function getPushHistories() {
             $.ajax({
                 type: 'GET',
-                url: '/promotion/facebook_notification/histories',
+                url: '/promotion/email/histories',
                 dataType: "json",
                 success: function(result) {
                     var headers = []
@@ -270,7 +270,6 @@
                                 } else {
                                     rows.push('<td>' +
                                                 '<span>Total: ' + row[column].total_count + '</span><br />' + 
-                                                '<span class="text-aqua">Running: ' + row[column].running_count + '</span><br />' + 
                                                 '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' + 
                                                 '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' + 
                                                 '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' + 

@@ -16,7 +16,7 @@ from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.promotion import process_facebook_notification
+from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi
 
 # default to dev config because no one should use this in
@@ -286,9 +286,11 @@ def sync_bi_statistic_for_today():
 @manager.command
 def process_promotion_push():
     if app.config['ENV'] == 'prod':
-        process_facebook_notification.delay()
+        process_promotion_facebook_notification.delay()
+        process_promotion_email.delay()
     else:
-        process_facebook_notification()
+        process_promotion_facebook_notification()
+        process_promotion_email()
 
 
 if __name__ == "__main__":
