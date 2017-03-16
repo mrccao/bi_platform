@@ -8,10 +8,9 @@ from app.tasks import with_db_context
 from app.utils import current_time
 
 
-def process_bi_statistic_revenue(target,timezone_offset):
+def process_bi_statistic_revenue(target, timezone_offset):
     yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
     today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
-
 
     def collection_revenue(connection, transaction):
         if target == 'lifetime':
@@ -45,7 +44,7 @@ def process_bi_statistic_revenue(target,timezone_offset):
                                            FROM   user_paylog
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=yesterday , timezone_offset=timezone_offset)
+                                       """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
@@ -62,7 +61,7 @@ def process_bi_statistic_revenue(target,timezone_offset):
                                            FROM   user_paylog
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
-                                       """), on_day=today,timezone_offset=timezone_offset)
+                                       """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_revenue, 'orig_wpt_payment')
 
@@ -75,7 +74,7 @@ def process_bi_statistic_revenue(target,timezone_offset):
     if rows:
         def sync_collection_revenue(connection, transaction):
             where = and_(
-                BIStatistic.__table__.c.on_day== bindparam('_on_day'),
+                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )

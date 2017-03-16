@@ -38,8 +38,8 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                             GROUP  BY on_week,
                                                                       game
                                                              """), week_day=week_day.strftime("%Y-%m-%d"),
-                                                                   timezone_offset=timezone_offset,
-                                                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                       timezone_offset=timezone_offset,
+                                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_week_result)
             return tmp_proxy
 
@@ -60,9 +60,9 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                                                       INTERVAL - 7 DAY)
                                                   AND transaction_type NOT IN :free_transaction_types
                                            GROUP  BY on_week,
-                                                     game_id
+                                                     game
                                            """), week_day=yesterday, timezone_offset=timezone_offset,
-                                                 free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
@@ -83,7 +83,7 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                 GROUP  BY on_week,
                                                           game
                                                """), week_day=today, timezone_offset=timezone_offset,
-                                                     free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     def collection_wau_all_games(connection, transaction):
 
@@ -103,8 +103,8 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                             GROUP  BY on_week
                                                             HAVING on_week = :week_day
                                                            """), week_day=week_day.strftime("%Y-%m-%d"),
-                                                             timezone_offset=timezone_offset,
-                                                             free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                       timezone_offset=timezone_offset,
+                                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_week_result)
             return tmp_proxy
 
@@ -122,7 +122,7 @@ def process_bi_statistic_wau(target, timezone_offset):
                                            GROUP  BY on_week
                                            HAVING on_week = :week_day
                                                 """), week_day=yesterday, timezone_offset=timezone_offset,
-                                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
@@ -166,11 +166,11 @@ def process_bi_statistic_wau(target, timezone_offset):
                     try:
                         connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                     except:
-                        print('process_bi_statistic_for_lifetime mau for every game transaction.rollback()')
+                        print('process_bi_statistic_for_lifetime wau for every game transaction.rollback()')
                         transaction.rollback()
                         raise
                     else:
-                        print('process_bi_statistic_for_lifetime mau for every game transaction.commit()')
+                        print('process_bi_statistic_for_lifetime wau for every game transaction.commit()')
                         transaction.commit()
 
         else:
@@ -186,11 +186,11 @@ def process_bi_statistic_wau(target, timezone_offset):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('process_bi_statistic_for_lifetime mau for every game transaction.rollback()')
+                    print('process_bi_statistic_for_lifetime wau for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
-                    print('process_bi_statistic_for_lifetime mau for every game transaction.commit()')
+                    print('process_bi_statistic_for_lifetime wau for every game transaction.commit()')
                     transaction.commit()
 
     def sync_collection_wau_all_games(connection, transaction):
@@ -219,11 +219,11 @@ def process_bi_statistic_wau(target, timezone_offset):
                     try:
                         connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                     except:
-                        print('process_bi_statistic_for_lifetime mau for all games transaction.rollback()')
+                        print('process_bi_statistic_for_lifetime wau for all games transaction.rollback()')
                         transaction.rollback()
                         raise
                     else:
-                        print('process_bi_statistic_for_lifetime mau for all games transaction.commit()')
+                        print('process_bi_statistic_for_lifetime wau for all games transaction.commit()')
                         transaction.commit()
 
         else:
@@ -240,11 +240,11 @@ def process_bi_statistic_wau(target, timezone_offset):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('process_bi_statistic_for_lifetime mau for all games transaction.rollback()')
+                    print('process_bi_statistic_for_lifetime wau for all games transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
-                    print('process_bi_statistic_for_lifetime mau for all games transaction.commit()')
+                    print('process_bi_statistic_for_lifetime wau for all games transaction.commit()')
                     transaction.commit()
 
     with_db_context(db, sync_collection_wau_every_game)

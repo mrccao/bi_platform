@@ -1,7 +1,8 @@
 from sqlalchemy import text
 from sqlalchemy.schema import UniqueConstraint
 
-from app.constants import TRANSACTION_TYPES, BI_USER_SORTED_COLUMNS, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
+from app.constants import TRANSACTION_TYPES, BI_USER_SORTED_COLUMNS, GOLD_FREE_TRANSACTION_TYPES, \
+    SILVER_FREE_TRANSACTION_TYPES
 from app.extensions import db
 from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime
 from app.models.orig_wpt import WPTUserLoginLog
@@ -26,6 +27,7 @@ class BIStatistic(db.Model):
 
     new_registration = db.Column(db.Integer, default=0)
     dau = db.Column(db.Integer, default=0)
+    wau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
     new_registration_game_dau = db.Column(db.Integer, default=0)
 
@@ -61,7 +63,6 @@ class BIStatistic(db.Model):
 
 
 class BIUser(db.Model):
-
     __tablename__ = 'bi_user'
 
     id = db.Column(db.BIGINT, primary_key=True)
@@ -156,30 +157,35 @@ class BIUser(db.Model):
     updated_at = db.Column(AwareDateTime, onupdate=current_time, index=True)
 
     def attribute_pairs(self):
-        return [ [column.replace('_', ' ').title(), self.__dict__[column] or ''] for column in BI_USER_SORTED_COLUMNS ]
+        return [[column.replace('_', ' ').title(), self.__dict__[column] or ''] for column in BI_USER_SORTED_COLUMNS]
         # return { column.replace('_', ' ').title(): self.__dict__[column] for column in sorted(self.__dict__) if not column.startswith('_sa_') }
 
     def login_logs(self, limit=5):
         return WPTUserLoginLog.query.filter_by(user_id=self.user_id).order_by(text('id DESC')).limit(limit).all()
 
     def gold_activities(self, limit=5):
-        return BIUserCurrency.query.filter_by(currency_type='Gold', user_id=self.user_id).order_by(text('created_at DESC')).limit(limit).all()
+        return BIUserCurrency.query.filter_by(currency_type='Gold', user_id=self.user_id).order_by(
+            text('created_at DESC')).limit(limit).all()
 
     def silver_activities(self, limit=5):
-        return BIUserCurrency.query.filter_by(currency_type='Silver', user_id=self.user_id).order_by(text('created_at DESC')).limit(limit).all()
+        return BIUserCurrency.query.filter_by(currency_type='Silver', user_id=self.user_id).order_by(
+            text('created_at DESC')).limit(limit).all()
 
     def gold_free_currency(self, limit=5):
-        return BIUserCurrency.query.filter_by(currency_type='Gold', user_id=self.user_id).filter(BIUserCurrency.transaction_type.in_(GOLD_FREE_TRANSACTION_TYPES)).order_by(text('created_at DESC')).limit(limit).all()
+        return BIUserCurrency.query.filter_by(currency_type='Gold', user_id=self.user_id).filter(
+            BIUserCurrency.transaction_type.in_(GOLD_FREE_TRANSACTION_TYPES)).order_by(text('created_at DESC')).limit(
+            limit).all()
 
     def silver_free_currency(self, limit=5):
-        return BIUserCurrency.query.filter_by(currency_type='Silver', user_id=self.user_id).filter(BIUserCurrency.transaction_type.in_(SILVER_FREE_TRANSACTION_TYPES)).order_by(text('created_at DESC')).limit(limit).all()
+        return BIUserCurrency.query.filter_by(currency_type='Silver', user_id=self.user_id).filter(
+            BIUserCurrency.transaction_type.in_(SILVER_FREE_TRANSACTION_TYPES)).order_by(text('created_at DESC')).limit(
+            limit).all()
 
     def __repr__(self):
         return '<BITUser %r>' % self.email
 
 
 class BIUserCurrency(db.Model):
-
     __tablename__ = 'bi_user_currency'
 
     id = db.Column(db.BIGINT, primary_key=True)
@@ -201,7 +207,6 @@ class BIUserCurrency(db.Model):
 
 
 class BIUserBill(db.Model):
-
     __tablename__ = 'bi_user_bill'
 
     id = db.Column(db.BIGINT, primary_key=True)

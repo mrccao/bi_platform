@@ -33,8 +33,8 @@ def visualization_summary_data():
                                                  AND on_day = :day"""), day=day).scalar()
 
     revenue = db.engine.execute(text( """
-                                         SELECT revenue
-                                         FROM bi_statistic
+                                         SELECT dollar_paid_count
+                                         FROM   bi_statistic
                                          WHERE on_day= :day"""), day=day).scalar()
 
     game_dau = db.engine.execute(text("""

@@ -21,25 +21,25 @@ def process_bi_statistic_mau(target, timezone_offset):
             tmp_proxy = []
             for month_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
                 every_month_result = connection.execute(text("""
-                                                            SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_month,
-                                                                   CASE
-                                                                     WHEN game_id = 25011 THEN 'Texas Poker'
-                                                                     WHEN game_id = 35011 THEN 'TimeSlots'
-                                                                   ELSE 'Unknown'
-                                                                   END                                                       AS game,
-                                                                   COUNT(DISTINCT user_id)                                   AS sum
-                                                            FROM   bi_user_currency
-                                                            WHERE  created_at < DATE(CONVERT_TZ(:month_day, '+00:00', :timezone_offset))
-                                                                   AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:month_day, '+00:00',
+                                                             SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                                                    CASE
+                                                                      WHEN game_id = 25011 THEN 'Texas Poker'
+                                                                      WHEN game_id = 35011 THEN 'TimeSlots'
+                                                                    ELSE 'Unknown'
+                                                                    END                                                       AS game,
+                                                                    COUNT(DISTINCT user_id)                                   AS sum
+                                                             FROM   bi_user_currency
+                                                             WHERE  created_at < DATE(CONVERT_TZ(:month_day, '+00:00', :timezone_offset))
+                                                                    AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:month_day, '+00:00',
                                                                                                    :timezone_offset
                                                                                                    )),
                                                                                                        INTERVAL - 7 DAY)
-                                                                   AND transaction_type NOT IN :free_transaction_types
-                                                            GROUP  BY on_month,
-                                                                      game
+                                                                    AND transaction_type NOT IN :free_transaction_types
+                                                             GROUP  BY on_month,
+                                                                       game
                                                              """), month_day=month_day.strftime("%Y-%m-%d"),
-                                                                   timezone_offset=timezone_offset,
-                                                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                        timezone_offset=timezone_offset,
+                                                        free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_month_result)
             return tmp_proxy
 
@@ -60,30 +60,30 @@ def process_bi_statistic_mau(target, timezone_offset):
                                                                                       INTERVAL - 7 DAY)
                                                   AND transaction_type NOT IN :free_transaction_types
                                            GROUP  BY on_month,
-                                                     game_id
+                                                     game
                                            """), month_day=yesterday, timezone_offset=timezone_offset,
-                                                 free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
-                                                SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_month,
-                                                       CASE
-                                                         WHEN game_id = 25011 THEN 'Texas Poker'
-                                                         WHEN game_id = 35011 THEN 'TimeSlots'
-                                                         ELSE 'Unknown'
-                                                       END                                                       AS game,
-                                                       COUNT(DISTINCT user_id)                                   AS sum
-                                                FROM   bi_user_currency
-                                                WHERE  created_at < DATE(CONVERT_TZ(:month_day, '+00:00', :timezone_offset))
-                                                       AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:month_day, '+00:00',
-                                                                                       :timezone_offset
-                                                                                       )),
-                                                                                           INTERVAL - 7 DAY)
-                                                       AND transaction_type NOT IN :free_transaction_types
-                                                GROUP  BY on_month,
-                                                          game
+                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_month,
+                                                  CASE
+                                                    WHEN game_id = 25011 THEN 'Texas Poker'
+                                                    WHEN game_id = 35011 THEN 'TimeSlots'
+                                                    ELSE 'Unknown'
+                                                  END                                                       AS game,
+                                                  COUNT(DISTINCT user_id)                                   AS sum
+                                           FROM   bi_user_currency
+                                           WHERE  created_at < DATE(CONVERT_TZ(:month_day, '+00:00', :timezone_offset))
+                                                  AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:month_day, '+00:00',
+                                                                                   :timezone_offset
+                                                                                   )),
+                                                                                       INTERVAL - 7 DAY)
+                                                  AND transaction_type NOT IN :free_transaction_types
+                                            GROUP BY on_month,
+                                                     game
                                                """), month_day=today, timezone_offset=timezone_offset,
-                                                     free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     def collection_mau_all_games(connection, transaction):
 
@@ -103,8 +103,8 @@ def process_bi_statistic_mau(target, timezone_offset):
                                                             GROUP  BY on_month
                                                             HAVING on_month = :month_day
                                                            """), month_day=month_day.strftime("%Y-%m-%d"),
-                                                             timezone_offset=timezone_offset,
-                                                             free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                        timezone_offset=timezone_offset,
+                                                        free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_month_result)
             return tmp_proxy
 
@@ -122,7 +122,7 @@ def process_bi_statistic_mau(target, timezone_offset):
                                            GROUP  BY on_month
                                            HAVING on_month = :month_day
                                                 """), month_day=yesterday, timezone_offset=timezone_offset,
-                                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
