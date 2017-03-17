@@ -1,11 +1,19 @@
+import csv
+import json
+import  pandas as pd
 import arrow
+from io import StringIO
+import xlsxwriter as xlsxwriter
 from flask import Blueprint, render_template, request, jsonify
 from flask import current_app as app
+from flask import make_response
 from flask_login import login_required
 from sqlalchemy import text
+from flask import  send_file
 
 from app.extensions import db
-from app.utils import current_time
+from app.libs.dataframe import DataFrame
+from app.utils import current_time, dedup
 
 dashboard = Blueprint('dashboard', __name__)
 
@@ -141,11 +149,66 @@ def visualization_executive_data():
                       AND platform = :platform
                 """), start_time=start_time, end_time=end_time, game='All Game', platform='All Platform')
 
-    labels = []
-    data = []
+    # labels = []
+    # data = []
 
-    for row in proxy:
-        labels.append(arrow.get(row[0]).format('YYYY-MM-DD'))
-        data.append(row[1])
+        if proxy.cursor:
+            column_names = dedup([col[0] for col in proxy.cursor.description])
+            data = proxy.fetchall()
+            result = DataFrame(pd.DataFrame(data, columns=column_names))
+            headers = {'Content-Type': "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+            return make_response(result, 200, headers)
 
-    return jsonify(labels=labels, data=data, game=game, platform=platform)
+
+
+    # for row in proxy:
+    #     labels.append(arrow.get(row[0]).format('YYYY-MM-DD'))
+    #     data.append(row[1])
+    #
+    # return jsonify(labels=labels, data=data, game=game, platform=platform)
+
+
+
+# @dashboard.route("/dashboard/visualization/executive_data", methods=["GET"])
+# @login_required
+# def make_csv_response(query_result):
+#     s = StringIO()
+#
+#     query_data = json.loads(query_result.data)
+#     writer = csv.DictWriter(s, fieldnames=[col['name'] for col in query_data['columns']])
+#     writer.writer = utils.UnicodeWriter(s)
+#     writer.writeheader()
+#     for row in query_data['rows']:
+#         writer.writerow(row)
+#
+#     headers = {'Content-Type': "text/csv; charset=UTF-8"}
+#     return make_response(s.getvalue(), 200, headers)
+#
+# @dashboard.route("/dashboard/visualization/executive_data", methods=["GET"])
+# @login_required
+# def make_excel_response(query_result):
+#     s = StringIO()
+#
+#     query_data = json.loads(query_result.data)
+#     book = xlsxwriter.Workbook(s)
+#     sheet = book.add_worksheet("result")
+#
+#     column_names = []
+#     for (c, col) in enumerate(query_data['columns']):
+#         sheet.write(0, c, col['name'])
+#         column_names.append(col['name'])
+#
+#     for (r, row) in enumerate(query_data['rows']):
+#         for (c, name) in enumerate(column_names):
+#             sheet.write(r + 1, c, row.get(name))
+#
+#     book.close()
+#
+#     headers = {'Content-Type': "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+#     return make_response(s.getvalue(), 200, headers)
+
+
+#
+#
+
+

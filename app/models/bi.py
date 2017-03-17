@@ -244,10 +244,10 @@ class BIUserBill(db.Model):
 class BIUserStatistic(db.Model):
     __tablename__ = 'bi_user_statistic'
 
-    id = db.Column(db.BIGINT, primary=True)
+    id = db.Column(db.BIGINT, primary_key=True)
     user_id = db.Column(db.BIGINT, nullable=False, index=True)
 
-    on_day = db.Column(db.NaiveDateTime, nullable=False, index=True)
+    on_day = db.Column(NaiveDateTime, nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
     # ring_player = db.Column(db.Integer, nullable=False)
