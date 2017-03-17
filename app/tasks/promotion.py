@@ -4,7 +4,7 @@ from random import randrange
 
 import arrow
 import requests
-from sqlalchemy import text
+from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
@@ -83,20 +83,24 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
 
 
 @celery.task
-def process_promotion_facebook_notification(push_id=None):
+def process_promotion_facebook_notification_retrying(push_id):
+    status_values = [PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value]
+    db.session.query(PromotionPushHistory).filter_by(push_id=push_id) \
+                                          .filter(PromotionPushHistory.status.in_(status_values)) \
+                                          .update({PromotionPushHistory.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
+    db.session.commit()
+
+
+@celery.task
+def process_promotion_facebook_notification():
 
     print('process_promotion_facebook_notification: preparing')
 
-    if push_id is not None:  # for retry
-        push_histories = db.session.query(PromotionPushHistory).filter_by(push_id=push_id,
-                                                                          push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
-                                                                          status=PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value).all()
-    else:  # for scheduled
-        now = current_time().format('YYYY-MM-DD HH:mm:ss')
-        push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
-                                                                          status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
-                                                               .filter(PromotionPushHistory.scheduled_at <= now) \
-                                                               .all()
+    now = current_time().format('YYYY-MM-DD HH:mm:ss')
+    push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
+                                                                      status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
+                                                           .filter(PromotionPushHistory.scheduled_at <= now) \
+                                                           .all()
 
     if len(push_histories) == 0:
         print('process_promotion_facebook_notification: no data')

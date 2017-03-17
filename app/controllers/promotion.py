@@ -14,9 +14,8 @@ from app.extensions import db
 from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
-                                 process_promotion_facebook_notification,
-                                 process_promotion_email_items,
-                                 process_promotion_email)
+                                 process_promotion_facebook_notification_retrying,
+                                 process_promotion_email_items)
 from app.utils import error_msg_from_exception, current_time
 
 promotion = Blueprint('promotion', __name__)
@@ -47,11 +46,10 @@ def facebook_notification_histories():
 def facebook_notification_retry():
     push_id = request.form.get('push_id')
     if push_id:
-        process_promotion_facebook_notification(push_id)
         if app.config['ENV'] == 'prod':
-            process_promotion_facebook_notification.delay(push_id)
+            process_promotion_facebook_notification_retrying.delay(push_id)
         else:
-            process_promotion_facebook_notification(push_id)
+            process_promotion_facebook_notification_retrying(push_id)
     return jsonify(result='ok')
 
 
