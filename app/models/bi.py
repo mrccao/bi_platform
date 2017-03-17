@@ -241,6 +241,72 @@ class BIUserBill(db.Model):
     __table_args__ = (UniqueConstraint('orig_db', 'orig_id', name='ix_uniq_orig_db_and_orig_id'),)
 
 
+class BIUserStatistic(db.Model):
+    __tablename__ = 'bi_user_statistic'
+
+    id = db.Column(db.BIGINT, primary=True)
+    user_id = db.Column(db.BIGINT, nullable=False, index=True)
+
+    on_day = db.Column(db.NaiveDateTime, nullable=False, index=True)
+    platform = db.Column(db.String(255), nullable=False, index=True)
+
+    # ring_player = db.Column(db.Integer, nullable=False)
+    # ring_won_loss = db.Column(db.Integer, nullable=False)
+    #
+    # rake = db.Column(db.String(255), nullable=False)
+    #
+    # sng_player = db.Column(db.Integer, nullable=False)
+    # sng_entries = db.Column(db.Integer, nullable=False)
+    # sng_buy_ins = db.Column(db.Integer, nullable=False)
+    # sng_fee = db.Column(db.Integer, nullable=False)
+    # sng_winnings = db.Column(db.Integer, nullable=False)
+    #
+    # mtt_player = db.Column(db.Integer, nullable=False)
+    # mtt_entries = db.Column(db.String(255), nullable=False)
+    # mtt_buy_ins = db.Column(db.Integer, nullable=False)
+    # mtt_fees = db.Column(db.Integer, nullable=False)
+    # mtt_rebuys = db.Column(db.Integer, nullable=False)
+    # mtt_add_ons = db.Column(db.String(255), nullable=False)
+    # mtt_winnings = db.Column(db.Integer, nullable=False)
+
+    # slots_player = db.Column(db.Integer, nullable=False)
+    # slots_spins = db.Column(db.Integer, nullable=False)
+    # slots_wagered = db.Column(db.Integer, nullable=False)
+    # slots_won_loss = db.Column(db.Integer, nullable=False)
+
+    purchase_gold_dollar = db.Column(db.Float, nullable=False)
+    purchase_gold_count = db.Column(db.Integer, nullable=False)
+    purchase_gold = db.Column(db.BIGINT, nullable=False)
+
+    purchase_silver_dollar = db.Column(db.Float, nullable=False)
+    purchase_silver_count = db.Column(db.Integer, nullable=False)
+    purchase_silver = db.Column(db.BIGINT, nullable=False)
+
+    purchase_avatar_gold = db.Column(db.BIGINT, nullable=False)
+    purchase_charms_gold = db.Column(db.BIGINT, nullable=False)
+    purchase_emoji_gold = db.Column(db.BIGINT, nullable=False)
+    purchase_table_gifts_gold = db.Column(db.BIGINT, nullable=False)
+
+    convert_silver_gold = db.Column(db.BIGINT, nullable=False)
+    convert_silver_count = db.Column(db.Integer, nullable=False)
+    convert_silver = db.Column(db.BIGINT, nullable=False)
+
+    lucky_spin_free_count = db.Column(db.Integer, nullable=False)
+    lucky_spin_buy_gold = db.Column(db.BIGINT, nullable=False)
+    lucky_spin_buy_count = db.Column(db.Integer, nullable=False)
+    lucky_spin_booster_gold = db.Column(db.BIGINT, nullable=False)
+    lucky_spin_booster_count = db.Column(db.Integer, nullable=False)
+
+    time_slot_daily_silver = db.Column(db.Integer, nullable=False)
+    time_slot_bonus_silver = db.Column(db.Integer, nullable=False)
+    time_slot_wagered = db.Column(db.Integer, nullable=False)
+    time_slot_won = db.Column(db.Integer, nullable=False)
+
+    reward_points_earned = db.Column(db.Integer, nullable=False)
+    reward_points_redeemed = db.Column(db.Integer, nullable=False)
+    reward_points_gold = db.Column(db.BIGINT, nullable=False)
+
+
 class BIClubWPTUser(db.Model):
     __tablename__ = 'bi_clubwpt_user'
 

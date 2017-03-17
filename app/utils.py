@@ -103,7 +103,7 @@ def dedup(l, suffix='__'):
     Always returns the same number of entries as provided, and always returns
     unique values.
 
-    >>> dedup(['foo', 'bar', 'bar', 'bar'])
+    # >>> dedup(['foo', 'bar', 'bar', 'bar'])
     ['foo', 'bar', 'bar__1', 'bar__2']
     """
     new_l = []

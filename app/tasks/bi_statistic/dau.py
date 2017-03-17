@@ -10,8 +10,8 @@ from app.utils import current_time
 
 
 def process_bi_statistic_dau(target, timezone_offset):
-    yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
+    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
     def collection_dau_all_games(connection, transaction):
         if target == 'lifetime':

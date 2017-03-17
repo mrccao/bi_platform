@@ -9,8 +9,8 @@ from app.utils import current_time
 
 
 def process_bi_statistic_new_reg(target, timezone_offset):
-    yesterday = current_time().to(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
+    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
     def collection_new_registration(connection, transaction):
         if target == 'lifetime':
