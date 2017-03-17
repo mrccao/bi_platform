@@ -23,8 +23,8 @@ def index():
 @sql_lab.route("/sql_lab/query_histories", methods=["GET"])
 @login_required
 def query_histories():
-    queries = db.session.query(AdminUserQuery).filter_by(admin_user_id=current_user.id).order_by(AdminUserQuery.updated_at.desc()).limit(10)
-    return jsonify(data=[i.to_dict() for i in queries.all()])
+    data = db.session.query(AdminUserQuery).filter_by(admin_user_id=current_user.id).order_by(AdminUserQuery.updated_at.desc()).limit(10).all()
+    return jsonify(data=[item.to_dict() for item in data])
 
 
 @sql_lab.route("/sql_lab/format_sql", methods=["POST"])

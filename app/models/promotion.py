@@ -18,6 +18,7 @@ class PromotionPush(db.Model):
     status = db.Column(db.String(50))
     message = db.Column(db.Text, nullable=False)
     message_key = db.Column(db.String(255), nullable=False, index=True)
+    scheduled_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
     updated_at = db.Column(AwareDateTime, onupdate=current_time, index=True)
     created_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
 
@@ -44,10 +45,10 @@ class PromotionPush(db.Model):
     def to_dict(self):
         if self.status == PROMOTION_PUSH_STATUSES.SCHEDULED.value:
             total_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id"), push_id=self.id).scalar()
+            running_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='running'"), push_id=self.id).scalar()
             successed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"), push_id=self.id).scalar()
             request_failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='request_failed'"), push_id=self.id).scalar()
             failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='failed'"), push_id=self.id).scalar()
-            scheduled_at = db.engine.execute(text("SELECT scheduled_at FROM promotion_push_history WHERE push_id = :push_id ORDER BY scheduled_at ASC LIMIT 1"), push_id=self.id).scalar()
 
         return {
             'id': self.id,
@@ -55,9 +56,10 @@ class PromotionPush(db.Model):
             'based_query_id': self.based_query_id,
             'based_query_sql': self.based_query_sql(),
             'push_type': self.push_type,
-            'scheduled_at': arrow.get(self.created_at).to(app.config['APP_TIMEZONE']).format() if self.status != PROMOTION_PUSH_STATUSES.SCHEDULED.value else arrow.get(scheduled_at).to(app.config['APP_TIMEZONE']).format(),
+            'scheduled_at': arrow.get(self.scheduled_at).to(app.config['APP_TIMEZONE']).format(),
             'status': self.status if self.status != PROMOTION_PUSH_STATUSES.SCHEDULED.value else {
                 'total_count': total_count,
+                'running_count': running_count,
                 'successed_count': successed_count,
                 'request_failed_count': request_failed_count,
                 'failed_count': failed_count
