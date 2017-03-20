@@ -21,7 +21,7 @@ def process_bi_statistic_wau(target, timezone_offset):
             tmp_proxy = []
             for on_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
                 every_week_result = connection.execute(text("""
-                                                           SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                                   CASE
                                                                     WHEN game_id = 25011 THEN 'Texas Poker'
                                                                     WHEN game_id = 35011 THEN 'TimeSlots'
@@ -43,7 +43,7 @@ def process_bi_statistic_wau(target, timezone_offset):
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset))  AS on_day,
                                                   CASE
                                                     WHEN game_id = 25011 THEN 'Texas Poker'
                                                     WHEN game_id = 35011 THEN 'TimeSlots'
@@ -62,7 +62,7 @@ def process_bi_statistic_wau(target, timezone_offset):
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset))  AS on_day,
                                                   CASE
                                                     WHEN game_id = 25011 THEN 'Texas Poker'
                                                     WHEN game_id = 35011 THEN 'TimeSlots'
@@ -85,7 +85,7 @@ def process_bi_statistic_wau(target, timezone_offset):
             tmp_proxy = []
             for on_day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
                 every_week_result = connection.execute(text("""
-                                                           SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset))  AS on_day,
                                                                   COUNT(DISTINCT user_id)                                    AS sum
                                                            FROM   bi_user_currency
                                                            WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
@@ -102,7 +102,7 @@ def process_bi_statistic_wau(target, timezone_offset):
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                             SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                             SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset))  AS on_day,
                                                     COUNT(DISTINCT user_id)                                    AS sum
                                              FROM   bi_user_currency
                                              WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
@@ -116,7 +116,7 @@ def process_bi_statistic_wau(target, timezone_offset):
 
         if target == 'today':
             return connection.execute(text("""
-                                             SELECT DATE (CONVERT_TZ(created_at), '+00:00', :timezone_offset)  AS on_day,
+                                             SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset))  AS on_day,
                                                     COUNT(DISTINCT user_id)                                    AS sum
                                              FROM   bi_user_currency
                                              WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
