@@ -22,7 +22,7 @@ def process_bi_statistic_dau(target, timezone_offset):
                                            WHERE  transaction_type NOT IN :free_transaction_types
                                            GROUP  BY on_day
                                            """), timezone_offset=timezone_offset,
-                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'yesterday':
             return connection.execute(text("""
@@ -33,7 +33,7 @@ def process_bi_statistic_dau(target, timezone_offset):
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset,
-                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
@@ -44,7 +44,7 @@ def process_bi_statistic_dau(target, timezone_offset):
                                            GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_dau_all_games)
 
@@ -92,7 +92,7 @@ def process_bi_statistic_dau(target, timezone_offset):
                                            GROUP  BY on_day,
                                                      game
                                           """), timezone_offset=timezone_offset,
-                                          free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'yesterday':
             return connection.execute(text("""
@@ -107,9 +107,9 @@ def process_bi_statistic_dau(target, timezone_offset):
                                            WHERE  transaction_type NOT IN :free_transaction_types
                                            GROUP  BY on_day,
                                                      game
-                                           HAVING on_day = : on_day
+                                           HAVING on_day = :on_day
                                           """), on_day=yesterday, timezone_offset=timezone_offset,
-                                          free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
@@ -126,7 +126,7 @@ def process_bi_statistic_dau(target, timezone_offset):
                                                      game
                                            HAVING on_day = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_dau_every_game)
 
