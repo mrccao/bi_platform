@@ -29,17 +29,17 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                                    END                                                       AS game,
                                                                    COUNT(DISTINCT user_id)                                   AS sum
                                                             FROM   bi_user_currency
-                                                            WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                                   AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                                            WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                                   AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
                                                                                                    :timezone_offset
                                                                                                    )),
                                                                                                        INTERVAL - 7 DAY)
                                                                    AND transaction_type NOT IN :free_transaction_types
                                                             GROUP  BY on_week,
                                                                       game
-                                                             """), week_day=week_day.strftime("%Y-%m-%d"),
-                                                       timezone_offset=timezone_offset,
-                                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                            """), week_day=week_day.strftime("%Y-%m-%d"),
+                                                            timezone_offset=timezone_offset,
+                                                            free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_week_result)
             return tmp_proxy
 
@@ -53,8 +53,8 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                   END                                                       AS game,
                                                   COUNT(DISTINCT user_id)                                   AS sum
                                            FROM   bi_user_currency
-                                           WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                  AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                           WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                  AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
                                                                                   :timezone_offset
                                                                                   )),
                                                                                       INTERVAL - 7 DAY)
@@ -62,28 +62,28 @@ def process_bi_statistic_wau(target, timezone_offset):
                                            GROUP  BY on_week,
                                                      game
                                            """), week_day=yesterday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
-                                                SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_week,
-                                                       CASE
-                                                         WHEN game_id = 25011 THEN 'Texas Poker'
-                                                         WHEN game_id = 35011 THEN 'TimeSlots'
-                                                         ELSE 'Unknown'
-                                                       END                                                       AS game,
-                                                       COUNT(DISTINCT user_id)                                   AS sum
-                                                FROM   bi_user_currency
-                                                WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                       AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
-                                                                                       :timezone_offset
-                                                                                       )),
-                                                                                           INTERVAL - 7 DAY)
-                                                       AND transaction_type NOT IN :free_transaction_types
-                                                GROUP  BY on_week,
-                                                          game
-                                               """), week_day=today, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                           SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_week,
+                                                  CASE
+                                                    WHEN game_id = 25011 THEN 'Texas Poker'
+                                                    WHEN game_id = 35011 THEN 'TimeSlots'
+                                                    ELSE 'Unknown'
+                                                  END                                                       AS game,
+                                                  COUNT(DISTINCT user_id)                                   AS sum
+                                           FROM   bi_user_currency
+                                           WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                  AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                                                                 :timezone_offset
+                                                                                 )),
+                                                                                     INTERVAL - 7 DAY)
+                                                  AND transaction_type NOT IN :free_transaction_types
+                                           GROUP  BY on_week,
+                                                     game
+                                          """), week_day=today, timezone_offset=timezone_offset,
+                                          free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     def collection_wau_all_games(connection, transaction):
 
@@ -94,8 +94,8 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                             SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                                    COUNT(DISTINCT user_id)                                   AS sum
                                                             FROM   bi_user_currency
-                                                            WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                                   AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                                            WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                                   AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
                                                                                                    :timezone_offset
                                                                                                    )),
                                                                                                     INTERVAL - 7 DAY)
@@ -103,8 +103,8 @@ def process_bi_statistic_wau(target, timezone_offset):
                                                             GROUP  BY on_week
                                                             HAVING on_week = :week_day
                                                            """), week_day=week_day.strftime("%Y-%m-%d"),
-                                                       timezone_offset=timezone_offset,
-                                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                                           timezone_offset=timezone_offset,
+                                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
                 tmp_proxy.append(every_week_result)
             return tmp_proxy
 
@@ -113,24 +113,24 @@ def process_bi_statistic_wau(target, timezone_offset):
                                            SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                   COUNT(DISTINCT user_id)                                   AS sum
                                            FROM   bi_user_currency
-                                           WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                  AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                           WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                  AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
                                                                                   :timezone_offset
                                                                                   )),
                                                                                      INTERVAL - 7 DAY)
                                                   AND transaction_type NOT IN :free_transaction_types
                                            GROUP  BY on_week
                                            HAVING on_week = :week_day
-                                                """), week_day=yesterday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                             """), week_day=yesterday, timezone_offset=timezone_offset,
+                                            free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
                                            SELECT DATE (CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_week,
                                                   COUNT(DISTINCT user_id)                                   AS sum
                                            FROM   bi_user_currency
-                                           WHERE  created_at < DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
-                                                  AND created_at >= DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
+                                           WHERE  created_at <= DATE(CONVERT_TZ(:week_day, '+00:00', :timezone_offset))
+                                                  AND created_at > DATE_ADD(DATE(CONVERT_TZ(:week_day, '+00:00',
                                                                                     :timezone_offset
                                                                                       )),
                                                                                       INTERVAL - 7 DAY)
@@ -138,7 +138,7 @@ def process_bi_statistic_wau(target, timezone_offset):
                                            GROUP  BY on_week
                                            HAVING on_week = :week_day
                                                    """), week_day=today, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     def sync_collection_wau_every_game(connection, transaction):
 
