@@ -92,8 +92,7 @@ def process_bi_statistic_mau(target, timezone_offset):
                                                                   AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                                       DATE_ADD(:on_day, INTERVAL - 30 DAY)
                                                                   AND transaction_type NOT IN :free_transaction_types
-                                                           GROUP  BY on_day,
-                                                                     game
+                                                           GROUP  BY on_day
                                                            """), on_day=on_day.strftime("%Y-%m-%d"),
                                                        timezone_offset=timezone_offset,
                                                        free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
@@ -109,8 +108,7 @@ def process_bi_statistic_mau(target, timezone_offset):
                                                     AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                                       DATE_ADD(:on_day, INTERVAL - 30 DAY)
                                                     AND transaction_type NOT IN :free_transaction_types
-                                             GROUP  BY on_day,
-                                                       game
+                                             GROUP  BY on_day
                                              """), on_day=yesterday, timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
@@ -123,8 +121,7 @@ def process_bi_statistic_mau(target, timezone_offset):
                                                     AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                                       DATE_ADD(:on_day, INTERVAL - 30 DAY)
                                                     AND transaction_type NOT IN :free_transaction_types
-                                             GROUP  BY on_day,
-                                                       game
+                                             GROUP  BY on_day
                                                    """), on_day=today, timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
