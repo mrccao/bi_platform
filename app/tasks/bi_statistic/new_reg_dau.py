@@ -25,7 +25,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                             GROUP  BY on_day,
                                                       uc.game_id
                                             """), timezone_offset=timezone_offset,
-                                            free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'yesterday':
             return connection.execute(text("""
@@ -39,7 +39,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                                      uc.game_id
                                            HAVING on_day = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset,
-                                          free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
         if target == 'today':
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
@@ -52,7 +52,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                                      uc.game_id
                                            HAVING on_day = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                           free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_new_registration_dau)
 
