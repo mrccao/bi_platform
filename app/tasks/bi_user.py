@@ -997,6 +997,16 @@ def process_user_gold_balance_related_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT tb.username     AS og_account,
+                                                  (SELECT MIN(recdate)
+                                                   FROM   powergamecoin_detail
+                                                   WHERE  tb.username = username AND producttype = 925011307
+                                                   ORDER  BY recdate ASC
+                                                   LIMIT  1)      AS first_free_spin_time,
+                                                  (SELECT MAX(recdate)
+                                                   FROM   powergamecoin_detail
+                                                   WHERE  tb.username = username AND producttype = 925011307
+                                                   ORDER  BY recdate DESC
+                                                   LIMIT  1)      AS last_free_spin_time,
                                                   (SELECT recdate
                                                    FROM   powergamecoin_detail
                                                    WHERE  tb.username = username AND gamecoin < 0
@@ -1019,6 +1029,16 @@ def process_user_gold_balance_related_records():
                                            """))
         return connection.execute(text("""
                                        SELECT tb.username     AS og_account,
+                                              (SELECT MIN(recdate)
+                                               FROM   powergamecoin_detail
+                                               WHERE  tb.username = username AND producttype = 925011307
+                                               ORDER  BY recdate ASC
+                                               LIMIT  1)      AS first_free_spin_time,
+                                              (SELECT MAX(recdate)
+                                               FROM   powergamecoin_detail
+                                               WHERE  tb.username = username AND producttype = 925011307
+                                               ORDER  BY recdate DESC
+                                               LIMIT  1)      AS last_free_spin_time,
                                               (SELECT recdate
                                                FROM   powergamecoin_detail
                                                WHERE  tb.username = username AND gamecoin < 0
@@ -1048,6 +1068,8 @@ def process_user_gold_balance_related_records():
         'gold_balance': row['gold_balance'],
         'first_poker_time': row['first_poker_time'],
         'last_poker_time': row['last_poker_time'],
+        'first_free_spin_time': row['first_free_spin_time'],
+        'last_free_spin_time': row['last_free_spin_time'],
         'max_recdate': row['max_recdate']
     } for row in result_proxy]
 
@@ -1060,7 +1082,9 @@ def process_user_gold_balance_related_records():
             values = {
                 'gold_balance': bindparam('gold_balance'),
                 'first_poker_time': bindparam('first_poker_time'),
-                'last_poker_time': bindparam('last_poker_time')
+                'last_poker_time': bindparam('last_poker_time'),
+                'first_free_spin_time': bindparam('first_free_spin_time'),
+                'last_free_spin_time': bindparam('last_free_spin_time')
                 }
 
             try:
