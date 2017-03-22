@@ -14,45 +14,51 @@ def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1, 
         try:
             process_bi_statistic_dau(target, timezone_offset)
         except:
-            print('DAU Failed')
+            print('-----DAU Failed-----')
+            raise
         else:
-            print('DAU Done')
+            print('------DAU Done------')
 
     if wau:
         try:
             process_bi_statistic_wau(target, timezone_offset)
         except:
-            print('WAU Failed')
+            print('-----WAU Failed------')
+            raise
         else:
-            print('WAU Done')
+            print('------WAU Done------')
     if mau:
         try:
             process_bi_statistic_mau(target, timezone_offset)
         except:
-            print('MAU Failed')
+            print('------MAU Failed-----')
+            raise
         else:
-            print('MAU Done')
+            print('------MAU Done------')
 
     if new_reg:
         try:
             process_bi_statistic_new_reg(target, timezone_offset)
         except:
-            print('New_reg Failed')
+            print('-----New_reg Failed------')
+            raise
         else:
-            print('New_reg Done')
+            print('------New_reg Done------')
 
     if new_reg_dau:
         try:
             process_bi_statistic_new_reg_dau(target, timezone_offset)
         except:
-            print('New_reg_dau Failed')
+            print('------New_reg_dau Failed-----')
+            raise
         else:
-            print('New_reg_dau Done')
+            print('------New_reg_dau Done-----')
 
     if revenue:
         try:
             process_bi_statistic_revenue(target, timezone_offset)
         except:
-            print('Revenue Failed')
+            print('-----Revenue Failed-----')
+            raise
         else:
-            print('Revenue Done')
+            print('-----Revenue Done-----')

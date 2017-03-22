@@ -72,11 +72,11 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('process_bi_statistic_for_lifetime new_registration_game_dau_transaction.rollback()')
+                print('New_registration_game_dau_transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_bi_statistic_for_lifetime new_registration_game_dau_transaction.commit()')
+                print('New_registration_game_dau_transaction.commit()')
                 transaction.commit()
             return
 

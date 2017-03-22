@@ -48,9 +48,6 @@ def process_bi_statistic_dau(target, timezone_offset):
 
     result_proxy = with_db_context(db, collection_dau_all_games)
 
-    if result_proxy is None:
-        return
-
     rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
@@ -67,11 +64,11 @@ def process_bi_statistic_dau(target, timezone_offset):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('process_bi_statistic_for_lifetime dau all games transaction.rollback()')
+                print('DAU for all games transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_bi_statistic_for_lifetime dau all games transaction.commit()')
+                print('DAU for all games transaction.commit()')
                 transaction.commit()
             return
 
@@ -82,7 +79,7 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                    WHEN game_id = 25011 THEN 'Texas Poker'
+                                                    WHEN game_id = 25011 THEN 'TexasPoker'
                                                     WHEN game_id = 35011 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
@@ -98,7 +95,7 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                     WHEN game_id = 25011 THEN 'Texas Poker'
+                                                     WHEN game_id = 25011 THEN 'TexasPoker'
                                                      WHEN game_id = 35011 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
@@ -115,7 +112,7 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                     WHEN game_id = 25011 THEN 'Texas Poker'
+                                                     WHEN game_id = 25011 THEN 'TexasPoker'
                                                      WHEN game_id = 35011 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
@@ -129,9 +126,6 @@ def process_bi_statistic_dau(target, timezone_offset):
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_dau_every_game)
-
-    if result_proxy is None:
-        return
 
     rows = [{'_on_day': row['on_day'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
 
@@ -149,11 +143,11 @@ def process_bi_statistic_dau(target, timezone_offset):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('process_bi_statistic_for_lifetime dau  for every game transaction.rollback()')
+                print('DAU for every game transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_bi_statistic_for_lifetime dau  for every game transaction.commit()')
+                print('DAU  for every game transaction.commit()')
                 transaction.commit()
             return
 

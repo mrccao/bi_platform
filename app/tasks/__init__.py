@@ -11,12 +11,12 @@ def get_engine(db_instance, bind=None):
     return db_instance.get_engine(db_instance.get_app(), bind=bind)
 
 
-def with_db_context(db_instance, func=None, bind=None):
+def with_db_context(db_instance, func=None, bind=None,*args,**kwargs):
     """ Exec with db context. """
     with get_engine(db_instance, bind=bind).connect() as connection:
         with connection.begin() as transaction:
             if func:
-                return func(connection, transaction)
+                return func(connection, transaction,*args,**kwargs)
             return
 
 

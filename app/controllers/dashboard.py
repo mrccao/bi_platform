@@ -88,7 +88,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                       """), start_time=start_time, end_time=end_time, game='All Game', platform=platform)
+                                       """), start_time=start_time, end_time=end_time, game='All Game',
+                                  platform=platform)
 
     elif report_type == 'Game DAU':
 
@@ -99,7 +100,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                       """), start_time=start_time, end_time=end_time, game=game, platform='All Platform')
+                                       """), start_time=start_time, end_time=end_time, game=game,
+                                  platform='All Platform')
 
     elif report_type == 'WAU':
 
@@ -110,7 +112,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                       """), start_time=start_time, end_time=end_time, game=game, platform='All Platform')
+                                       """), start_time=start_time, end_time=end_time, game=game,
+                                  platform='All Platform')
 
     elif report_type == 'MAU':
 
@@ -121,7 +124,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                        """), start_time=start_time, end_time=end_time, game=game, platform='All Platform')
+                                        """), start_time=start_time, end_time=end_time, game=game,
+                                  platform='All Platform')
 
     elif report_type == 'New Reg Game DAU':
 
@@ -132,7 +136,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                        """), start_time=start_time, end_time=end_time, game='All Game', platform='All Platform')
+                                        """), start_time=start_time, end_time=end_time, game='All Game',
+                                  platform='All Platform')
 
     elif report_type == 'Revenue':
 
@@ -143,7 +148,8 @@ def visualization_executive_data():
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
                                               AND platform = :platform
-                                       """), start_time=start_time, end_time=end_time, game='All Game', platform='All Platform')
+                                       """), start_time=start_time, end_time=end_time, game='All Game',
+                                  platform='All Platform')
 
     labels = []
     data = []
