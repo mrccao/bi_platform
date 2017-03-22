@@ -7,6 +7,7 @@ from sqlalchemy import text
 from app.extensions import db
 from app.utils import current_time
 
+
 dashboard = Blueprint('dashboard', __name__)
 
 @dashboard.route("/", methods=["GET"])

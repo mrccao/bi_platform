@@ -1,5 +1,6 @@
 import logging
 import signal
+import importlib
 from calendar import monthrange
 
 import arrow
@@ -94,6 +95,12 @@ def dedup(l, suffix='__'):
             seen[s] = 0
         new_l.append(s)
     return new_l
+
+
+def str_to_class(module_name, class_name):
+    mdl = importlib.import_module(module_name)
+    kls = getattr(mdl, class_name)
+    return kls
 
 
 # def base_json_conv(obj):

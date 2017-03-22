@@ -28,6 +28,8 @@ def parse_user_mall_platform(platform, desc):
 def parse_user_mall_platform_from_reg_source(reg_source):
     if reg_source.startswith('Web'):
         return 'Web'
+    if reg_source.startswith('Web Mobile'):
+        return 'Web Mobile'
     if reg_source.startswith('iOS'):
         return 'iOS'
     if reg_source.startswith('Android'):

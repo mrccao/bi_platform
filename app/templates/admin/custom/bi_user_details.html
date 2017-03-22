@@ -45,6 +45,17 @@
                             {{ item[-1] }}
                           </td>
                         </tr>
+                        {% if item[0].startswith('Last Time Of') or
+                              item[0] == 'Dollar Paid Count' or
+                              item[0] == 'Reward Point' or
+                              item[0] == 'Last Free Spin Time' or
+                              item[0] == 'Account Status Orig' or
+                              item[0] == 'Email Promotion Allowed' or
+                              item[0] == 'Billing Zip Code' or
+                              item[0] == 'Reg Campaign Orig' or
+                              item[0] == 'Last Login Time' %}
+                            <tr><td colspan="2" style="line-height: 2px;">&nbsp;</td></tr>
+                        {% endif %}
                         {% endfor %}
                       </tbody>
                     </table>
