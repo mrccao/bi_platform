@@ -140,16 +140,15 @@ def visualization_executive_data():
                                   platform='All Platform')
 
     elif report_type == 'Revenue':
-
         proxy = db.engine.execute(text("""
-                                       SELECT DATE(on_day),
-                                              dollar_paid_amount
-                                       FROM   bi_statistic
-                                       WHERE  on_day BETWEEN :start_time AND :end_time
-                                              AND game = :game
-                                              AND platform = :platform
-                                       """), start_time=start_time, end_time=end_time, game='All Game',
-                                  platform='All Platform')
+                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
+                                              ROUND(SUM(currency_amount), 2)
+                                       FROM   bi_user_bill
+                                       WHERE  currency_type = 'Dollar'
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) BETWEEN
+                                                  :start_time AND :end_time
+                                       GROUP  BY on_day
+                                       """), start_time=start_time, end_time=end_time)
 
     labels = []
     data = []

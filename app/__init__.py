@@ -66,12 +66,22 @@ def register_extensions(app):
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
         admin = Admin(app, index_view=AdminBaseIndexView(), url='/data')
-        admin.add_view(AdminUserModelView(AdminUser, db.session, menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='admin_user'))
-        admin.add_view(AdminBIUserModelView(BIUser, db.session, name='BI User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user'))
-        admin.add_view(AdminBIUserCurrencyModelView(BIUserCurrency, db.session, name='BI User Currency', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_currency'))
-        admin.add_view(AdminBIUserBillModelView(BIUserBill, db.session, name='BI User Bill', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_user_bill'))
-        admin.add_view(AdminBIClubWPTUserModelView(BIClubWPTUser, db.session, name='BI ClubWPT User', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='bi_clubwpt_user'))
-        admin.add_view(AdminWPTUserLoginLogModelView(WPTUserLoginLog, db.session, name='User Login Log', menu_icon_type='fa', menu_icon_value='fa-circle-o', endpoint='user_login_log'))
+        admin.add_view(AdminUserModelView(AdminUser, db.session, menu_icon_type='fa', menu_icon_value='fa-circle-o',
+                                          endpoint='admin_user'))
+        admin.add_view(
+            AdminBIUserModelView(BIUser, db.session, name='BI User', menu_icon_type='fa', menu_icon_value='fa-circle-o',
+                                 endpoint='bi_user'))
+        admin.add_view(
+            AdminBIUserCurrencyModelView(BIUserCurrency, db.session, name='BI User Currency', menu_icon_type='fa',
+                                         menu_icon_value='fa-circle-o', endpoint='bi_user_currency'))
+        admin.add_view(AdminBIUserBillModelView(BIUserBill, db.session, name='BI User Bill', menu_icon_type='fa',
+                                                menu_icon_value='fa-circle-o', endpoint='bi_user_bill'))
+        admin.add_view(
+            AdminBIClubWPTUserModelView(BIClubWPTUser, db.session, name='BI ClubWPT User', menu_icon_type='fa',
+                                        menu_icon_value='fa-circle-o', endpoint='bi_clubwpt_user'))
+        admin.add_view(
+            AdminWPTUserLoginLogModelView(WPTUserLoginLog, db.session, name='User Login Log', menu_icon_type='fa',
+                                          menu_icon_value='fa-circle-o', endpoint='user_login_log'))
 
     login.init_app(app)
     login.login_view = "account.sign_in"
@@ -86,15 +96,16 @@ def register_blueprints(app):
     """Register Flask blueprints."""
 
     from app.controllers.account import account
-    from app.controllers.dashboard import dashboard
-    # from app.controllers.dashboard_before import dashboard
+    # from app.controllers.dashboard import dashboard
+    from app.controllers.dashboard_before import dashboard_before
 
     from app.controllers.sql_lab import sql_lab
     from app.controllers.page import page
     from app.controllers.promotion import promotion
 
     app.register_blueprint(account)
-    app.register_blueprint(dashboard)
+    # app.register_blueprint(dashboard)
+    app.register_blueprint(dashboard_before)
     app.register_blueprint(sql_lab)
     app.register_blueprint(page)
     app.register_blueprint(promotion)

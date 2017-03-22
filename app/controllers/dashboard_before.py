@@ -7,16 +7,16 @@ from sqlalchemy import text
 from app.extensions import db
 from app.utils import current_time
 
-dashboard = Blueprint('dashboard', __name__)
+dashboard_before = Blueprint('dashboard_before', __name__)
 
 
-@dashboard.route("/", methods=["GET"])
+@dashboard_before.route("/", methods=["GET"])
 @login_required
 def index():
     return render_template('dashboard/index.html')
 
 
-@dashboard.route("/dashboard/visualization/summary_data", methods=["GET"])
+@dashboard_before.route("/dashboard/visualization/summary_data", methods=["GET"])
 @login_required
 def visualization_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
@@ -33,7 +33,7 @@ def visualization_summary_data():
         day=day).scalar()
     revenue = db.engine.execute(text(
         "SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day"),
-                                day=day).scalar()
+        day=day).scalar()
     # game_dau = db.engine.execute(text("""
     #                                   SELECT Count(DISTINCT user_id)
     #                                   FROM   bi_user_currency
@@ -73,7 +73,7 @@ def visualization_summary_data():
     return jsonify(payload)
 
 
-@dashboard.route("/dashboard/visualization/executive_data", methods=["GET"])
+@dashboard_before.route("/dashboard/visualization/executive_data", methods=["GET"])
 @login_required
 def visualization_executive_data():
     days_ago = request.args.get('days_ago')
@@ -139,13 +139,13 @@ def visualization_executive_data():
     #                                    FROM   bi_user_currency
     #                                    GROUP  BY on_week
     #                                    """))
-    elif report_type == 'MAU':
-        proxy = db.engine.execute(text("""
-                                       SELECT DATE_FORMAT(CONVERT_TZ(created_at, '+00:00', '-05:00'), '%Y-%m') AS on_month,
-                                              COUNT(DISTINCT user_id)
-                                       FROM   bi_user_currency
-                                       GROUP  BY on_month
-                                       """))
+    # elif report_type == 'MAU':
+    #     proxy = db.engine.execute(text("""
+    #                                    SELECT DATE_FORMAT(CONVERT_TZ(created_at, '+00:00', '-05:00'), '%Y-%m') AS on_month,
+    #                                           COUNT(DISTINCT user_id)
+    #                                    FROM   bi_user_currency
+    #                                    GROUP  BY on_month
+    #                                    """))
         # platform = 'All Platform'
         # today = current_time().to(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
         # last_day_of_prev_month = get_last_day_of_prev_month().format('YYYY-MM-DD')
