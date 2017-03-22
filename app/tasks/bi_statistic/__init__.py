@@ -7,7 +7,7 @@ from .revenue import process_bi_statistic_revenue
 from .wau import process_bi_statistic_wau
 
 
-def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1):
+def process_bi_statistic(target, dau=0, wau=0, mau=0, new_reg=1, new_reg_dau=1):
     timezone_offset = get_db_timezone_offset()
 
     if dau:

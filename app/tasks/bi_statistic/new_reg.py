@@ -100,17 +100,16 @@ def process_bi_statistic_new_reg(target, timezone_offset):
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day,
-                                                     reg_source
+                                           GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
+
 
         if target == 'yesterday':
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day,
-                                                     reg_source
+                                           GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset)
 
@@ -119,8 +118,7 @@ def process_bi_statistic_new_reg(target, timezone_offset):
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day,
-                                                     reg_source
+                                           GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset)
 

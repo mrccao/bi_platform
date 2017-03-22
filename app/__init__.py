@@ -96,16 +96,16 @@ def register_blueprints(app):
     """Register Flask blueprints."""
 
     from app.controllers.account import account
-    # from app.controllers.dashboard import dashboard
-    from app.controllers.dashboard_before import dashboard_before
+    from app.controllers.dashboard import dashboard
+    # from app.controllers.dashboard_before import dashboard_before
 
     from app.controllers.sql_lab import sql_lab
     from app.controllers.page import page
     from app.controllers.promotion import promotion
 
     app.register_blueprint(account)
-    # app.register_blueprint(dashboard)
-    app.register_blueprint(dashboard_before)
+    app.register_blueprint(dashboard)
+    # app.register_blueprint(dashboard_before)
     app.register_blueprint(sql_lab)
     app.register_blueprint(page)
     app.register_blueprint(promotion)
