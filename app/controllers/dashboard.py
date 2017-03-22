@@ -27,27 +27,28 @@ def visualization_summary_data():
         day = now.format('YYYY-MM-DD')
 
     new_registration = db.engine.execute(text("""
-                                              SELECT new_registration
+                                              SELECT SUM(new_registration)
                                               FROM   bi_statistic
                                               WHERE  platform = 'All Platform'
                                               AND    on_day = :day
                                               """), day=day).scalar()
 
     revenue = db.engine.execute(text("""
-                                     SELECT dollar_paid_amount
-                                     FROM   bi_statistic
-                                     WHERE  on_day = :day
+                                     SELECT ROUND(SUM(currency_amount), 2)
+                                     FROM   bi_user_bill
+                                     WHERE  currency_type = 'Dollar'
+                                            AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day
                                      """), day=day).scalar()
 
     game_dau = db.engine.execute(text("""
-                                      SELECT dau
+                                      SELECT SUM(dau)
                                       FROM   bi_statistic
                                       WHERE  game ='All Game'
                                       AND    on_day = :day
                                       """), day=day).scalar()
 
     new_registration_game_dau = db.engine.execute(text("""
-                                                       SELECT new_registration_game_dau
+                                                       SELECT SUM(new_registration_game_dau)
                                                        FROM   bi_statistic
                                                        WHERE  on_day = :day
                                                        """), day=day).scalar()

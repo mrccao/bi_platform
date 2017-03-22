@@ -30,6 +30,7 @@ manager.add_command("show-urls", ShowUrls())
 manager.add_command("clean", Clean())
 manager.add_command('db', MigrateCommand)
 
+
 @manager.shell
 def make_shell_context():
     """ Creates a python REPL with several default imports
@@ -214,7 +215,7 @@ def reset_bi_statistic():
     import pandas as pd
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
-            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Facebook Game','Web Mobile']:
+            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Facebook Game', 'Web Mobile']:
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
     db.session.commit()
 
