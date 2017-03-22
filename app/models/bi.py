@@ -1,7 +1,8 @@
+import sys
 from sqlalchemy import text
 from sqlalchemy.schema import UniqueConstraint
 
-from app.constants import TRANSACTION_TYPES, BI_USER_SORTED_COLUMNS, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
+from app.constants import TRANSACTION_TYPES, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
 from app.extensions import db
 from app.libs.datetime_type import NaiveDateTime, AwareDateTime, OGInsertableAwareDateTime
 from app.models.orig_wpt import WPTUserLoginLog
@@ -68,27 +69,17 @@ class BIUser(db.Model):
     user_id = db.Column(db.BIGINT, unique=True, nullable=False, index=True)
     username = db.Column(db.String(255), index=True)
     og_account = db.Column(db.String(255), index=True)
-    first_name = db.Column(db.String(255))
-    middle_name = db.Column(db.String(255))
-    last_name = db.Column(db.String(255))
-    address = db.Column(db.String(255))
-    city = db.Column(db.String(255))
-    state = db.Column(db.String(255))
-    country = db.Column(db.String(255))
-    zip_code = db.Column(db.String(255))
-
-    billing_contact = db.Column(db.String(255))
-    billing_address = db.Column(db.String(255))
-    billing_city = db.Column(db.String(255))
-    billing_state = db.Column(db.String(255))
-    billing_country = db.Column(db.String(255))
-    billing_zip_code = db.Column(db.String(255))
-
-    phone = db.Column(db.String(255))
+    facebook_id = db.Column(db.String(255))
     email = db.Column(db.String(255), index=True)
     email_validate_time = db.Column(OGInsertableAwareDateTime, index=True)
     email_promotion_allowed = db.Column(db.Boolean)
-    birthday = db.Column(NaiveDateTime)
+
+    account_status = db.Column(db.String(255))
+    account_status_orig = db.Column(db.Integer)
+    last_login_ip = db.Column(db.String(255))
+    # last_login_ip_location = db.Column(db.String(255))
+    last_login_time = db.Column(OGInsertableAwareDateTime)
+
     reg_ip = db.Column(db.String(255))
     # reg_ip_location = db.Column(db.String(255))
     reg_time = db.Column(OGInsertableAwareDateTime, index=True)
@@ -97,8 +88,6 @@ class BIUser(db.Model):
     reg_platform = db.Column(db.String(255), index=True)
     reg_facebook_connect = db.Column(db.Boolean)
 
-    facebook_id = db.Column(db.String(255))
-
     reg_type_orig = db.Column(db.Integer)
     reg_platform_orig = db.Column(db.Integer)
     reg_device_orig = db.Column(db.Integer)
@@ -106,13 +95,26 @@ class BIUser(db.Model):
     reg_affiliate_orig = db.Column(db.Integer)
     reg_campaign = db.Column(db.String(255))
     reg_campaign_orig = db.Column(db.Integer)
-    last_login_ip = db.Column(db.String(255))
-    # last_login_ip_location = db.Column(db.String(255))
-    last_login_time = db.Column(OGInsertableAwareDateTime)
+
+    first_name = db.Column(db.String(255))
+    middle_name = db.Column(db.String(255))
+    last_name = db.Column(db.String(255))
+    address = db.Column(db.String(255))
+    city = db.Column(db.String(255))
+    state = db.Column(db.String(255))
+    country = db.Column(db.String(255))
+    zip_code = db.Column(db.String(255))
+    phone = db.Column(db.String(255))
+    birthday = db.Column(NaiveDateTime)
     gender = db.Column(db.String(255))
     gender_orig = db.Column(db.Integer)
-    account_status = db.Column(db.String(255))
-    account_status_orig = db.Column(db.Integer)
+
+    billing_contact = db.Column(db.String(255))
+    billing_address = db.Column(db.String(255))
+    billing_city = db.Column(db.String(255))
+    billing_state = db.Column(db.String(255))
+    billing_country = db.Column(db.String(255))
+    billing_zip_code = db.Column(db.String(255))
 
     gold_balance = db.Column(db.Integer, index=True)
     silver_balance = db.Column(db.Integer, index=True)
@@ -120,6 +122,14 @@ class BIUser(db.Model):
     first_slots_time = db.Column(OGInsertableAwareDateTime)
     last_poker_time = db.Column(OGInsertableAwareDateTime, index=True)
     last_slots_time = db.Column(OGInsertableAwareDateTime, index=True)
+
+    first_promotion_fb_notification_time = db.Column(AwareDateTime)
+    first_promotion_email_time = db.Column(AwareDateTime)
+    last_promotion_fb_notification_time = db.Column(AwareDateTime)
+    last_promotion_email_time = db.Column(AwareDateTime)
+
+    first_free_spin_time = db.Column(OGInsertableAwareDateTime)
+    last_free_spin_time = db.Column(OGInsertableAwareDateTime, index=True)
 
     reward_level = db.Column(db.Integer)
     reward_xp = db.Column(db.Integer)
@@ -130,34 +140,63 @@ class BIUser(db.Model):
 
     count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer)
     amount_of_masterpoint_exchanged_for_gold = db.Column(db.Float)
+    first_time_of_masterpoint_exchanged_for_gold = db.Column(OGInsertableAwareDateTime)
+    last_time_of_masterpoint_exchanged_for_gold = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_dollar_exchanged_for_gold = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_gold = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_gold = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_gold = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_gold_exchanged_for_silver = db.Column(db.Integer)
     amount_of_gold_exchanged_for_silver = db.Column(db.Float)
+    first_time_of_gold_exchanged_for_silver = db.Column(OGInsertableAwareDateTime)
+    last_time_of_gold_exchanged_for_silver = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_dollar_exchanged_for_silver = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_silver = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_silver = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_silver = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_dollar_exchanged_for_lucky_spin = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_lucky_spin = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_lucky_spin = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_lucky_spin = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_gold_exchanged_for_lucky_charm = db.Column(db.Integer)
     amount_of_gold_exchanged_for_lucky_charm = db.Column(db.Float)
+    first_time_of_gold_exchanged_for_lucky_charm = db.Column(OGInsertableAwareDateTime)
+    last_time_of_gold_exchanged_for_lucky_charm = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_gold_exchanged_for_avatar = db.Column(db.Integer)
     amount_of_gold_exchanged_for_avatar = db.Column(db.Float)
+    first_time_of_gold_exchanged_for_avatar = db.Column(OGInsertableAwareDateTime)
+    last_time_of_gold_exchanged_for_avatar = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_gold_exchanged_for_emoji = db.Column(db.Integer)
     amount_of_gold_exchanged_for_emoji = db.Column(db.Float)
+    first_time_of_gold_exchanged_for_emoji = db.Column(OGInsertableAwareDateTime)
+    last_time_of_gold_exchanged_for_emoji = db.Column(OGInsertableAwareDateTime, index=True)
 
     count_of_dollar_exchanged_for_spin_purchase = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_spin_purchase = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_spin_purchase = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_spin_purchase = db.Column(OGInsertableAwareDateTime, index=True)
 
     count_of_dollar_exchanged_for_spin_ticket = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_spin_ticket = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_spin_ticket = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_spin_ticket = db.Column(OGInsertableAwareDateTime, index=True)
+
     count_of_dollar_exchanged_for_spin_booster = db.Column(db.Integer)
     amount_of_dollar_exchanged_for_spin_booster = db.Column(db.Float)
+    first_time_of_dollar_exchanged_for_spin_booster = db.Column(OGInsertableAwareDateTime)
+    last_time_of_dollar_exchanged_for_spin_booster = db.Column(OGInsertableAwareDateTime, index=True)
 
     updated_at = db.Column(AwareDateTime, onupdate=current_time, index=True)
 
     def attribute_pairs(self):
-        return [ [column.replace('_', ' ').title(), self.__dict__[column] or ''] for column in BI_USER_SORTED_COLUMNS ]
-        # return { column.replace('_', ' ').title(): self.__dict__[column] for column in sorted(self.__dict__) if not column.startswith('_sa_') }
+        return [[column.key.replace('_', ' ').title(), self.__dict__[column.key] or ''] for column in self.__table__.columns]
 
     def login_logs(self, limit=5):
         return WPTUserLoginLog.query.filter_by(user_id=self.user_id).order_by(text('id DESC')).limit(limit).all()
@@ -233,7 +272,7 @@ class BIUserBill(db.Model):
 
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
-    __table_args__ = (UniqueConstraint('orig_db', 'orig_id', name='ix_uniq_orig_db_and_orig_id'),)
+    __table_args__ = (UniqueConstraint('orig_db', 'orig_id', 'product_orig', name='ix_uniq_orig_db_and_orig_id_and_product_orig'),)
 
 
 class BIClubWPTUser(db.Model):
