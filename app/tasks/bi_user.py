@@ -2210,19 +2210,19 @@ def process_user_promotion_time():
             return connection.execute(text("""
                                            SELECT user_id,
                                                   MIN(CASE
-                                                        WHEN push_type = 'fb_notification' THEN created_at
+                                                        WHEN push_type = 'fb_notification' THEN scheduled_at
                                                         ELSE NULL
                                                       END) AS first_promotion_fb_notification_time,
                                                   MIN(CASE
-                                                        WHEN push_type = 'email' THEN created_at
+                                                        WHEN push_type = 'email' THEN scheduled_at
                                                         ELSE NULL
                                                       END) AS first_promotion_email_time,
                                                   MAX(CASE
-                                                        WHEN push_type = 'fb_notification' THEN created_at
+                                                        WHEN push_type = 'fb_notification' THEN scheduled_at
                                                         ELSE NULL
                                                       END) AS last_promotion_fb_notification_time,
                                                   MAX(CASE
-                                                        WHEN push_type = 'email' THEN created_at
+                                                        WHEN push_type = 'email' THEN scheduled_at
                                                         ELSE NULL
                                                       END) AS last_promotion_email_time,
                                                   MAX(id)  AS max_id
@@ -2234,19 +2234,19 @@ def process_user_promotion_time():
         return connection.execute(text("""
                                        SELECT user_id,
                                               MIN(CASE
-                                                    WHEN push_type = 'fb_notification' THEN created_at
+                                                    WHEN push_type = 'fb_notification' THEN scheduled_at
                                                     ELSE NULL
                                                   END) AS first_promotion_fb_notification_time,
                                               MIN(CASE
-                                                    WHEN push_type = 'email' THEN created_at
+                                                    WHEN push_type = 'email' THEN scheduled_at
                                                     ELSE NULL
                                                   END) AS first_promotion_email_time,
                                               MAX(CASE
-                                                    WHEN push_type = 'fb_notification' THEN created_at
+                                                    WHEN push_type = 'fb_notification' THEN scheduled_at
                                                     ELSE NULL
                                                   END) AS last_promotion_fb_notification_time,
                                               MAX(CASE
-                                                    WHEN push_type = 'email' THEN created_at
+                                                    WHEN push_type = 'email' THEN scheduled_at
                                                     ELSE NULL
                                                   END) AS last_promotion_email_time,
                                               MAX(id)  AS max_id
