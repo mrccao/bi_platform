@@ -22,7 +22,6 @@ def process_bi_statistic_new_reg(target, timezone_offset):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'Unknown'
                                                   END                                                  AS platform,
                                                   COUNT(*)                                             AS sum
                                            FROM   bi_user
@@ -39,7 +38,6 @@ def process_bi_statistic_new_reg(target, timezone_offset):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'Unknown'
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user
@@ -57,7 +55,6 @@ def process_bi_statistic_new_reg(target, timezone_offset):
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                    ELSE 'Unknown'
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user

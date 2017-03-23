@@ -81,7 +81,6 @@ def process_bi_statistic_dau(target, timezone_offset):
                                                   CASE
                                                     WHEN game_id = 39990 THEN 'TexasPoker'
                                                     WHEN game_id = 23118 THEN 'TimeSlots'
-                                                  ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
@@ -97,7 +96,6 @@ def process_bi_statistic_dau(target, timezone_offset):
                                                   CASE
                                                      WHEN game_id = 39990 THEN 'TexasPoker'
                                                      WHEN game_id = 23118 THEN 'TimeSlots'
-                                                  ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
@@ -114,7 +112,6 @@ def process_bi_statistic_dau(target, timezone_offset):
                                                   CASE
                                                      WHEN game_id = 39990 THEN 'TexasPoker'
                                                      WHEN game_id = 23118 THEN 'TimeSlots'
-                                                  ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency

@@ -23,7 +23,6 @@ def process_bi_statistic_mau(target, timezone_offset):
                                               CASE
                                                 WHEN game_id = 39990 THEN 'TexasPoker'
                                                 WHEN game_id = 23118 THEN 'TimeSlots'
-                                                ELSE 'Unknown'
                                               END                     AS game
                                        FROM   bi_user_currency
                                        WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
