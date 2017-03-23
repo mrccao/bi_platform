@@ -18,7 +18,7 @@ def is_dst_now_in(zonename):
 
 def get_db_timezone_offset():
     """ get offset time of between DST and CST """
-    return '-04:00' if is_dst_now_in(app.config["APP_TIMEZONE"]) else  '-05:00'
+    return app.config["APP_TIMEZONE"]
 
 
 # def nowfun():
