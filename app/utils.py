@@ -11,21 +11,9 @@ from flask import current_app as app
 from app.exceptions import TimeoutException
 
 
-def is_dst_now_in(zonename):
-    """ According to the region to determine whether it is DST """
-    return bool(datetime.now(pytz.timezone(zonename)).dst())
-
 
 def get_db_timezone_offset():
-    """ get offset time of between DST and CST """
     return app.config["APP_TIMEZONE"]
-
-
-# def nowfun():
-#     """ Determine local time for celery crontab """
-#     return datetime.now(pytz.timezone('America/New_York'))
-
-
 
 
 
