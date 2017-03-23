@@ -58,7 +58,8 @@ def init_bi_user_import_config():
                  'last_imported_user_mall_order_add_time',
                  'last_imported_user_mall_order_update_time',
                  'last_imported_og_powergamecoin_add_time',
-                 'last_imported_og_gamecoin_add_time']
+                 'last_imported_og_gamecoin_add_time',
+                 'last_imported_promotion_history_id']
 
     for v in variables:
         db.session.query(BIImportConfig).filter_by(var=v).delete()
@@ -214,9 +215,9 @@ def reset_bi_statistic():
     from datetime import date
     import pandas as pd
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
-        for game in ['All Game', 'TexasPoker', 'TimeSlots']:
-            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Facebook Game', 'Web Mobile']:
-                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+        for game in ['All Game', 'Texas Poker', 'TimeSlots']:
+            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
+                db.session.add(BIStatistic(day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
     db.session.commit()
 
 

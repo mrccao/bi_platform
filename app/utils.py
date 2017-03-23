@@ -1,5 +1,6 @@
 import logging
 import signal
+import importlib
 from calendar import monthrange
 from datetime import datetime
 
@@ -118,34 +119,40 @@ def dedup(l, suffix='__'):
     return new_l
 
 
-    # def base_json_conv(obj):
+def str_to_class(module_name, class_name):
+    mdl = importlib.import_module(module_name)
+    kls = getattr(mdl, class_name)
+    return kls
 
-    #     if isinstance(obj, numpy.int64):
-    #         return int(obj)
-    #     elif isinstance(obj, set):
-    #         return list(obj)
-    #     elif isinstance(obj, decimal.Decimal):
-    #         return float(obj)
-    #     elif isinstance(obj, uuid.UUID):
-    #         return str(obj)
 
-    # def json_iso_dttm_ser(obj):
-    #     """
-    #     json serializer that deals with dates
+# def base_json_conv(obj):
+    
+#     if isinstance(obj, numpy.int64):
+#         return int(obj)
+#     elif isinstance(obj, set):
+#         return list(obj)
+#     elif isinstance(obj, decimal.Decimal):
+#         return float(obj)
+#     elif isinstance(obj, uuid.UUID):
+#         return str(obj)
 
-    #     >>> dttm = datetime(1970, 1, 1)
-    #     >>> json.dumps({'dttm': dttm}, default=json_iso_dttm_ser)
-    #     '{"dttm": "1970-01-01T00:00:00"}'
-    #     """
-    #     val = base_json_conv(obj)
-    #     if val is not None:
-    #         return val
-    #     if isinstance(obj, datetime):
-    #         obj = obj.isoformat()
-    #     elif isinstance(obj, date):
-    #         obj = obj.isoformat()
-    #     else:
-    #         raise TypeError(
-    #             "Unserializable object {} of type {}".format(obj, type(obj))
-    #         )
-    #     return obj
+# def json_iso_dttm_ser(obj):
+#     """
+#     json serializer that deals with dates
+
+#     >>> dttm = datetime(1970, 1, 1)
+#     >>> json.dumps({'dttm': dttm}, default=json_iso_dttm_ser)
+#     '{"dttm": "1970-01-01T00:00:00"}'
+#     """
+#     val = base_json_conv(obj)
+#     if val is not None:
+#         return val
+#     if isinstance(obj, datetime):
+#         obj = obj.isoformat()
+#     elif isinstance(obj, date):
+#         obj = obj.isoformat()
+#     else:
+#         raise TypeError(
+#             "Unserializable object {} of type {}".format(obj, type(obj))
+#         )
+#     return obj

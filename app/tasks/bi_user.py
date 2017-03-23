@@ -1,6 +1,7 @@
 import arrow
-from sqlalchemy import text
+from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
+from flask import current_app as app
 
 from app.extensions import db
 from app.models.bi import BIUser
@@ -17,6 +18,13 @@ def parse_user_source(reg_device, p_id, u_type):
 
         if p_id == 0:
             return 'Web'
+
+    if reg_device == 2: # PlayWPT Mobile
+        if p_id == 100:
+            return 'Web Mobile Facebook'
+
+        if p_id == 0:
+            return 'Web Mobile'
 
     if reg_device == 5: # iOS
         if p_id == 100:
@@ -45,6 +53,9 @@ def parse_user_platform(reg_device, p_id, u_type):
 
         if p_id == 0:
             return 'Web'
+
+    if reg_device == 2: # PlayWPT Mobile
+        return 'Web Mobile'
 
     if reg_device == 5: # iOS
         return 'iOS'
@@ -766,14 +777,22 @@ def process_user_payment_spin_purchase_newly_added_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT u_id,
-                                                  Sum(CASE
+                                                  SUM(CASE
                                                         WHEN user_paylog_status_id = 3 THEN 1
                                                         ELSE 0
-                                                      end)                 AS count_of_dollar_exchanged_for_spin_purchase,
-                                                  Round(Sum(CASE
+                                                      END)                 AS count_of_dollar_exchanged_for_spin_purchase,
+                                                  ROUND(SUM(CASE
                                                               WHEN user_paylog_status_id = 3 THEN order_price
                                                               ELSE 0
-                                                            end) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                                            END) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                                  MIN(CASE
+                                                        WHEN user_paylog_status_id = 3 THEN createtime
+                                                        ELSE NULL
+                                                      END)                 AS first_time_of_dollar_exchanged_for_spin_purchase,
+                                                  MAX(CASE
+                                                        WHEN user_paylog_status_id = 3 THEN createtime
+                                                        ELSE NULL
+                                                      END)                 AS last_time_of_dollar_exchanged_for_spin_purchase,
                                                   Max(createtime)          AS max_createtime
                                            FROM   user_paylog
                                            WHERE  tb_product_id = 925011306 AND user_paylog_status_id = 3
@@ -783,14 +802,22 @@ def process_user_payment_spin_purchase_newly_added_records():
         fixed_config_value = arrow.get(config_value).replace(hours=-24).format('YYYY-MM-DD HH:mm:ss')
         return connection.execute(text("""
                                        SELECT u_id,
-                                              Sum(CASE
+                                              SUM(CASE
                                                     WHEN user_paylog_status_id = 3 THEN 1
                                                     ELSE 0
-                                                  end)                 AS count_of_dollar_exchanged_for_spin_purchase,
-                                              Round(Sum(CASE
+                                                  END)                 AS count_of_dollar_exchanged_for_spin_purchase,
+                                              ROUND(SUM(CASE
                                                           WHEN user_paylog_status_id = 3 THEN order_price
                                                           ELSE 0
-                                                        end) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                                        END) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                              MIN(CASE
+                                                    WHEN user_paylog_status_id = 3 THEN createtime
+                                                    ELSE NULL
+                                                  END)                 AS first_time_of_dollar_exchanged_for_spin_purchase,
+                                              MAX(CASE
+                                                    WHEN user_paylog_status_id = 3 THEN createtime
+                                                    ELSE NULL
+                                                  END)                 AS last_time_of_dollar_exchanged_for_spin_purchase,
                                               Max(createtime)          AS max_createtime
                                        FROM   user_paylog
                                        WHERE  tb_product_id = 925011306 AND user_paylog_status_id = 3
@@ -807,6 +834,8 @@ def process_user_payment_spin_purchase_newly_added_records():
         '_user_id': row['u_id'],
         'count_of_dollar_exchanged_for_spin_purchase': row['count_of_dollar_exchanged_for_spin_purchase'],
         'amount_of_dollar_exchanged_for_spin_purchase': row['amount_of_dollar_exchanged_for_spin_purchase'],
+        'first_time_of_dollar_exchanged_for_spin_purchase': row['first_time_of_dollar_exchanged_for_spin_purchase'],
+        'last_time_of_dollar_exchanged_for_spin_purchase': row['last_time_of_dollar_exchanged_for_spin_purchase'],
         'max_createtime': row['max_createtime']
     } for row in result_proxy]
 
@@ -818,11 +847,23 @@ def process_user_payment_spin_purchase_newly_added_records():
             where = BIUser.__table__.c.user_id == bindparam('_user_id')
             values = {
                 'count_of_dollar_exchanged_for_spin_purchase': bindparam('count_of_dollar_exchanged_for_spin_purchase'),
-                'amount_of_dollar_exchanged_for_spin_purchase': bindparam('amount_of_dollar_exchanged_for_spin_purchase')
+                'amount_of_dollar_exchanged_for_spin_purchase': bindparam('amount_of_dollar_exchanged_for_spin_purchase'),
+                'last_time_of_dollar_exchanged_for_spin_purchase': bindparam('last_time_of_dollar_exchanged_for_spin_purchase')
                 }
+
+            column_keys = ['first_time_of_dollar_exchanged_for_spin_purchase']
+            column_params = {}
+            for column in column_keys:
+                column_params[column + '_where'] = and_(
+                                                       BIUser.__table__.c.user_id == bindparam('_user_id'),
+                                                       BIUser.__table__.c[column] == None
+                                                   )
+                column_params[column + '_values'] = {column: bindparam(column)}
 
             try:
                 connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                for column in column_keys:
+                    connection.execute(BIUser.__table__.update().where(column_params[column + '_where']).values(column_params[column + '_values']), rows)
                 set_config_value(connection, 'last_imported_user_payment_spin_purchase_add_time', new_config_value)
             except:
                 print('process_user_payment_spin_purchase_newly_added_records transaction.rollback()')
@@ -846,15 +887,23 @@ def process_user_payment_spin_purchase_newly_updated_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT u_id,
-                                                  Sum(CASE
+                                                  SUM(CASE
                                                         WHEN user_paylog_status_id = 3 THEN 1
                                                         ELSE 0
-                                                      end)                 AS count_of_dollar_exchanged_for_spin_purchase,
-                                                  Round(Sum(CASE
+                                                      END)                 AS count_of_dollar_exchanged_for_spin_purchase,
+                                                  ROUND(SUM(CASE
                                                               WHEN user_paylog_status_id = 3 THEN order_price
                                                               ELSE 0
-                                                            end) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
-                                                  Max(platform_return_time)          AS max_updatetime
+                                                            END) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                                  MIN(CASE
+                                                        WHEN user_paylog_status_id = 3 THEN createtime
+                                                        ELSE NULL
+                                                      END)                 AS first_time_of_dollar_exchanged_for_spin_purchase,
+                                                  MAX(CASE
+                                                        WHEN user_paylog_status_id = 3 THEN createtime
+                                                        ELSE NULL
+                                                      END)                 AS last_time_of_dollar_exchanged_for_spin_purchase,
+                                                  MAX(platform_return_time)          AS max_updatetime
                                            FROM   user_paylog
                                            WHERE  tb_product_id = 925011306 AND user_paylog_status_id = 3
                                            GROUP  BY u_id
@@ -863,14 +912,22 @@ def process_user_payment_spin_purchase_newly_updated_records():
         fixed_config_value = arrow.get(config_value).replace(hours=-24).format('YYYY-MM-DD HH:mm:ss')
         return connection.execute(text("""
                                        SELECT u_id,
-                                              Sum(CASE
+                                              SUM(CASE
                                                     WHEN user_paylog_status_id = 3 THEN 1
                                                     ELSE 0
-                                                  end)                 AS count_of_dollar_exchanged_for_spin_purchase,
-                                              Round(Sum(CASE
+                                                  END)                 AS count_of_dollar_exchanged_for_spin_purchase,
+                                              ROUND(SUM(CASE
                                                           WHEN user_paylog_status_id = 3 THEN order_price
                                                           ELSE 0
-                                                        end) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                                        END) / 100, 2) AS amount_of_dollar_exchanged_for_spin_purchase,
+                                              MIN(CASE
+                                                    WHEN user_paylog_status_id = 3 THEN createtime
+                                                    ELSE NULL
+                                                  END)                 AS first_time_of_dollar_exchanged_for_spin_purchase,
+                                              MAX(CASE
+                                                    WHEN user_paylog_status_id = 3 THEN createtime
+                                                    ELSE NULL
+                                                  END)                 AS last_time_of_dollar_exchanged_for_spin_purchase,
                                               Max(platform_return_time)          AS max_updatetime
                                        FROM   user_paylog
                                        WHERE  tb_product_id = 925011306 AND user_paylog_status_id = 3
@@ -887,6 +944,8 @@ def process_user_payment_spin_purchase_newly_updated_records():
         '_user_id': row['u_id'],
         'count_of_dollar_exchanged_for_spin_purchase': row['count_of_dollar_exchanged_for_spin_purchase'],
         'amount_of_dollar_exchanged_for_spin_purchase': row['amount_of_dollar_exchanged_for_spin_purchase'],
+        'first_time_of_dollar_exchanged_for_spin_purchase': row['first_time_of_dollar_exchanged_for_spin_purchase'],
+        'last_time_of_dollar_exchanged_for_spin_purchase': row['last_time_of_dollar_exchanged_for_spin_purchase'],
         'max_updatetime': row['max_updatetime']
     } for row in result_proxy]
 
@@ -898,11 +957,23 @@ def process_user_payment_spin_purchase_newly_updated_records():
             where = BIUser.__table__.c.user_id == bindparam('_user_id')
             values = {
                 'count_of_dollar_exchanged_for_spin_purchase': bindparam('count_of_dollar_exchanged_for_spin_purchase'),
-                'amount_of_dollar_exchanged_for_spin_purchase': bindparam('amount_of_dollar_exchanged_for_spin_purchase')
+                'amount_of_dollar_exchanged_for_spin_purchase': bindparam('amount_of_dollar_exchanged_for_spin_purchase'),
+                'last_time_of_dollar_exchanged_for_spin_purchase': bindparam('last_time_of_dollar_exchanged_for_spin_purchase')
                 }
+
+            column_keys = ['first_time_of_dollar_exchanged_for_spin_purchase']
+            column_params = {}
+            for column in column_keys:
+                column_params[column + '_where'] = and_(
+                                                       BIUser.__table__.c.user_id == bindparam('_user_id'),
+                                                       BIUser.__table__.c[column] == None
+                                                   )
+                column_params[column + '_values'] = {column: bindparam(column)}
 
             try:
                 connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                for column in column_keys:
+                    connection.execute(BIUser.__table__.update().where(column_params[column + '_where']).values(column_params[column + '_values']), rows)
                 set_config_value(connection, 'last_imported_user_payment_spin_purchase_update_time', new_config_value)
             except:
                 print('process_user_payment_spin_purchase_newly_updated_records transaction.rollback()')
@@ -926,6 +997,16 @@ def process_user_gold_balance_related_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT tb.username     AS og_account,
+                                                  (SELECT MIN(recdate)
+                                                   FROM   powergamecoin_detail
+                                                   WHERE  tb.username = username AND producttype = 925011307
+                                                   ORDER  BY recdate ASC
+                                                   LIMIT  1)      AS first_free_spin_time,
+                                                  (SELECT MAX(recdate)
+                                                   FROM   powergamecoin_detail
+                                                   WHERE  tb.username = username AND producttype = 925011307
+                                                   ORDER  BY recdate DESC
+                                                   LIMIT  1)      AS last_free_spin_time,
                                                   (SELECT recdate
                                                    FROM   powergamecoin_detail
                                                    WHERE  tb.username = username AND gamecoin < 0
@@ -948,6 +1029,16 @@ def process_user_gold_balance_related_records():
                                            """))
         return connection.execute(text("""
                                        SELECT tb.username     AS og_account,
+                                              (SELECT MIN(recdate)
+                                               FROM   powergamecoin_detail
+                                               WHERE  tb.username = username AND producttype = 925011307
+                                               ORDER  BY recdate ASC
+                                               LIMIT  1)      AS first_free_spin_time,
+                                              (SELECT MAX(recdate)
+                                               FROM   powergamecoin_detail
+                                               WHERE  tb.username = username AND producttype = 925011307
+                                               ORDER  BY recdate DESC
+                                               LIMIT  1)      AS last_free_spin_time,
                                               (SELECT recdate
                                                FROM   powergamecoin_detail
                                                WHERE  tb.username = username AND gamecoin < 0
@@ -977,6 +1068,8 @@ def process_user_gold_balance_related_records():
         'gold_balance': row['gold_balance'],
         'first_poker_time': row['first_poker_time'],
         'last_poker_time': row['last_poker_time'],
+        'first_free_spin_time': row['first_free_spin_time'],
+        'last_free_spin_time': row['last_free_spin_time'],
         'max_recdate': row['max_recdate']
     } for row in result_proxy]
 
@@ -989,7 +1082,9 @@ def process_user_gold_balance_related_records():
             values = {
                 'gold_balance': bindparam('gold_balance'),
                 'first_poker_time': bindparam('first_poker_time'),
-                'last_poker_time': bindparam('last_poker_time')
+                'last_poker_time': bindparam('last_poker_time'),
+                'first_free_spin_time': bindparam('first_free_spin_time'),
+                'last_free_spin_time': bindparam('last_free_spin_time')
                 }
 
             try:
@@ -1112,87 +1207,167 @@ def process_user_mall_order_newly_added_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT o.UserId,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN 1
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_masterpoint_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN o.TotalPrice
+                                                      END)     AS count_of_masterpoint_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_masterpoint_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_masterpoint_exchanged_for_gold,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_masterpoint_exchanged_for_gold,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_masterpoint_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_gold,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_gold,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_gold_exchanged_for_silver,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_silver,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_silver,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_silver,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_lucky_spin,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_lucky_spin,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_lucky_spin,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_lucky_spin,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_lucky_spin,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_lucky_spin,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_lucky_charm,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_lucky_charm,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_lucky_charm,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_gold_exchanged_for_lucky_charm,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_lucky_charm,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_lucky_charm,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_avatar,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_avatar,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_avatar,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_gold_exchanged_for_avatar,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_avatar,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_avatar,
+                                                  SUM(CASE
                                                         WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_emoji,
-                                                  Sum(CASE
+                                                      END)     AS count_of_gold_exchanged_for_emoji,
+                                                  SUM(CASE
                                                         WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_emoji,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_gold_exchanged_for_emoji,
+                                                  MIN(CASE
+                                                        WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_emoji,
+                                                  MAX(CASE
+                                                        WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_emoji,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_spin_booster,
-                                                  Sum(CASE
+                                                      END)     AS count_of_dollar_exchanged_for_spin_booster,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_spin_booster,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_dollar_exchanged_for_spin_booster,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_spin_booster,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_spin_booster,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_spin_ticket,
-                                                  Sum(CASE
+                                                      END)     AS count_of_dollar_exchanged_for_spin_ticket,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_spin_ticket,
-                                                  Max(o.cDate) AS max_createtime
+                                                      END)     AS amount_of_dollar_exchanged_for_spin_ticket,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_spin_ticket,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_spin_ticket,
+                                                  Max(o.CDate) AS max_createtime
                                            FROM   Mall_tOrder o
                                                   LEFT JOIN Mall_tOrderProductLog op
                                                          ON op.OrderId = o.OrderId
@@ -1206,87 +1381,167 @@ def process_user_mall_order_newly_added_records():
                                            """))
         return connection.execute(text("""
                                        SELECT o.UserId,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN 1
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_masterpoint_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN o.TotalPrice
+                                                  END)     AS count_of_masterpoint_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_masterpoint_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN 1
+                                                  END)     AS amount_of_masterpoint_exchanged_for_gold,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_masterpoint_exchanged_for_gold,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_masterpoint_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN 1
+                                                  END)     AS amount_of_dollar_exchanged_for_gold,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_gold,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN 1
+                                                  END)     AS amount_of_gold_exchanged_for_silver,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_silver,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN 1
+                                                  END)     AS amount_of_dollar_exchanged_for_silver,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_silver,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_lucky_spin,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_lucky_spin,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_lucky_spin,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN 1
+                                                  End)     AS amount_of_dollar_exchanged_for_lucky_spin,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_lucky_spin,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  End)     AS last_time_of_dollar_exchanged_for_lucky_spin,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_lucky_charm,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_lucky_charm,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_lucky_charm,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN 1
+                                                  END)     AS amount_of_gold_exchanged_for_lucky_charm,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_lucky_charm,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_lucky_charm,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_avatar,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_avatar,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_avatar,
-                                              Sum(CASE
+                                                  END)     AS amount_of_gold_exchanged_for_avatar,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_avatar,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_avatar,
+                                              SUM(CASE
                                                     WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_emoji,
-                                              Sum(CASE
+                                                  END)     AS count_of_gold_exchanged_for_emoji,
+                                              SUM(CASE
                                                     WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_emoji,
-                                              Sum(CASE
+                                                  END)     AS amount_of_gold_exchanged_for_emoji,
+                                              MIN(CASE
+                                                    WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_emoji,
+                                              MAX(CASE
+                                                    WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_emoji,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_spin_booster,
-                                              Sum(CASE
+                                                  END)     AS count_of_dollar_exchanged_for_spin_booster,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_spin_booster,
-                                              Sum(CASE
+                                                  END)     AS amount_of_dollar_exchanged_for_spin_booster,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_spin_booster,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_spin_booster,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_spin_ticket,
-                                              Sum(CASE
+                                                  END)     AS count_of_dollar_exchanged_for_spin_ticket,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_spin_ticket,
-                                              Max(o.cDate) AS max_createtime
+                                                  END)     AS amount_of_dollar_exchanged_for_spin_ticket,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_spin_ticket,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_spin_ticket,
+                                              Max(o.CDate) AS max_createtime
                                        FROM   Mall_tOrder o
                                               LEFT JOIN Mall_tOrderProductLog op
                                                      ON op.OrderId = o.OrderId
@@ -1295,9 +1550,9 @@ def process_user_mall_order_newly_added_records():
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
                                        WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
-                                              AND o.UserId IN (SELECT DISTINCT userid
+                                              AND o.UserId IN (SELECT DISTINCT UserId
                                                                FROM   Mall_tOrder
-                                                               WHERE  cdate >= :add_time)
+                                                               WHERE  CDate >= :add_time)
                                        GROUP  BY o.UserId
                                        ORDER  BY max_createtime ASC
                                        """), add_time=config_value)
@@ -1306,26 +1561,57 @@ def process_user_mall_order_newly_added_records():
 
     rows = [{
         '_user_id': row['UserId'],
+
         'count_of_masterpoint_exchanged_for_gold': row['count_of_masterpoint_exchanged_for_gold'],
         'amount_of_masterpoint_exchanged_for_gold': row['amount_of_masterpoint_exchanged_for_gold'],
+        'first_time_of_masterpoint_exchanged_for_gold': row['first_time_of_masterpoint_exchanged_for_gold'],
+        'last_time_of_masterpoint_exchanged_for_gold': row['last_time_of_masterpoint_exchanged_for_gold'],
+
         'count_of_dollar_exchanged_for_gold': row['count_of_dollar_exchanged_for_gold'],
         'amount_of_dollar_exchanged_for_gold': row['amount_of_dollar_exchanged_for_gold'],
+        'first_time_of_dollar_exchanged_for_gold': row['first_time_of_dollar_exchanged_for_gold'],
+        'last_time_of_dollar_exchanged_for_gold': row['last_time_of_dollar_exchanged_for_gold'],
+
         'count_of_gold_exchanged_for_silver': row['count_of_gold_exchanged_for_silver'],
         'amount_of_gold_exchanged_for_silver': row['amount_of_gold_exchanged_for_silver'],
+        'first_time_of_gold_exchanged_for_silver': row['first_time_of_gold_exchanged_for_silver'],
+        'last_time_of_gold_exchanged_for_silver': row['last_time_of_gold_exchanged_for_silver'],
+
         'count_of_dollar_exchanged_for_silver': row['count_of_dollar_exchanged_for_silver'],
         'amount_of_dollar_exchanged_for_silver': row['amount_of_dollar_exchanged_for_silver'],
+        'first_time_of_dollar_exchanged_for_silver': row['first_time_of_dollar_exchanged_for_silver'],
+        'last_time_of_dollar_exchanged_for_silver': row['last_time_of_dollar_exchanged_for_silver'],
+
         'count_of_dollar_exchanged_for_lucky_spin': row['count_of_dollar_exchanged_for_lucky_spin'],
         'amount_of_dollar_exchanged_for_lucky_spin': row['amount_of_dollar_exchanged_for_lucky_spin'],
+        'first_time_of_dollar_exchanged_for_lucky_spin': row['first_time_of_dollar_exchanged_for_lucky_spin'],
+        'last_time_of_dollar_exchanged_for_lucky_spin': row['last_time_of_dollar_exchanged_for_lucky_spin'],
+
         'count_of_gold_exchanged_for_lucky_charm': row['count_of_gold_exchanged_for_lucky_charm'],
         'amount_of_gold_exchanged_for_lucky_charm': row['amount_of_gold_exchanged_for_lucky_charm'],
+        'first_time_of_gold_exchanged_for_lucky_charm': row['first_time_of_gold_exchanged_for_lucky_charm'],
+        'last_time_of_gold_exchanged_for_lucky_charm': row['last_time_of_gold_exchanged_for_lucky_charm'],
+
         'count_of_gold_exchanged_for_avatar': row['count_of_gold_exchanged_for_avatar'],
         'amount_of_gold_exchanged_for_avatar': row['amount_of_gold_exchanged_for_avatar'],
+        'first_time_of_gold_exchanged_for_avatar': row['first_time_of_gold_exchanged_for_avatar'],
+        'last_time_of_gold_exchanged_for_avatar': row['last_time_of_gold_exchanged_for_avatar'],
+
         'count_of_gold_exchanged_for_emoji': row['count_of_gold_exchanged_for_emoji'],
         'amount_of_gold_exchanged_for_emoji': row['amount_of_gold_exchanged_for_emoji'],
+        'first_time_of_gold_exchanged_for_emoji': row['first_time_of_gold_exchanged_for_emoji'],
+        'last_time_of_gold_exchanged_for_emoji': row['last_time_of_gold_exchanged_for_emoji'],
+
         'count_of_dollar_exchanged_for_spin_booster': row['count_of_dollar_exchanged_for_spin_booster'],
         'amount_of_dollar_exchanged_for_spin_booster': row['amount_of_dollar_exchanged_for_spin_booster'],
+        'first_time_of_dollar_exchanged_for_spin_booster': row['first_time_of_dollar_exchanged_for_spin_booster'],
+        'last_time_of_dollar_exchanged_for_spin_booster': row['last_time_of_dollar_exchanged_for_spin_booster'],
+
         'count_of_dollar_exchanged_for_spin_ticket': row['count_of_dollar_exchanged_for_spin_ticket'],
         'amount_of_dollar_exchanged_for_spin_ticket': row['amount_of_dollar_exchanged_for_spin_ticket'],
+        'first_time_of_dollar_exchanged_for_spin_ticket': row['first_time_of_dollar_exchanged_for_spin_ticket'],
+        'last_time_of_dollar_exchanged_for_spin_ticket': row['last_time_of_dollar_exchanged_for_spin_ticket'],
+
         'max_createtime': row['max_createtime']
     } for row in result_proxy]
 
@@ -1338,28 +1624,67 @@ def process_user_mall_order_newly_added_records():
             values = {
                 'count_of_masterpoint_exchanged_for_gold': bindparam('count_of_masterpoint_exchanged_for_gold'),
                 'amount_of_masterpoint_exchanged_for_gold': bindparam('amount_of_masterpoint_exchanged_for_gold'),
+                'last_time_of_masterpoint_exchanged_for_gold': bindparam('last_time_of_masterpoint_exchanged_for_gold'),
+                
                 'count_of_dollar_exchanged_for_gold': bindparam('count_of_dollar_exchanged_for_gold'),
                 'amount_of_dollar_exchanged_for_gold': bindparam('amount_of_dollar_exchanged_for_gold'),
+                'last_time_of_dollar_exchanged_for_gold': bindparam('last_time_of_dollar_exchanged_for_gold'),
+                
                 'count_of_gold_exchanged_for_silver': bindparam('count_of_gold_exchanged_for_silver'),
                 'amount_of_gold_exchanged_for_silver': bindparam('amount_of_gold_exchanged_for_silver'),
+                'last_time_of_gold_exchanged_for_silver': bindparam('last_time_of_gold_exchanged_for_silver'),
+                
                 'count_of_dollar_exchanged_for_silver': bindparam('count_of_dollar_exchanged_for_silver'),
                 'amount_of_dollar_exchanged_for_silver': bindparam('amount_of_dollar_exchanged_for_silver'),
+                'last_time_of_dollar_exchanged_for_silver': bindparam('last_time_of_dollar_exchanged_for_silver'),
+                
                 'count_of_dollar_exchanged_for_lucky_spin': bindparam('count_of_dollar_exchanged_for_lucky_spin'),
                 'amount_of_dollar_exchanged_for_lucky_spin': bindparam('amount_of_dollar_exchanged_for_lucky_spin'),
+                'last_time_of_dollar_exchanged_for_lucky_spin': bindparam('last_time_of_dollar_exchanged_for_lucky_spin'),
+                
                 'count_of_gold_exchanged_for_lucky_charm': bindparam('count_of_gold_exchanged_for_lucky_charm'),
                 'amount_of_gold_exchanged_for_lucky_charm': bindparam('amount_of_gold_exchanged_for_lucky_charm'),
+                'last_time_of_gold_exchanged_for_lucky_charm': bindparam('last_time_of_gold_exchanged_for_lucky_charm'),
+                
                 'count_of_gold_exchanged_for_avatar': bindparam('count_of_gold_exchanged_for_avatar'),
                 'amount_of_gold_exchanged_for_avatar': bindparam('amount_of_gold_exchanged_for_avatar'),
+                'last_time_of_gold_exchanged_for_avatar': bindparam('last_time_of_gold_exchanged_for_avatar'),
+                
                 'count_of_gold_exchanged_for_emoji': bindparam('count_of_gold_exchanged_for_emoji'),
                 'amount_of_gold_exchanged_for_emoji': bindparam('amount_of_gold_exchanged_for_emoji'),
+                'last_time_of_gold_exchanged_for_emoji': bindparam('last_time_of_gold_exchanged_for_emoji'),
+                
                 'count_of_dollar_exchanged_for_spin_booster': bindparam('count_of_dollar_exchanged_for_spin_booster'),
                 'amount_of_dollar_exchanged_for_spin_booster': bindparam('amount_of_dollar_exchanged_for_spin_booster'),
+                'last_time_of_dollar_exchanged_for_spin_booster': bindparam('last_time_of_dollar_exchanged_for_spin_booster'),
+                
                 'count_of_dollar_exchanged_for_spin_ticket': bindparam('count_of_dollar_exchanged_for_spin_ticket'),
-                'amount_of_dollar_exchanged_for_spin_ticket': bindparam('amount_of_dollar_exchanged_for_spin_ticket')
+                'amount_of_dollar_exchanged_for_spin_ticket': bindparam('amount_of_dollar_exchanged_for_spin_ticket'),
+                'last_time_of_dollar_exchanged_for_spin_ticket': bindparam('last_time_of_dollar_exchanged_for_spin_ticket'),
                 }
+
+            column_keys = ['first_time_of_masterpoint_exchanged_for_gold',
+                           'first_time_of_dollar_exchanged_for_gold',
+                           'first_time_of_gold_exchanged_for_silver',
+                           'first_time_of_dollar_exchanged_for_silver',
+                           'first_time_of_dollar_exchanged_for_lucky_spin',
+                           'first_time_of_gold_exchanged_for_lucky_charm',
+                           'first_time_of_gold_exchanged_for_avatar',
+                           'first_time_of_gold_exchanged_for_emoji',
+                           'first_time_of_dollar_exchanged_for_spin_booster',
+                           'first_time_of_dollar_exchanged_for_spin_ticket']
+            column_params = {}
+            for column in column_keys:
+                column_params[column + '_where'] = and_(
+                                                       BIUser.__table__.c.user_id == bindparam('_user_id'),
+                                                       BIUser.__table__.c[column] == None
+                                                   )
+                column_params[column + '_values'] = {column: bindparam(column)}
 
             try:
                 connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                for column in column_keys:
+                    connection.execute(BIUser.__table__.update().where(column_params[column + '_where']).values(column_params[column + '_values']), rows)
                 set_config_value(connection, 'last_imported_user_mall_order_add_time', new_config_value)
             except:
                 print('process_user_mall_order_newly_added_records transaction.rollback()')
@@ -1383,87 +1708,167 @@ def process_user_mall_order_newly_updated_records():
         if config_value is None:
             return connection.execute(text("""
                                            SELECT o.UserId,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN 1
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_masterpoint_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN o.TotalPrice
+                                                      END)     AS count_of_masterpoint_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_masterpoint_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_masterpoint_exchanged_for_gold,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_masterpoint_exchanged_for_gold,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_masterpoint_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_gold,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_gold,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_gold,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_gold,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_gold_exchanged_for_silver,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_silver,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_silver,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_silver,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_silver,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_silver,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_lucky_spin,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                      END)     AS count_of_dollar_exchanged_for_lucky_spin,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_lucky_spin,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_dollar_exchanged_for_lucky_spin,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_lucky_spin,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_lucky_spin,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_lucky_charm,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_lucky_charm,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_lucky_charm,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN 1
+                                                      END)     AS amount_of_gold_exchanged_for_lucky_charm,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_lucky_charm,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_lucky_charm,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_avatar,
-                                                  Sum(CASE
-                                                        WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                      END)     AS count_of_gold_exchanged_for_avatar,
+                                                  SUM(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_avatar,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_gold_exchanged_for_avatar,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_avatar,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_avatar,
+                                                  SUM(CASE
                                                         WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_gold_exchanged_for_emoji,
-                                                  Sum(CASE
+                                                      END)     AS count_of_gold_exchanged_for_emoji,
+                                                  SUM(CASE
                                                         WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_gold_exchanged_for_emoji,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_gold_exchanged_for_emoji,
+                                                  MIN(CASE
+                                                        WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_gold_exchanged_for_emoji,
+                                                  MAX(CASE
+                                                        WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_gold_exchanged_for_emoji,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_spin_booster,
-                                                  Sum(CASE
+                                                      END)     AS count_of_dollar_exchanged_for_spin_booster,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_spin_booster,
-                                                  Sum(CASE
+                                                      END)     AS amount_of_dollar_exchanged_for_spin_booster,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_spin_booster,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_spin_booster,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                         ELSE 0
-                                                      end)     AS count_of_dollar_exchanged_for_spin_ticket,
-                                                  Sum(CASE
+                                                      END)     AS count_of_dollar_exchanged_for_spin_ticket,
+                                                  SUM(CASE
                                                         WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                         ELSE 0
-                                                      end)     AS amount_of_dollar_exchanged_for_spin_ticket,
-                                                  Max(o.udate) AS max_updatetime
+                                                      END)     AS amount_of_dollar_exchanged_for_spin_ticket,
+                                                  MIN(CASE
+                                                        WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS first_time_of_dollar_exchanged_for_spin_ticket,
+                                                  MAX(CASE
+                                                        WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                        ELSE NULL
+                                                      END)     AS last_time_of_dollar_exchanged_for_spin_ticket,
+                                                  Max(o.UDate) AS max_updatetime
                                            FROM   Mall_tOrder o
                                                   LEFT JOIN Mall_tOrderProductLog op
                                                          ON op.OrderId = o.OrderId
@@ -1477,87 +1882,167 @@ def process_user_mall_order_newly_updated_records():
                                            """))
         return connection.execute(text("""
                                        SELECT o.UserId,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN 1
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_masterpoint_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 106 THEN o.TotalPrice
+                                                  END)     AS count_of_masterpoint_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_masterpoint_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN 1
+                                                  END)     AS amount_of_masterpoint_exchanged_for_gold,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_masterpoint_exchanged_for_gold,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 106 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_masterpoint_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 1 OR p.ParentId = 1) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_gold,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN 1
+                                                  END)     AS amount_of_dollar_exchanged_for_gold,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_gold,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 1 OR p.ParentId = 1 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_gold,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN 1
+                                                  End)     AS amount_of_gold_exchanged_for_silver,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_silver,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 2 OR p.ParentId = 2) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_silver,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN 1
+                                                  END)     AS amount_of_dollar_exchanged_for_silver,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_silver,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 2 OR p.ParentId = 2 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_silver,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_lucky_spin,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 3 OR p.ParentId = 3) AND o.CurrencyCode = 201 THEN o.TotalPrice
+                                                  END)     AS count_of_dollar_exchanged_for_lucky_spin,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_lucky_spin,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN 1
+                                                  END)     AS amount_of_dollar_exchanged_for_lucky_spin,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_lucky_spin,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 3 OR p.ParentId = 3 ) AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_lucky_spin,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_lucky_charm,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 5 OR p.ParentId = 5) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_lucky_charm,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_lucky_charm,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN 1
+                                                  END)     AS amount_of_gold_exchanged_for_lucky_charm,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_lucky_charm,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 5 OR p.ParentId = 5 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_lucky_charm,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_avatar,
-                                              Sum(CASE
-                                                    WHEN (p.Id = 6 OR p.ParentId = 6) AND o.CurrencyCode = 101 THEN o.TotalPrice
+                                                  END)     AS count_of_gold_exchanged_for_avatar,
+                                              SUM(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_avatar,
-                                              Sum(CASE
+                                                  END)     AS amount_of_gold_exchanged_for_avatar,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_avatar,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 6 OR p.ParentId = 6 ) AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_avatar,
+                                              SUM(CASE
                                                     WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_gold_exchanged_for_emoji,
-                                              Sum(CASE
+                                                  END)     AS count_of_gold_exchanged_for_emoji,
+                                              SUM(CASE
                                                     WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_gold_exchanged_for_emoji,
-                                              Sum(CASE
+                                                  END)     AS amount_of_gold_exchanged_for_emoji,
+                                              MIN(CASE
+                                                    WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_gold_exchanged_for_emoji,
+                                              MAX(CASE
+                                                    WHEN p.ParentId = 35 AND o.CurrencyCode = 101 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_gold_exchanged_for_emoji,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_spin_booster,
-                                              Sum(CASE
+                                                  END)     AS count_of_dollar_exchanged_for_spin_booster,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_spin_booster,
-                                              Sum(CASE
+                                                  END)     AS amount_of_dollar_exchanged_for_spin_booster,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_spin_booster,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 8 OR p.Id = 15 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_spin_booster,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN 1
                                                     ELSE 0
-                                                  end)     AS count_of_dollar_exchanged_for_spin_ticket,
-                                              Sum(CASE
+                                                  END)     AS count_of_dollar_exchanged_for_spin_ticket,
+                                              SUM(CASE
                                                     WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.TotalPrice
                                                     ELSE 0
-                                                  end)     AS amount_of_dollar_exchanged_for_spin_ticket,
-                                              Max(o.uDate) AS max_updatetime
+                                                  END)     AS amount_of_dollar_exchanged_for_spin_ticket,
+                                              MIN(CASE
+                                                    WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS first_time_of_dollar_exchanged_for_spin_ticket,
+                                              MAX(CASE
+                                                    WHEN ( p.Id = 9 OR p.Id = 16 ) AND p.ParentId = 3 AND o.CurrencyCode = 201 THEN o.CDate
+                                                    ELSE NULL
+                                                  END)     AS last_time_of_dollar_exchanged_for_spin_ticket,
+                                              Max(o.UDate) AS max_updatetime
                                        FROM   Mall_tOrder o
                                               LEFT JOIN Mall_tOrderProductLog op
                                                      ON op.OrderId = o.OrderId
@@ -1566,9 +2051,9 @@ def process_user_mall_order_newly_updated_records():
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
                                        WHERE  o.OrderStatus != 1 AND o.OrderStatus != 41 AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
-                                              AND o.UserId IN (SELECT DISTINCT userid
+                                              AND o.UserId IN (SELECT DISTINCT UserId
                                                                FROM   Mall_tOrder
-                                                               WHERE  uDate >= :update_time)
+                                                               WHERE  UDate >= :update_time)
                                        GROUP  BY o.UserId
                                        ORDER  BY max_updatetime ASC
                                        """), update_time=config_value)
@@ -1577,26 +2062,57 @@ def process_user_mall_order_newly_updated_records():
 
     rows = [{
         '_user_id': row['UserId'],
+
         'count_of_masterpoint_exchanged_for_gold': row['count_of_masterpoint_exchanged_for_gold'],
         'amount_of_masterpoint_exchanged_for_gold': row['amount_of_masterpoint_exchanged_for_gold'],
+        'first_time_of_masterpoint_exchanged_for_gold': row['first_time_of_masterpoint_exchanged_for_gold'],
+        'last_time_of_masterpoint_exchanged_for_gold': row['last_time_of_masterpoint_exchanged_for_gold'],
+
         'count_of_dollar_exchanged_for_gold': row['count_of_dollar_exchanged_for_gold'],
         'amount_of_dollar_exchanged_for_gold': row['amount_of_dollar_exchanged_for_gold'],
+        'first_time_of_dollar_exchanged_for_gold': row['first_time_of_dollar_exchanged_for_gold'],
+        'last_time_of_dollar_exchanged_for_gold': row['last_time_of_dollar_exchanged_for_gold'],
+
         'count_of_gold_exchanged_for_silver': row['count_of_gold_exchanged_for_silver'],
         'amount_of_gold_exchanged_for_silver': row['amount_of_gold_exchanged_for_silver'],
+        'first_time_of_gold_exchanged_for_silver': row['first_time_of_gold_exchanged_for_silver'],
+        'last_time_of_gold_exchanged_for_silver': row['last_time_of_gold_exchanged_for_silver'],
+
         'count_of_dollar_exchanged_for_silver': row['count_of_dollar_exchanged_for_silver'],
         'amount_of_dollar_exchanged_for_silver': row['amount_of_dollar_exchanged_for_silver'],
+        'first_time_of_dollar_exchanged_for_silver': row['first_time_of_dollar_exchanged_for_silver'],
+        'last_time_of_dollar_exchanged_for_silver': row['last_time_of_dollar_exchanged_for_silver'],
+
         'count_of_dollar_exchanged_for_lucky_spin': row['count_of_dollar_exchanged_for_lucky_spin'],
         'amount_of_dollar_exchanged_for_lucky_spin': row['amount_of_dollar_exchanged_for_lucky_spin'],
+        'first_time_of_dollar_exchanged_for_lucky_spin': row['first_time_of_dollar_exchanged_for_lucky_spin'],
+        'last_time_of_dollar_exchanged_for_lucky_spin': row['last_time_of_dollar_exchanged_for_lucky_spin'],
+
         'count_of_gold_exchanged_for_lucky_charm': row['count_of_gold_exchanged_for_lucky_charm'],
         'amount_of_gold_exchanged_for_lucky_charm': row['amount_of_gold_exchanged_for_lucky_charm'],
+        'first_time_of_gold_exchanged_for_lucky_charm': row['first_time_of_gold_exchanged_for_lucky_charm'],
+        'last_time_of_gold_exchanged_for_lucky_charm': row['last_time_of_gold_exchanged_for_lucky_charm'],
+
         'count_of_gold_exchanged_for_avatar': row['count_of_gold_exchanged_for_avatar'],
         'amount_of_gold_exchanged_for_avatar': row['amount_of_gold_exchanged_for_avatar'],
+        'first_time_of_gold_exchanged_for_avatar': row['first_time_of_gold_exchanged_for_avatar'],
+        'last_time_of_gold_exchanged_for_avatar': row['last_time_of_gold_exchanged_for_avatar'],
+
         'count_of_gold_exchanged_for_emoji': row['count_of_gold_exchanged_for_emoji'],
         'amount_of_gold_exchanged_for_emoji': row['amount_of_gold_exchanged_for_emoji'],
+        'first_time_of_gold_exchanged_for_emoji': row['first_time_of_gold_exchanged_for_emoji'],
+        'last_time_of_gold_exchanged_for_emoji': row['last_time_of_gold_exchanged_for_emoji'],
+
         'count_of_dollar_exchanged_for_spin_booster': row['count_of_dollar_exchanged_for_spin_booster'],
         'amount_of_dollar_exchanged_for_spin_booster': row['amount_of_dollar_exchanged_for_spin_booster'],
+        'first_time_of_dollar_exchanged_for_spin_booster': row['first_time_of_dollar_exchanged_for_spin_booster'],
+        'last_time_of_dollar_exchanged_for_spin_booster': row['last_time_of_dollar_exchanged_for_spin_booster'],
+
         'count_of_dollar_exchanged_for_spin_ticket': row['count_of_dollar_exchanged_for_spin_ticket'],
         'amount_of_dollar_exchanged_for_spin_ticket': row['amount_of_dollar_exchanged_for_spin_ticket'],
+        'first_time_of_dollar_exchanged_for_spin_ticket': row['first_time_of_dollar_exchanged_for_spin_ticket'],
+        'last_time_of_dollar_exchanged_for_spin_ticket': row['last_time_of_dollar_exchanged_for_spin_ticket'],
+
         'max_updatetime': row['max_updatetime']
     } for row in result_proxy]
 
@@ -1609,28 +2125,67 @@ def process_user_mall_order_newly_updated_records():
             values = {
                 'count_of_masterpoint_exchanged_for_gold': bindparam('count_of_masterpoint_exchanged_for_gold'),
                 'amount_of_masterpoint_exchanged_for_gold': bindparam('amount_of_masterpoint_exchanged_for_gold'),
+                'last_time_of_masterpoint_exchanged_for_gold': bindparam('last_time_of_masterpoint_exchanged_for_gold'),
+
                 'count_of_dollar_exchanged_for_gold': bindparam('count_of_dollar_exchanged_for_gold'),
                 'amount_of_dollar_exchanged_for_gold': bindparam('amount_of_dollar_exchanged_for_gold'),
+                'last_time_of_dollar_exchanged_for_gold': bindparam('last_time_of_dollar_exchanged_for_gold'),
+
                 'count_of_gold_exchanged_for_silver': bindparam('count_of_gold_exchanged_for_silver'),
                 'amount_of_gold_exchanged_for_silver': bindparam('amount_of_gold_exchanged_for_silver'),
+                'last_time_of_gold_exchanged_for_silver': bindparam('last_time_of_gold_exchanged_for_silver'),
+
                 'count_of_dollar_exchanged_for_silver': bindparam('count_of_dollar_exchanged_for_silver'),
                 'amount_of_dollar_exchanged_for_silver': bindparam('amount_of_dollar_exchanged_for_silver'),
+                'last_time_of_dollar_exchanged_for_silver': bindparam('last_time_of_dollar_exchanged_for_silver'),
+
                 'count_of_dollar_exchanged_for_lucky_spin': bindparam('count_of_dollar_exchanged_for_lucky_spin'),
                 'amount_of_dollar_exchanged_for_lucky_spin': bindparam('amount_of_dollar_exchanged_for_lucky_spin'),
+                'last_time_of_dollar_exchanged_for_lucky_spin': bindparam('last_time_of_dollar_exchanged_for_lucky_spin'),
+
                 'count_of_gold_exchanged_for_lucky_charm': bindparam('count_of_gold_exchanged_for_lucky_charm'),
                 'amount_of_gold_exchanged_for_lucky_charm': bindparam('amount_of_gold_exchanged_for_lucky_charm'),
+                'last_time_of_gold_exchanged_for_lucky_charm': bindparam('last_time_of_gold_exchanged_for_lucky_charm'),
+
                 'count_of_gold_exchanged_for_avatar': bindparam('count_of_gold_exchanged_for_avatar'),
                 'amount_of_gold_exchanged_for_avatar': bindparam('amount_of_gold_exchanged_for_avatar'),
+                'last_time_of_gold_exchanged_for_avatar': bindparam('last_time_of_gold_exchanged_for_avatar'),
+
                 'count_of_gold_exchanged_for_emoji': bindparam('count_of_gold_exchanged_for_emoji'),
                 'amount_of_gold_exchanged_for_emoji': bindparam('amount_of_gold_exchanged_for_emoji'),
+                'last_time_of_gold_exchanged_for_emoji': bindparam('last_time_of_gold_exchanged_for_emoji'),
+
                 'count_of_dollar_exchanged_for_spin_booster': bindparam('count_of_dollar_exchanged_for_spin_booster'),
                 'amount_of_dollar_exchanged_for_spin_booster': bindparam('amount_of_dollar_exchanged_for_spin_booster'),
+                'last_time_of_dollar_exchanged_for_spin_booster': bindparam('last_time_of_dollar_exchanged_for_spin_booster'),
+
                 'count_of_dollar_exchanged_for_spin_ticket': bindparam('count_of_dollar_exchanged_for_spin_ticket'),
-                'amount_of_dollar_exchanged_for_spin_ticket': bindparam('amount_of_dollar_exchanged_for_spin_ticket')
-                }
+                'amount_of_dollar_exchanged_for_spin_ticket': bindparam('amount_of_dollar_exchanged_for_spin_ticket'),
+                'last_time_of_dollar_exchanged_for_spin_ticket': bindparam('last_time_of_dollar_exchanged_for_spin_ticket'),
+            }
+
+            column_keys = ['first_time_of_masterpoint_exchanged_for_gold',
+                           'first_time_of_dollar_exchanged_for_gold',
+                           'first_time_of_gold_exchanged_for_silver',
+                           'first_time_of_dollar_exchanged_for_silver',
+                           'first_time_of_dollar_exchanged_for_lucky_spin',
+                           'first_time_of_gold_exchanged_for_lucky_charm',
+                           'first_time_of_gold_exchanged_for_avatar',
+                           'first_time_of_gold_exchanged_for_emoji',
+                           'first_time_of_dollar_exchanged_for_spin_booster',
+                           'first_time_of_dollar_exchanged_for_spin_ticket']
+            column_params = {}
+            for column in column_keys:
+                column_params[column + '_where'] = and_(
+                    BIUser.__table__.c.user_id == bindparam('_user_id'),
+                    BIUser.__table__.c[column] == None
+                )
+                column_params[column + '_values'] = {column: bindparam(column)}
 
             try:
                 connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                for column in column_keys:
+                    connection.execute(BIUser.__table__.update().where(column_params[column + '_where']).values(column_params[column + '_values']), rows)
                 set_config_value(connection, 'last_imported_user_mall_order_update_time', new_config_value)
             except:
                 print('process_user_mall_order_newly_updated_records transaction.rollback()')
@@ -1638,6 +2193,115 @@ def process_user_mall_order_newly_updated_records():
                 raise
             else:
                 print('process_user_mall_order_newly_updated_records transaction.commit()')
+                transaction.commit()
+            return
+
+        with_db_context(db, sync_collection)
+
+    return
+
+
+def process_user_promotion_time():
+    config_value = get_config_value(db, 'last_imported_promotion_history_id')
+
+    def collection(connection, transaction):
+        """ Get newly added. """
+        if config_value is None:
+            return connection.execute(text("""
+                                           SELECT user_id,
+                                                  MIN(CASE
+                                                        WHEN push_type = 'fb_notification' THEN scheduled_at
+                                                        ELSE NULL
+                                                      END) AS first_promotion_fb_notification_time,
+                                                  MIN(CASE
+                                                        WHEN push_type = 'email' THEN scheduled_at
+                                                        ELSE NULL
+                                                      END) AS first_promotion_email_time,
+                                                  MAX(CASE
+                                                        WHEN push_type = 'fb_notification' THEN scheduled_at
+                                                        ELSE NULL
+                                                      END) AS last_promotion_fb_notification_time,
+                                                  MAX(CASE
+                                                        WHEN push_type = 'email' THEN scheduled_at
+                                                        ELSE NULL
+                                                      END) AS last_promotion_email_time,
+                                                  MAX(id)  AS max_id
+                                           FROM   promotion_push_history
+                                           WHERE  status = 'success'
+                                           GROUP  BY user_id
+                                           ORDER  BY max_id ASC
+                                           """))
+        return connection.execute(text("""
+                                       SELECT user_id,
+                                              MIN(CASE
+                                                    WHEN push_type = 'fb_notification' THEN scheduled_at
+                                                    ELSE NULL
+                                                  END) AS first_promotion_fb_notification_time,
+                                              MIN(CASE
+                                                    WHEN push_type = 'email' THEN scheduled_at
+                                                    ELSE NULL
+                                                  END) AS first_promotion_email_time,
+                                              MAX(CASE
+                                                    WHEN push_type = 'fb_notification' THEN scheduled_at
+                                                    ELSE NULL
+                                                  END) AS last_promotion_fb_notification_time,
+                                              MAX(CASE
+                                                    WHEN push_type = 'email' THEN scheduled_at
+                                                    ELSE NULL
+                                                  END) AS last_promotion_email_time,
+                                              MAX(id)  AS max_id
+                                       FROM   promotion_push_history
+                                       WHERE  status = 'success'
+                                              AND user_id IN (SELECT DISTINCT user_id
+                                                              FROM   promotion_push_history
+                                                              WHERE  id > :max_id)
+                                       GROUP  BY user_id
+                                       ORDER  BY max_id ASC
+                                       """), max_id=config_value)
+
+    result_proxy = with_db_context(db, collection)
+
+    rows = [{
+        '_user_id': row['user_id'],
+        'first_promotion_fb_notification_time': row['first_promotion_fb_notification_time'],
+        'first_promotion_email_time': row['first_promotion_email_time'],
+        'last_promotion_fb_notification_time': row['last_promotion_fb_notification_time'],
+        'last_promotion_email_time': row['last_promotion_email_time'],
+        'max_id': row['max_id']
+    } for row in result_proxy]
+
+    if rows:
+        new_config_value = rows[-1]['max_id']
+
+        def sync_collection(connection, transaction):
+            """ Sync newly added. """
+            where = BIUser.__table__.c.user_id == bindparam('_user_id')
+            values = {
+                'last_promotion_email_time': bindparam('last_promotion_email_time'),
+                'last_promotion_fb_notification_time': bindparam('last_promotion_fb_notification_time')
+                }
+
+            column_keys = ['first_promotion_fb_notification_time',
+                           'first_promotion_email_time']
+            column_params = {}
+            for column in column_keys:
+                column_params[column + '_where'] = and_(
+                    BIUser.__table__.c.user_id == bindparam('_user_id'),
+                    BIUser.__table__.c[column] == None
+                )
+                column_params[column + '_values'] = {column: bindparam(column)}
+
+            try:
+                connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                for column in column_keys:
+                    connection.execute(BIUser.__table__.update().where(column_params[column + '_where']).values(column_params[column + '_values']), rows)
+                set_config_value(connection, 'last_imported_promotion_history_id', new_config_value)
+            except:
+                print('process_user_promotion_time transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                print('process_user_promotion_time transaction.commit()')
                 transaction.commit()
             return
 
@@ -1688,11 +2352,15 @@ def process_bi_user():
     process_user_mall_order_newly_updated_records()
     print('process_user_mall_order_newly_updated_records() done.')
 
-    process_user_gold_balance_related_records()
-    print('process_user_gold_balance_related_records() done.')
+    if app.config['ENV'] == 'prod':
+        process_user_gold_balance_related_records()
+        print('process_user_gold_balance_related_records() done.')
 
-    process_user_silver_balance_related_records()
-    print('process_user_silver_balance_related_records() done.')
+        process_user_silver_balance_related_records()
+        print('process_user_silver_balance_related_records() done.')
 
-    process_user_reward_point_related_records()
-    print('process_user_reward_point_related_records() done.')
+        process_user_reward_point_related_records()
+        print('process_user_reward_point_related_records() done.')
+
+    process_user_promotion_time()
+    print('process_user_promotion_time() done.')
