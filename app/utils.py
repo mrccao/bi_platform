@@ -1,20 +1,11 @@
+import importlib
 import logging
 import signal
-import importlib
 from calendar import monthrange
-from datetime import datetime
 
 import arrow
-import pytz
-from flask import current_app as app
 
 from app.exceptions import TimeoutException
-
-
-
-def get_db_timezone_offset():
-    return app.config["APP_TIMEZONE"]
-
 
 
 def current_time(timezone=None):
@@ -112,9 +103,8 @@ def str_to_class(module_name, class_name):
     kls = getattr(mdl, class_name)
     return kls
 
-
 # def base_json_conv(obj):
-    
+
 #     if isinstance(obj, numpy.int64):
 #         return int(obj)
 #     elif isinstance(obj, set):

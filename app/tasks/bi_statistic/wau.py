@@ -12,9 +12,10 @@ from app.tasks import with_db_context
 from app.utils import current_time
 
 
-def process_bi_statistic_wau(target, timezone_offset):
+def process_bi_statistic_wau(target):
     yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
     today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    timezone_offset = app.config['APP_TIMEZONE']
 
     def collection_wau_every_game(connection, transaction, day):
 
@@ -36,7 +37,7 @@ def process_bi_statistic_wau(target, timezone_offset):
     def get_wau_every_game():
         if target == 'lifetime':
             result_proxy = []
-            for day in pd.date_range(date(2016, 6, 1), date(2017, 3, 21)):
+            for day in pd.date_range(date(2016, 6, 1), date(2017, 3, 24)):
                 day = day.strftime("%Y-%m-%d")
                 print('wau for every game on ' + str(day))
                 every_week_result = with_db_context(db, collection_wau_every_game, day=day)
