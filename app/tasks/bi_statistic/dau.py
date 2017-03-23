@@ -79,8 +79,8 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                    WHEN game_id = 25011 THEN 'TexasPoker'
-                                                    WHEN game_id = 35011 THEN 'TimeSlots'
+                                                    WHEN game_id = 39990 THEN 'TexasPoker'
+                                                    WHEN game_id = 23118 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
@@ -95,8 +95,8 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                     WHEN game_id = 25011 THEN 'TexasPoker'
-                                                     WHEN game_id = 35011 THEN 'TimeSlots'
+                                                     WHEN game_id = 39990 THEN 'TexasPoker'
+                                                     WHEN game_id = 23118 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
@@ -112,8 +112,8 @@ def process_bi_statistic_dau(target, timezone_offset):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                     WHEN game_id = 25011 THEN 'TexasPoker'
-                                                     WHEN game_id = 35011 THEN 'TimeSlots'
+                                                     WHEN game_id = 39990 THEN 'TexasPoker'
+                                                     WHEN game_id = 23118 THEN 'TimeSlots'
                                                   ELSE 'Unknown'
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum

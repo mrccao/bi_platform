@@ -22,8 +22,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                                    LEFT JOIN bi_user_currency uc
                                                           ON u.user_id = uc.user_id
                                             WHERE  uc.transaction_type NOT IN :free_transaction_types
-                                            GROUP  BY on_day,
-                                                      uc.game_id
+                                            GROUP  BY on_day
                                             """), timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
@@ -35,8 +34,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
                                            WHERE  uc.transaction_type NOT IN :free_transaction_types
-                                           GROUP  BY on_day,
-                                                     uc.game_id
+                                           GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
@@ -48,8 +46,7 @@ def process_bi_statistic_new_reg_dau(target, timezone_offset):
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
                                            WHERE  uc.transaction_type NOT IN :free_transaction_types
-                                           GROUP  BY on_day,
-                                                     uc.game_id
+                                           GROUP  BY on_day
                                            HAVING on_day = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
