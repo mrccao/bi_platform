@@ -8,11 +8,13 @@ from flask_script.commands import ShowUrls, Clean
 
 from app import create_app
 from app.extensions import db
-from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
+from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
+    BIUserStatistic
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
 from app.tasks.bi_statistic import process_bi_statistic
+from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
@@ -220,6 +222,21 @@ def reset_bi_statistic():
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
     db.session.commit()
 
+@manager.command
+def reset_bi_user_statistic():
+    """ ReCreate Database and Seed """
+
+    BIUserStatistic.__table__.drop(db.engine, checkfirst=True)
+
+    BIUserStatistic.__table__.create(db.engine, checkfirst=True)
+
+    from datetime import date
+    import pandas as pd
+    for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+        for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
+                db.session.add(BIUserStatistic(on_day=day.strftime("%Y-%m-%d"), platform=platform))
+    db.session.commit()
+
 
 @manager.command
 def sync_bi():
@@ -283,6 +300,32 @@ def sync_bi_statistic_for_today():
         process_bi_statistic.delay('today')
     else:
         process_bi_statistic('today')
+
+
+
+@manager.command
+def sync_bi_user_statistic_for_lifetime():
+    if app.config['ENV'] == 'prod':
+        process_bi_user_statistic.delay('lifetime')
+    else:
+        process_bi_user_statistic('lifetime')
+
+
+@manager.command
+def sync_bi_user_statistic_for_yesterday():
+    if app.config['ENV'] == 'prod':
+        process_bi_user_statistic.delay('yesterday')
+    else:
+        process_bi_user_statistic('yesterday')
+
+
+@manager.command
+def sync_bi_user_statistic_for_today():
+    if app.config['ENV'] == 'prod':
+        process_bi_user_statistic.delay('today')
+    else:
+        process_bi_user_statistic('today')
+
 
 
 @manager.command

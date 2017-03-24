@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 TRANSACTION_TYPES = {
     # Gold Free Currency
     20132001: 'Admin mannually',
@@ -75,7 +74,8 @@ TRANSACTION_TYPES = {
     923118136: '比倍环节Bonus结算',
 }
 
-GOLD_FREE_TRANSACTION_TYPES = [20132001, 999998301, 925011306, 925011307, 925011410, 925011411, 30007777, 925011311, 999998302]
+GOLD_FREE_TRANSACTION_TYPES = [20132001, 999998301, 925011306, 925011307, 925011410, 925011411, 30007777, 925011311,
+                               999998302]
 
 SILVER_FREE_TRANSACTION_TYPES = [923118301, 923118302, 923118303, 923118304, 923118311, 923118312, 923118313, 923118314]
 
@@ -83,10 +83,17 @@ FREE_TRANSACTION_TYPES = GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_T
 
 FREE_TRANSACTION_TYPES_TUPLE = tuple(GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_TYPES)
 
+PRODUCT_AND_PRODUCT_ORIG_mapping = {
+    'charm': [28, 42, 39, 36, 33, 34, 44, 27, 41, 29, 43, 40, 16, 31, 32, 30, 35, 37, 38],
+    'avatar': [53, 23, 22, 18, 10, 50, 14, 21, 20, 15, 48, 56, 49, 25, 52, 13, 51, 19, 26, 57, 12, 47, 17, 24, 55, 11,
+               54],
+    'emoji': [46], 'gold': [1], 'silver': [2], 'spin_cccelerator': [8], 'spin_ticket': [9], 'lucky_spin': [-1]}
+
 
 class BaseEnum(Enum):
     def __str__(self):
         return self.value
+
 
 class ADMIN_USER_ACTIVITY_ACTIONS(BaseEnum):
     LOGIN_FAILED = 'login_failed'
@@ -95,10 +102,12 @@ class ADMIN_USER_ACTIVITY_ACTIONS(BaseEnum):
     PAGE_VIEW = 'page_view'
     CSV_EXPORT = 'csv_export'
 
+
 class ADMIN_USER_ROLES(BaseEnum):
     ROOT = 'root'
     ADMIN = 'admin'
     MANAGER = 'manager'
+
 
 class ADMIN_USER_QUERY_STATUSES(BaseEnum):
     CANCELLED = 'cancelled'
@@ -109,20 +118,24 @@ class ADMIN_USER_QUERY_STATUSES(BaseEnum):
     SUCCESS = 'success'
     TIME_OUT = 'timed_out'
 
+
 class SQL_RESULT_STRATEGIES(BaseEnum):
     RENDER_JSON = 'render_json'
     SEND_TO_MAIL = 'send_to_mail'
     GENERATE_DOWNLOAD_LINK = 'generate_download_link'
 
+
 class PROMOTION_PUSH_TYPES(BaseEnum):
     FB_NOTIFICATION = 'fb_notification'
     EMAIL = 'email'
+
 
 class PROMOTION_PUSH_STATUSES(BaseEnum):
     FAILED = 'failed'
     PENDING = 'pending'
     PREPARING = 'preparing'
     SCHEDULED = 'scheduled'
+
 
 class PROMOTION_PUSH_HISTORY_STATUSES(BaseEnum):
     REQUEST_FAILED = 'request_failed'
