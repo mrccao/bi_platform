@@ -1,12 +1,13 @@
 import arrow
 from flask import Blueprint, render_template, request, jsonify
+from flask import current_app
 from flask import current_app as app
 from flask_login import login_required
+from flask_sqlalchemy import get_debug_queries
 from sqlalchemy import text
 
 from app.extensions import db
 from app.utils import current_time
-
 
 dashboard = Blueprint('dashboard', __name__)
 
@@ -34,7 +35,7 @@ def visualization_summary_data():
         day=day).scalar()
     revenue = db.engine.execute(text(
         "SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day"),
-                                day=day).scalar()
+        day=day).scalar()
     # game_dau = db.engine.execute(text("""
     #                                   SELECT Count(DISTINCT user_id)
     #                                   FROM   bi_user_currency
@@ -209,3 +210,13 @@ def visualization_executive_data():
         labels.append(arrow.get(row[0]).format('YYYY-MM-DD'))
         data.append(row[1])
     return jsonify(labels=labels, data=data, game=game, platform=platform)
+
+
+@dashboard.after_app_request
+def after_request(response):
+    from termcolor import colored
+    for query in get_debug_queries():
+        if query.duration >= current_app.config['FLASKY_SLOW_DB_QUERY_TIME']:
+            print(colored(('SQL语句: %s\n参数: %s\n时间: %fs\n代码位置: %s\n' % (
+                query.statement, query.parameters, query.duration, query.context)), 'red'))
+    return response
