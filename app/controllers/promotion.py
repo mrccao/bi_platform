@@ -68,7 +68,7 @@ def facebook_notification_sender():
         scheduled_at = current_time()
 
     formatted_message = message.strip()
-    pending_digest = (str(current_user.id) + '_' + formatted_message).encode('utf-8')
+    pending_digest = (str(current_user.id) + '_' + formatted_message + '_' + scheduled_at.format('YYYYMMDD')).encode('utf-8')
     message_key = hashlib.md5(pending_digest).hexdigest()
 
     push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
