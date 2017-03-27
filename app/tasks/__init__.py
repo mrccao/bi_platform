@@ -11,21 +11,23 @@ def get_engine(db_instance, bind=None):
     return db_instance.get_engine(db_instance.get_app(), bind=bind)
 
 
-def with_db_context(db_instance, func=None, bind=None):
+def with_db_context(db_instance, func=None, bind=None, *args, **kwargs):
     """ Exec with db context. """
     with get_engine(db_instance, bind=bind).connect() as connection:
         with connection.begin() as transaction:
             if func:
-                return func(connection, transaction)
+                return func(connection, transaction, *args, **kwargs)
             return
 
 
 def get_config_value(db_instance, key):
     "" "Get import config with key. """
+
     def func(connection, transation):
         """ Nested func """
         data = connection.execute(text('SELECT value FROM bi_import_config WHERE var = :key'), key=key).first()
         return data[0]
+
     return with_db_context(db_instance, func)
 
 
@@ -37,7 +39,9 @@ def set_config_value(connection, key, value):
 
 def get_wpt_og_user_mapping(db, og_accounts):
     def func(connection, transaction):
-        return connection.execute(text('SELECT user_id, og_account FROM bi_user WHERE og_account IN :og_accounts'), og_accounts=tuple(og_accounts))
+        return connection.execute(text('SELECT user_id, og_account FROM bi_user WHERE og_account IN :og_accounts'),
+                                  og_accounts=tuple(og_accounts))
+
     result_proxy = with_db_context(db, func)
     return {row['og_account']: row['user_id'] for row in result_proxy}
 

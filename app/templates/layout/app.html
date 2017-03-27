@@ -3,7 +3,7 @@
 <html>
     <head>
         <title>{% block page_title %}{% endblock %} - WPT Data Warehouse</title>
-        
+
         {% block head_meta %}
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -24,7 +24,7 @@
         {% assets "common_css" %}
             <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
         {% endassets %}
-  
+
         {% block head %}{% endblock %}
         {% block head_tail %}{% endblock %}
     </head>
@@ -178,12 +178,12 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js" type="text/javascript"></script>
-            
+
             <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/mode/sql/sql.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/sql-hint.min.js" type="text/javascript"></script>
-            
+
             <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js" type="text/javascript"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.11/moment-timezone.min.js" type="text/javascript"></script>
@@ -192,7 +192,7 @@
         {% endblock %}
 
         {% assets "common_js" %}
-            <script src="{{ ASSET_URL }}" type="text/javascript"></script>   
+            <script src="{{ ASSET_URL }}" type="text/javascript"></script>
         {% endassets %}
 
         <script type="text/javascript">

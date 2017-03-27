@@ -10,6 +10,7 @@ from app.utils import current_time
 
 dashboard = Blueprint('dashboard', __name__)
 
+
 @dashboard.route("/", methods=["GET"])
 @login_required
 def index():
@@ -28,14 +29,18 @@ def visualization_summary_data():
 
     index_time = now.replace(days=-2).format('YYYY-MM-DD')
 
-    new_registration = db.engine.execute(text("SELECT COUNT(*) FROM bi_user WHERE DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) = :day"), day=day).scalar()
-    revenue = db.engine.execute(text("SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day"), day=day).scalar()
+    new_registration = db.engine.execute(
+        text("SELECT COUNT(*) FROM bi_user WHERE DATE(CONVERT_TZ(reg_time, '+00:00', '-05:00')) = :day"),
+        day=day).scalar()
+    revenue = db.engine.execute(text(
+        "SELECT ROUND(SUM(currency_amount), 2) FROM bi_user_bill WHERE currency_type = 'Dollar' AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day"),
+                                day=day).scalar()
     # game_dau = db.engine.execute(text("""
     #                                   SELECT Count(DISTINCT user_id)
     #                                   FROM   bi_user_currency
     #                                   WHERE  created_at > :index_time
     #                                          AND transaction_type NOT IN :transaction_type
-    #                                          AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day 
+    #                                          AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day
     #                                   """), day=day, index_time=index_time, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
     # new_registration_game_dau = db.engine.execute(text("""
     #                                                    SELECT COUNT(DISTINCT uc.user_id)
@@ -43,21 +48,21 @@ def visualization_summary_data():
     #                                                           LEFT JOIN bi_user_currency uc
     #                                                             ON u.user_id = uc.user_id
     #                                                    WHERE  uc.transaction_type NOT IN :transaction_type
-    #                                                           AND DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day 
+    #                                                           AND DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day
     #                                                    """), day=day, transaction_type=tuple(FREE_TRANSACTION_TYPES)).scalar()
 
     game_dau = db.engine.execute(text("""
                                       SELECT Count(DISTINCT user_id)
                                       FROM   bi_user_currency
                                       WHERE  created_at > :index_time
-                                             AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day 
+                                             AND Date(Convert_tz(created_at, '+00:00', '-05:00')) = :day
                                       """), day=day, index_time=index_time).scalar()
     new_registration_game_dau = db.engine.execute(text("""
                                                        SELECT COUNT(DISTINCT uc.user_id)
                                                        FROM   bi_user u
                                                               LEFT JOIN bi_user_currency uc
                                                                 ON u.user_id = uc.user_id
-                                                       WHERE  DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day 
+                                                       WHERE  DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) = :day
                                                        """), day=day).scalar()
 
     payload = {
@@ -128,8 +133,8 @@ def visualization_executive_data():
         #                                """), start_time=start_time, end_time=end_time, game=game, platform=platform)
     # elif report_type == 'WAU':
     #     proxy = db.engine.execute(text("""
-    #                                    SELECT CONCAT(DATE_FORMAT(DATE_ADD(CONVERT_TZ(created_at, '+00:00', '-05:00'), INTERVAL(1-DAYOFWEEK(CONVERT_TZ(created_at, '+00:00', '-05:00'))) DAY), '%Y-%m-%d'), 
-    #                                                  '  -  ', 
+    #                                    SELECT CONCAT(DATE_FORMAT(DATE_ADD(CONVERT_TZ(created_at, '+00:00', '-05:00'), INTERVAL(1-DAYOFWEEK(CONVERT_TZ(created_at, '+00:00', '-05:00'))) DAY), '%Y-%m-%d'),
+    #                                                  '  -  ',
     #                                                  DATE_FORMAT(DATE_ADD(CONVERT_TZ(created_at, '+00:00', '-05:00'), INTERVAL(7-DAYOFWEEK(CONVERT_TZ(created_at, '+00:00', '-05:00'))) DAY), '%Y-%m-%d')) as on_week,
     #                                           COUNT(DISTINCT user_id)
     #                                    FROM   bi_user_currency
@@ -163,7 +168,7 @@ def visualization_executive_data():
         #                                              ON u.user_id = uc.user_id
         #                                WHERE  uc.transaction_type NOT IN :transaction_type
         #                                       AND DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) BETWEEN :start_time AND :end_time
-        #                                GROUP  BY on_day 
+        #                                GROUP  BY on_day
         #                                """), start_time=start_time, end_time=end_time, transaction_type=tuple(FREE_TRANSACTION_TYPES))
         proxy = db.engine.execute(text("""
                                        SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) AS on_day,
@@ -172,7 +177,7 @@ def visualization_executive_data():
                                               LEFT JOIN bi_user_currency uc
                                                      ON u.user_id = uc.user_id
                                        WHERE  DATE(CONVERT_TZ(u.reg_time, '+00:00', '-05:00')) BETWEEN :start_time AND :end_time
-                                       GROUP  BY on_day 
+                                       GROUP  BY on_day
                                        """), start_time=start_time, end_time=end_time)
         # platform = 'All Platform'
         # proxy = db.engine.execute(text("""

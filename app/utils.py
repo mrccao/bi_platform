@@ -1,6 +1,6 @@
+import importlib
 import logging
 import signal
-import importlib
 from calendar import monthrange
 
 import arrow
@@ -29,6 +29,7 @@ class timeout(object):
     """
     To be used in a ``with`` block and timeout its content.
     """
+
     def __init__(self, seconds=1, error_message='Timeout'):
         self.seconds = seconds
         self.error_message = error_message
@@ -82,7 +83,7 @@ def dedup(l, suffix='__'):
     Always returns the same number of entries as provided, and always returns
     unique values.
 
-    >>> dedup(['foo', 'bar', 'bar', 'bar'])
+    # >>> dedup(['foo', 'bar', 'bar', 'bar'])
     ['foo', 'bar', 'bar__1', 'bar__2']
     """
     new_l = []
@@ -102,9 +103,8 @@ def str_to_class(module_name, class_name):
     kls = getattr(mdl, class_name)
     return kls
 
-
 # def base_json_conv(obj):
-    
+
 #     if isinstance(obj, numpy.int64):
 #         return int(obj)
 #     elif isinstance(obj, set):
