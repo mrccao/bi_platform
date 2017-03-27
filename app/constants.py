@@ -83,11 +83,12 @@ FREE_TRANSACTION_TYPES = GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_T
 
 FREE_TRANSACTION_TYPES_TUPLE = tuple(GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_TYPES)
 
-PRODUCT_AND_PRODUCT_ORIG_mapping = {
-    'charm': [28, 42, 39, 36, 33, 34, 44, 27, 41, 29, 43, 40, 16, 31, 32, 30, 35, 37, 38],
+PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
+    'charms': [28, 42, 39, 36, 33, 34, 44, 27, 41, 29, 43, 40, 16, 31, 32, 30, 35, 37, 38],
     'avatar': [53, 23, 22, 18, 10, 50, 14, 21, 20, 15, 48, 56, 49, 25, 52, 13, 51, 19, 26, 57, 12, 47, 17, 24, 55, 11,
                54],
-    'emoji': [46], 'gold': [1], 'silver': [2], 'spin_cccelerator': [8], 'spin_ticket': [9], 'lucky_spin': [-1]}
+    'emoji': [46], 'gold': [1], 'silver': [2], 'spin_accelerator': [8], 'spin_ticket': [9],
+    'lucky_spin': [-1]}
 
 
 class BaseEnum(Enum):
