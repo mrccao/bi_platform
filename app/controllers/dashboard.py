@@ -20,6 +20,7 @@ def index():
 @login_required
 def visualization_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
+    timezone_offset = app.config['APP_TIMEZONE']
 
     if request.args.get('day') and request.args.get('day') == 'yday':
         day = now.replace(days=-1).format('YYYY-MM-DD')
@@ -38,8 +39,8 @@ def visualization_summary_data():
                                      SELECT ROUND(SUM(currency_amount), 2)
                                      FROM   bi_user_bill
                                      WHERE  currency_type = 'Dollar'
-                                            AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) = :day
-                                     """), day=day).scalar()
+                                            AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :day
+                                     """), day=day, timezone_offset=timezone_offset).scalar()
 
     game_dau = db.engine.execute(text("""
                                       SELECT dau
@@ -71,6 +72,7 @@ def visualization_summary_data():
 @login_required
 def visualization_executive_data():
     days_ago = request.args.get('days_ago')
+    timezone_offset = app.config['APP_TIMEZONE']
 
     if days_ago is None:
         start_time, end_time = request.args.get('date_range').split('  -  ')
@@ -150,10 +152,11 @@ def visualization_executive_data():
                                               ROUND(SUM(currency_amount), 2)
                                        FROM   bi_user_bill
                                        WHERE  currency_type = 'Dollar'
-                                              AND DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) BETWEEN
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) BETWEEN
                                                   :start_time AND :end_time
                                        GROUP  BY on_day
-                                       """), start_time=start_time, end_time=end_time)
+
+                                       """), start_time=start_time, end_time=end_time, timezone_offset=timezone_offset)
 
     labels = []
     data = []
