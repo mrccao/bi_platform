@@ -148,7 +148,7 @@ def visualization_executive_data():
 
     elif report_type == 'Revenue':
         proxy = db.engine.execute(text("""
-                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', '-05:00')) AS on_day,
+                                       SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                               ROUND(SUM(currency_amount), 2)
                                        FROM   bi_user_bill
                                        WHERE  currency_type = 'Dollar'
