@@ -82,7 +82,6 @@ def visualization_executive_data():
     game = request.args.get('game')
     platform = request.args.get('platform')
     report_type = request.args.get('report_type')
-    file_type = request.args.get('file_type')
     proxy = []
 
     if report_type == 'New Registration':
