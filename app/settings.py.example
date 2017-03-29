@@ -27,7 +27,8 @@ class ProdConfig(Config):
     REPORT_FILE_FOLDER = '/data/data/app_exported'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_POOL_SIZE = 20
+    SQLALCHEMY_POOL_SIZE = 50
+    SQLALCHEMY_POOL_RECYCLE = 3000
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://x:x@127.0.0.1/bi_prod'
     SQLALCHEMY_BINDS = {
         'orig_wpt':            'mysql+pymysql://x:x@10.2.1.75/wpt',
