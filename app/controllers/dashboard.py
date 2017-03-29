@@ -155,7 +155,6 @@ def visualization_executive_data():
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) BETWEEN
                                                   :start_time AND :end_time
                                        GROUP  BY on_day
-
                                        """), start_time=start_time, end_time=end_time, timezone_offset=timezone_offset)
 
     labels = []
