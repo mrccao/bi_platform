@@ -86,12 +86,12 @@ def process_bi_statistic_mau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('MAU for every game transaction.rollback()')
+                    print(target + ' MAU for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('MAU for every game transaction.commit()')
+                    print(target + ' MAU for every game transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_mau_every_game)
@@ -156,12 +156,12 @@ def process_bi_statistic_mau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('MAU for all games transaction.rollback()')
+                    print(target + ' MAU for all games transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('MAU for all games transaction.commit()')
+                    print(target + ' MAU for all games transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_mau_all_games)

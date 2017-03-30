@@ -88,12 +88,12 @@ def process_bi_statistic_new_reg(target):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('New_registration transaction.rollback()')
+                print(target + ' New_registration transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print('New_registration for every platform transaction.commit()')
+                print(target + ' New_registration for every platform transaction.commit()')
             return
 
         with_db_context(db, sync_collection_new_registration)
@@ -148,12 +148,12 @@ def process_bi_statistic_new_reg(target):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('New_registration transaction.rollback()')
+                print(target + ' New_registration transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print('New_registration for all platforms transaction.commit()')
+                print(target + ' New_registration for all platforms transaction.commit()')
             return
 
         with_db_context(db, sync_collection_new_registration)

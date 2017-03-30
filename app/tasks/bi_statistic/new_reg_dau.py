@@ -76,12 +76,12 @@ def process_bi_statistic_new_reg_dau(target):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('New_registration_game_dau_transaction.rollback()')
+                print(target + ' New_registration_game_dau_transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print('New_registration_game_dau_transaction.commit()')
+                print(target + ' New_registration_game_dau_transaction.commit()')
             return
 
         with_db_context(db, sync_collection_new_registration_dau)

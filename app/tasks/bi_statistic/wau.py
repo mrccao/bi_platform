@@ -86,12 +86,12 @@ def process_bi_statistic_wau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('Wau for every game transaction.rollback()')
+                    print(target + ' Wau for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('Wau for every game transaction.commit()')
+                    print(target + ' Wau for every game transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_wau_every_game)
@@ -156,12 +156,12 @@ def process_bi_statistic_wau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('WAU for all games transaction.rollback()')
+                    print(target + ' WAU for all games transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('WAU for all games transaction.commit()')
+                    print(target + ' WAU for all games transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_wau_all_games)

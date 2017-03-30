@@ -71,12 +71,12 @@ def process_bi_statistic_dau(target):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('DAU for all games transaction.rollback()')
+                print(target + ' DAU for all games transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print('DAU for all games transaction.commit()')
+                print(target + ' DAU for all games transaction.commit()')
             return
 
         with_db_context(db, sync_collection_dau_all_games)
@@ -152,12 +152,12 @@ def process_bi_statistic_dau(target):
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print('DAU for every game transaction.rollback()')
+                print(target + ' DAU for every game transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print('DAU  for every game transaction.commit()')
+                print(target + ' DAU  for every game transaction.commit()')
             return
 
         with_db_context(db, sync_collection_dau_every_game)

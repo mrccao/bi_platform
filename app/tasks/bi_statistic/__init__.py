@@ -11,20 +11,20 @@ from .wau import process_bi_statistic_wau
 def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1):
     if dau:
         process_bi_statistic_dau(target)
-        print('******* '+target.capitalize()+' DAU Done *******')
+        print('******* ' + target.capitalize() + ' DAU Done *******')
 
     if wau:
         process_bi_statistic_wau(target)
-        print('******* ' +target.capitalize()+' WAU Done *******')
+        print('******* ' + target.capitalize() + ' WAU Done *******')
 
     if mau:
         process_bi_statistic_mau(target)
-        print('******* ' +target.capitalize()+' MAU Done *******')
+        print('******* ' + target.capitalize() + ' MAU Done *******')
 
     if new_reg:
         process_bi_statistic_new_reg(target)
-        print('******* ' +target.capitalize()+' New_reg Done *******')
+        print('******* ' + target.capitalize() + ' New_reg Done *******')
 
     if new_reg_dau:
         process_bi_statistic_new_reg_dau(target)
-        print('******* ' +target.capitalize()+' New_reg_dau Done ******')
+        print('******* ' + target.capitalize() + ' New_reg_dau Done ******')
