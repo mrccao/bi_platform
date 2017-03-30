@@ -39,7 +39,6 @@ def process_bi_statistic_mau(target):
             result_proxy = []
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
-                print('mau for every game on ' + str(day))
                 every_month_result = with_db_context(db, collection_mau_every_game, day=day)
                 every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
                                            every_month_result]
@@ -87,13 +86,13 @@ def process_bi_statistic_mau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('Wau for every game transaction.rollback()')
+                    print('MAU for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('Wau for every game transaction.commit()')
-                    print('----Wau for every game done----')
+                    print('MAU for every game transaction.commit()')
+                return
 
             with_db_context(db, sync_collection_mau_every_game)
 
@@ -115,7 +114,6 @@ def process_bi_statistic_mau(target):
             result_proxy = []
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
-                print('mau for all games on ' + str(day))
                 every_month_result = with_db_context(db, collection_mau_all_games, day=day)
                 every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
                 result_proxy.append(every_month_result_rows)
@@ -158,11 +156,12 @@ def process_bi_statistic_mau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print('Wau for all games transaction.rollback()')
+                    print('MAU for all games transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print('----Wau for all games done----')
+                    print('----MAU for all games done----')
+                return
 
             with_db_context(db, sync_collection_mau_all_games)

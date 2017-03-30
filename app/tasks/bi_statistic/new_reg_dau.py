@@ -82,7 +82,6 @@ def process_bi_statistic_new_reg_dau(target):
             else:
                 transaction.commit()
                 print('New_registration_game_dau_transaction.commit()')
-                print('----New_registration_game_dau done----')
             return
 
         with_db_context(db, sync_collection_new_registration_dau)

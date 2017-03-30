@@ -94,7 +94,6 @@ def process_bi_statistic_new_reg(target):
             else:
                 transaction.commit()
                 print('New_registration for every platform transaction.commit()')
-                print('----New_registration for every platform done----')
             return
 
         with_db_context(db, sync_collection_new_registration)
@@ -155,7 +154,6 @@ def process_bi_statistic_new_reg(target):
             else:
                 transaction.commit()
                 print('New_registration for all platforms transaction.commit()')
-                print('----New_registration for all platforms----')
             return
 
         with_db_context(db, sync_collection_new_registration)

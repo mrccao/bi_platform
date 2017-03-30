@@ -77,7 +77,6 @@ def process_bi_statistic_dau(target):
             else:
                 transaction.commit()
                 print('DAU for all games transaction.commit()')
-                print('----DAU for all games done----')
             return
 
         with_db_context(db, sync_collection_dau_all_games)
@@ -159,7 +158,6 @@ def process_bi_statistic_dau(target):
             else:
                 transaction.commit()
                 print('DAU  for every game transaction.commit()')
-                print('----DAU for every game done----')
             return
 
         with_db_context(db, sync_collection_dau_every_game)
