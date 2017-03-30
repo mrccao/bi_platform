@@ -161,7 +161,7 @@ def process_bi_statistic_mau(target):
                     raise
                 else:
                     transaction.commit()
-                    print('----MAU for all games done----')
+                    print('MAU for all games transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_mau_all_games)
