@@ -32,8 +32,7 @@ def process_bi_statistic_new_reg(target):
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-                                                  CASE
+                                           SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
@@ -42,15 +41,13 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day,
-                                                     platform
-                                           HAVING on_day = :on_day
+                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           GROUP  BY platform
                                            """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-                                                  CASE
+                                           SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
@@ -59,14 +56,23 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day,
-                                                     platform
-                                           HAVING on_day = :on_day
+                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           GROUP  BY platform
                                            """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_registration)
 
-    rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+    if target == 'yesterday':
+
+        rows = [{'_on_day': yesterday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    elif target == 'today':
+
+        rows = [{'_on_day': today, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_registration(connection, transaction):
@@ -86,8 +92,9 @@ def process_bi_statistic_new_reg(target):
                 transaction.rollback()
                 raise
             else:
-                print('New_registration transaction.commit()')
                 transaction.commit()
+                print('New_registration for every platform transaction.commit()')
+                print('----New_registration for every platform done----')
             return
 
         with_db_context(db, sync_collection_new_registration)
@@ -103,25 +110,30 @@ def process_bi_statistic_new_reg(target):
 
         if target == 'yesterday':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-                                                  COUNT(*)                                               AS sum
+                                           SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day
-                                           HAVING on_day = :on_day
+                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
-                                           SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-                                                  COUNT(*)                                               AS sum
+                                           SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           GROUP  BY on_day
-                                           HAVING on_day = :on_day
+                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_registration_all_platforms)
 
-    rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+    if target == 'yesterday':
+
+        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
+
+    elif target == 'today':
+
+        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
+
+    else:
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_registration(connection, transaction):
@@ -141,8 +153,9 @@ def process_bi_statistic_new_reg(target):
                 transaction.rollback()
                 raise
             else:
-                print('New_registration transaction.commit()')
                 transaction.commit()
+                print('New_registration for all platforms transaction.commit()')
+                print('----New_registration for all platforms----')
             return
 
         with_db_context(db, sync_collection_new_registration)
