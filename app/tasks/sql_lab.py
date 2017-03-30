@@ -31,7 +31,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
     try:
         parsed_sql = sqlparse.parse(query.sql)[0]
 
-        if str(parsed_sql.tokens[0]).upper() != 'SELECT':
+        if str(parsed_sql.tokens[0]).upper() != 'SELECT' and str(parsed_sql) != 'SHOW TABLES':
             handle_error("Only `SELECT` statements are allowed against this database")
 
         start_time = current_time_as_float()

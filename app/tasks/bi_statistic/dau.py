@@ -10,8 +10,10 @@ from app.utils import current_time
 
 
 def process_bi_statistic_dau(target):
-    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    now = current_time(app.config['APP_TIMEZONE'])
+    index_time = now.replace(days=-3).format('YYYY-MM-DD')
+    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     def collection_dau_all_games(connection, transaction):
@@ -29,19 +31,21 @@ def process_bi_statistic_dau(target):
             return connection.execute(text("""
                                            SELECT COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
-                                           WHERE  transaction_type NOT IN :free_transaction_types
-                                           AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                           WHERE  created_at > :index_time
+                                                  AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                                  AND transaction_type NOT IN :free_transaction_types
                                            """), on_day=yesterday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
         if target == 'today':
             return connection.execute(text("""
                                            SELECT COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
-                                           WHERE  transaction_type NOT IN :free_transaction_types
-                                           AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                           WHERE  created_at > :index_time
+                                                  AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                                  AND transaction_type NOT IN :free_transaction_types
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     result_proxy = with_db_context(db, collection_dau_all_games)
 
@@ -105,11 +109,12 @@ def process_bi_statistic_dau(target):
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
-                                           WHERE  transaction_type NOT IN :free_transaction_types
-                                           AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :on_day
+                                           WHERE  created_at > :index_time
+                                                  AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                                  AND transaction_type NOT IN :free_transaction_types
                                            GROUP  BY game
                                           """), on_day=yesterday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
         if target == 'today':
             return connection.execute(text("""
@@ -119,11 +124,12 @@ def process_bi_statistic_dau(target):
                                                   END                                                      AS game,
                                                   COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
-                                           WHERE  transaction_type NOT IN :free_transaction_types
-                                           AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                           WHERE  created_at > :index_time
+                                                  AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                                  AND transaction_type NOT IN :free_transaction_types
                                            GROUP  BY game
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     result_proxy = with_db_context(db, collection_dau_every_game)
 

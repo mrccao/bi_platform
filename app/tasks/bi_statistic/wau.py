@@ -13,8 +13,10 @@ from app.utils import current_time
 
 
 def process_bi_statistic_wau(target):
-    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
+    now = current_time(app.config['APP_TIMEZONE'])
+    index_time = now.replace(days=-(7 + 3)).format('YYYY-MM-DD')
+    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     def collection_wau_every_game(connection, transaction, day):
@@ -26,13 +28,14 @@ def process_bi_statistic_wau(target):
                                                 WHEN game_id = 23118 THEN 'TimeSlots'
                                               END                     AS game
                                        FROM   bi_user_currency
-                                       WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
+                                       WHERE  created_at > :index_time
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                   DATE_ADD(:on_day, INTERVAL - 7 DAY)
                                               AND transaction_type NOT IN :free_transaction_types
                                        GROUP  BY game
                                        """), on_day=day, timezone_offset=timezone_offset,
-                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_wau_every_game():
         if target == 'lifetime':
@@ -101,12 +104,13 @@ def process_bi_statistic_wau(target):
         return connection.execute(text("""
                                        SELECT COUNT(DISTINCT user_id) AS sum
                                        FROM   bi_user_currency
-                                       WHERE  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
+                                       WHERE  created_at > :index_time
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                   DATE_ADD(:on_day, INTERVAL - 7 DAY)
                                               AND transaction_type NOT IN :free_transaction_types
                                        """), on_day=day, timezone_offset=timezone_offset,
-                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
+                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_wau_all_games():
         if target == 'lifetime':

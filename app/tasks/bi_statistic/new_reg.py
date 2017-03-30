@@ -41,7 +41,7 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user
-                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            GROUP  BY platform
                                            """), on_day=yesterday, timezone_offset=timezone_offset)
 
@@ -56,7 +56,7 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                   AS platform,
                                                   COUNT(*)                                              AS sum
                                            FROM   bi_user
-                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            GROUP  BY platform
                                            """), on_day=today, timezone_offset=timezone_offset)
 
@@ -111,14 +111,14 @@ def process_bi_statistic_new_reg(target):
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=yesterday, timezone_offset=timezone_offset)
 
         if target == 'today':
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
-                                           WHERE DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_registration_all_platforms)
