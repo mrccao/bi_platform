@@ -91,8 +91,9 @@ def process_bi_statistic_wau(target):
                     transaction.rollback()
                     raise
                 else:
-                    print('Wau for every game transaction.commit()')
                     transaction.commit()
+                    print('Wau for every game transaction.commit()')
+                    print('----Wau for every game done----')
 
             with_db_context(db, sync_collection_wau_every_game)
 
@@ -161,7 +162,8 @@ def process_bi_statistic_wau(target):
                     transaction.rollback()
                     raise
                 else:
-                    print('Wau for all games transaction.commit()')
                     transaction.commit()
+                    print('Wau for all games transaction.commit()')
+                    print('----Wau for all games done----')
 
             with_db_context(db, sync_collection_wau_all_games)
