@@ -15,7 +15,7 @@ from app.utils import current_time, current_time_as_float, error_msg_from_except
 
 
 @celery.task
-def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
+def get_sql_results(database, query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
     """Executes the sql query returns the results."""
 
     query = db.session.query(AdminUserQuery).filter_by(id=query_id).one()
@@ -36,7 +36,7 @@ def get_sql_results(query_id, strategy=SQL_RESULT_STRATEGIES.RENDER_JSON.value):
 
         start_time = current_time_as_float()
 
-        result_proxy = db.engine.execute(text(str(parsed_sql)))
+        result_proxy = db.get_engine(db.get_app(), bind=database).execute(text(str(parsed_sql)))
 
         query.status = ADMIN_USER_QUERY_STATUSES.RUNNING.value
         db.session.flush()

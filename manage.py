@@ -118,34 +118,34 @@ def init_bi_clubwpt_user_import_config():
 @manager.command
 def reset_bi():
     """ ReCreate Database and Seed """
-    
-    answer = input("Do you want? (yes/NO) ")
+
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         db.drop_all(bind=None)
         db.create_all(bind=None)
-        
+
         init_bi_user_import_config()
         init_bi_user_bill_import_config()
         init_bi_user_currency_import_config()
         init_bi_clubwpt_user_import_config()
-        
+
         user = AdminUser(email='admin@admin.com', password='password', timezone='EST')
         user.name = "Test Account"
         db.session.add(user)
-        
+
         user = AdminUser(email='admin1@admin.com', password='password', timezone='EST')
         user.name = "Test1 Account"
         db.session.add(user)
-        
+
         db.session.commit()
 
 
 @manager.command
 def reset_bi_admin():
     """ ReCreate Database and Seed """
-    
-    answer = input("Do you want? (yes/NO) ")
+
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         AdminUserActivity.__table__.drop(db.engine, checkfirst=True)
@@ -159,12 +159,12 @@ def reset_bi_admin():
 def reset_bi_promotion():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         PromotionPush.__table__.drop(db.engine, checkfirst=True)
         PromotionPushHistory.__table__.drop(db.engine, checkfirst=True)
-        
+
         PromotionPush.__table__.create(db.engine, checkfirst=True)
         PromotionPushHistory.__table__.create(db.engine, checkfirst=True)
 
@@ -173,7 +173,7 @@ def reset_bi_promotion():
 def reset_bi_user():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         BIUser.__table__.drop(db.engine, checkfirst=True)
@@ -187,9 +187,9 @@ def reset_bi_user():
 def reset_bi_user_bill():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-    
+
         BIUserBill.__table__.drop(db.engine, checkfirst=True)
 
         BIUserBill.__table__.create(db.engine, checkfirst=True)
@@ -201,7 +201,7 @@ def reset_bi_user_bill():
 def reset_bi_user_currency():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         BIUserCurrency.__table__.drop(db.engine, checkfirst=True)
@@ -215,7 +215,7 @@ def reset_bi_user_currency():
 def reset_bi_clubwpt_user():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
     
         BIClubWPTUser.__table__.drop(db.engine, checkfirst=True)
@@ -229,7 +229,7 @@ def reset_bi_clubwpt_user():
 def reset_bi_statistic():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/NO) ")
+    answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
 
         BIStatistic.__table__.drop(db.engine, checkfirst=True)

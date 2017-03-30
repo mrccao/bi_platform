@@ -45,12 +45,21 @@ def execute_sql():
     formatted_sql = sqlparse.format(sql.strip().strip(';'), reindent=True, keyword_case='upper')
     strategy = request.form.get('strategy')
 
-    pending_digest = (str(current_user.id) + '_' + formatted_sql).encode('utf-8')
+    database = request.form.get('database')
+    if database not in app.config.get('SQLALCHEMY_BINDS').keys():
+        database = None
+
+    if database is None:
+        pending_digest = (str(current_user.id) + '_' + formatted_sql).encode('utf-8')
+    else:
+        pending_digest = (str(current_user.id) + '_' + database + '_' + formatted_sql).encode('utf-8')
+
     sql_key = hashlib.md5(pending_digest).hexdigest()
 
     query = db.session.query(AdminUserQuery).filter_by(sql_key=sql_key).first()
     if query is None:
         query = AdminUserQuery(
+            database=database,
             sql=formatted_sql,
             sql_key=sql_key,
             status=ADMIN_USER_QUERY_STATUSES.PENDING.value,
@@ -77,17 +86,17 @@ def execute_sql():
             with timeout(
                 seconds=10,
                 error_message="The query exceeded the 10 seconds timeout."):
-                result = get_sql_results(query_id, strategy=strategy)
+                result = get_sql_results(database, query_id, strategy=strategy)
             return jsonify(result)
         elif strategy == SQL_RESULT_STRATEGIES.SEND_TO_MAIL.value:
             if permission:
-                get_sql_results.delay(query_id, strategy=strategy)
+                get_sql_results.delay(database, query_id, strategy=strategy)
                 return jsonify(query_id=query_id), 202
             else:
                 return jsonify(error="You don't have permission to access this funtion"), 403
         elif strategy == SQL_RESULT_STRATEGIES.GENERATE_DOWNLOAD_LINK.value:
             if permission:
-                result = get_sql_results(query_id, strategy=strategy)
+                result = get_sql_results(database, query_id, strategy=strategy)
                 return jsonify(result)
             else:
                 return jsonify(error="You don't have permission to access this funtion"), 403

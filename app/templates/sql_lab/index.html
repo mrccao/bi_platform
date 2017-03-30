@@ -10,7 +10,13 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="box box-primary" id="sql-editor-box">
-                    <div class="box-header" style="padding-bottom: 2px;">
+                    <div class="box-header" style="padding-bottom: 2px; clear: both;">
+                        <div class="form-group" style="width: 150px; float: left; margin-right: 10px; margin-bottom: 0px;">
+                            <select class="form-control select2" style="width: 100%;" id="database-picker">
+                                <option value="bi" selected="selected">DB: BI</option>
+                                <option value="orig_wpt_ods">DB: Orig WPT ODS</option>
+                            </select>
+                        </div>
                         <div class="btn-group" style="margin-right: 5px;">
                           <button type="button" class="btn btn-success" id="btn-execute-sql"><i class="fa fa-toggle-right"></i> Run</button>
                           <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -138,8 +144,10 @@
     <script type="text/javascript">
     $(document).ready(function() {
 
+        $(".select2").select2();
+
         var resultDataTable = null;
-        var historyTableColumns = ['sql', 'status', 'run_time', 'rows', 'error_message', 'created_at'];
+        var historyTableColumns = ['database', 'sql', 'status', 'run_time', 'rows', 'error_message', 'created_at'];
 
         var editor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
             mode: 'text/x-mysql',
@@ -202,6 +210,8 @@
                             var column = historyTableColumns[i];
                             if (column === 'sql') {
                                 rows.push('<td><pre>' + row[column] + '</pre></td>');
+                            } else if (column === 'database') {
+                                rows.push('<td><span class="database">' + row[column] + '</span></td>');
                             } else {
                                 rows.push('<td>' + row[column] + '</td>');
                             }
@@ -266,6 +276,9 @@
             var decodedSql = tempDiv.innerText;
             tempDiv = null;
 
+            var db = $(this).closest('tr').find('span.database').text();
+            $('#database-picker').val(db).trigger('change');
+
             editor.setValue(decodedSql);
             $('#btn-execute-sql').trigger('click');
         });
@@ -278,6 +291,9 @@
             var decodedSql = tempDiv.innerText;
             tempDiv = null;
 
+            var db = $(this).closest('tr').find('span.database').text();
+            $('#database-picker').val(db).trigger('change');
+
             editor.setValue(decodedSql);
             $('#btn-execute-sql-in-menu-email').trigger('click');
         });
@@ -289,6 +305,9 @@
             tempDiv.innerHTML = sql;
             var decodedSql = tempDiv.innerText;
             tempDiv = null;
+
+            var db = $(this).closest('tr').find('span.database').text();
+            $('#database-picker').val(db).trigger('change');
 
             editor.setValue(decodedSql);
             $('#btn-execute-sql-in-menu-download').trigger('click');
@@ -325,7 +344,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/sql_lab/execute_sql',
-                data: { sql: editor.getValue(), strategy: 'render_json' },
+                data: { sql: editor.getValue(), strategy: 'render_json', database: $('#database-picker').val() },
                 dataType: "json",
                 success: function(result) {
                     stopRequestLoading(true);
@@ -371,7 +390,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/sql_lab/execute_sql',
-                data: { sql: editor.getValue(), strategy: 'send_to_mail' },
+                data: { sql: editor.getValue(), strategy: 'send_to_mail', database: $('#database-picker').val() },
                 dataType: "json",
                 success: function(result) {
                     stopRequestLoading(true);
@@ -392,7 +411,7 @@
             $.ajax({
                 type: 'POST',
                 url: '/sql_lab/execute_sql',
-                data: { sql: editor.getValue(), strategy: 'generate_download_link' },
+                data: { sql: editor.getValue(), strategy: 'generate_download_link', database: $('#database-picker').val() },
                 dataType: "json",
                 success: function(result) {
                     stopRequestLoading(true);
