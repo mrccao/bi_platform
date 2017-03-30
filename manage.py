@@ -118,107 +118,131 @@ def init_bi_clubwpt_user_import_config():
 @manager.command
 def reset_bi():
     """ ReCreate Database and Seed """
+    
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    db.drop_all(bind=None)
-    db.create_all(bind=None)
-
-    init_bi_user_import_config()
-    init_bi_user_bill_import_config()
-    init_bi_user_currency_import_config()
-    init_bi_clubwpt_user_import_config()
-
-    user = AdminUser(email='admin@admin.com', password='password', timezone='EST')
-    user.name = "Test Account"
-    db.session.add(user)
-
-    user = AdminUser(email='admin1@admin.com', password='password', timezone='EST')
-    user.name = "Test1 Account"
-    db.session.add(user)
-
-    db.session.commit()
+        db.drop_all(bind=None)
+        db.create_all(bind=None)
+        
+        init_bi_user_import_config()
+        init_bi_user_bill_import_config()
+        init_bi_user_currency_import_config()
+        init_bi_clubwpt_user_import_config()
+        
+        user = AdminUser(email='admin@admin.com', password='password', timezone='EST')
+        user.name = "Test Account"
+        db.session.add(user)
+        
+        user = AdminUser(email='admin1@admin.com', password='password', timezone='EST')
+        user.name = "Test1 Account"
+        db.session.add(user)
+        
+        db.session.commit()
 
 
 @manager.command
 def reset_bi_admin():
     """ ReCreate Database and Seed """
+    
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    AdminUserActivity.__table__.drop(db.engine, checkfirst=True)
-    AdminUserQuery.__table__.drop(db.engine, checkfirst=True)
+        AdminUserActivity.__table__.drop(db.engine, checkfirst=True)
+        AdminUserQuery.__table__.drop(db.engine, checkfirst=True)
 
-    AdminUserActivity.__table__.create(db.engine, checkfirst=True)
-    AdminUserQuery.__table__.create(db.engine, checkfirst=True)
+        AdminUserActivity.__table__.create(db.engine, checkfirst=True)
+        AdminUserQuery.__table__.create(db.engine, checkfirst=True)
 
 
 @manager.command
 def reset_bi_promotion():
     """ ReCreate Database and Seed """
 
-    PromotionPush.__table__.drop(db.engine, checkfirst=True)
-    PromotionPushHistory.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    PromotionPush.__table__.create(db.engine, checkfirst=True)
-    PromotionPushHistory.__table__.create(db.engine, checkfirst=True)
+        PromotionPush.__table__.drop(db.engine, checkfirst=True)
+        PromotionPushHistory.__table__.drop(db.engine, checkfirst=True)
+        
+        PromotionPush.__table__.create(db.engine, checkfirst=True)
+        PromotionPushHistory.__table__.create(db.engine, checkfirst=True)
 
 
 @manager.command
 def reset_bi_user():
     """ ReCreate Database and Seed """
 
-    BIUser.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    BIUser.__table__.create(db.engine, checkfirst=True)
+        BIUser.__table__.drop(db.engine, checkfirst=True)
 
-    init_bi_user_import_config()
+        BIUser.__table__.create(db.engine, checkfirst=True)
+
+        init_bi_user_import_config()
 
 
 @manager.command
 def reset_bi_user_bill():
     """ ReCreate Database and Seed """
 
-    BIUserBill.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
+    
+        BIUserBill.__table__.drop(db.engine, checkfirst=True)
 
-    BIUserBill.__table__.create(db.engine, checkfirst=True)
+        BIUserBill.__table__.create(db.engine, checkfirst=True)
 
-    init_bi_user_bill_import_config()
+        init_bi_user_bill_import_config()
 
 
 @manager.command
 def reset_bi_user_currency():
     """ ReCreate Database and Seed """
 
-    BIUserCurrency.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    BIUserCurrency.__table__.create(db.engine, checkfirst=True)
+        BIUserCurrency.__table__.drop(db.engine, checkfirst=True)
 
-    init_bi_user_currency_import_config()
+        BIUserCurrency.__table__.create(db.engine, checkfirst=True)
+
+        init_bi_user_currency_import_config()
 
 
 @manager.command
 def reset_bi_clubwpt_user():
     """ ReCreate Database and Seed """
 
-    BIClubWPTUser.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
+    
+        BIClubWPTUser.__table__.drop(db.engine, checkfirst=True)
 
-    BIClubWPTUser.__table__.create(db.engine, checkfirst=True)
+        BIClubWPTUser.__table__.create(db.engine, checkfirst=True)
 
-    init_bi_clubwpt_user_import_config()
+        init_bi_clubwpt_user_import_config()
 
 
 @manager.command
 def reset_bi_statistic():
     """ ReCreate Database and Seed """
 
-    BIStatistic.__table__.drop(db.engine, checkfirst=True)
+    answer = input("Do you want? (yes/NO) ")
+    if answer == 'yes':
 
-    BIStatistic.__table__.create(db.engine, checkfirst=True)
+        BIStatistic.__table__.drop(db.engine, checkfirst=True)
 
-    from datetime import date
-    import pandas as pd
-    for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
-        for game in ['All Game', 'TexasPoker', 'TimeSlots']:
-            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
-    db.session.commit()
+        BIStatistic.__table__.create(db.engine, checkfirst=True)
+
+        from datetime import date
+        import pandas as pd
+        for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+            for game in ['All Game', 'TexasPoker', 'TimeSlots']:
+                for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
+                    db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+        db.session.commit()
 
 
 @manager.command
