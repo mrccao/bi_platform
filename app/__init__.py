@@ -97,6 +97,8 @@ def register_blueprints(app):
 
     from app.controllers.account import account
     from app.controllers.dashboard import dashboard
+    from app.controllers.report import report
+
 
     from app.controllers.sql_lab import sql_lab
     from app.controllers.page import page
@@ -104,6 +106,7 @@ def register_blueprints(app):
 
     app.register_blueprint(account)
     app.register_blueprint(dashboard)
+    app.register_blueprint(report)
     app.register_blueprint(sql_lab)
     app.register_blueprint(page)
     app.register_blueprint(promotion)

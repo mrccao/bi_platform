@@ -1,0 +1,185 @@
+{% extends "layout/app.html" %}
+{% block head_tail %}
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
+{% endblock %}
+
+{% block main_content %}
+    <section class="content-header">
+        <h1>Daily Monitoring</h1>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div id="charts" style="height: 600px; width: 100%;"></div>
+        </div>
+        <div class='row' style="height: 60px"></div>
+        <div class="row">
+            <table id="result-table"
+                   class="display responsive no-wrap table table-bordered table-striped table-hover dataTable">
+                <thead>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="999">
+                        <div class="text-center">
+                            There are no items in the result table.
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}
+
+{% block body_tail %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/buttons.html5.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts-all-3.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    {% assets "common_js" %}
+        <script src="{{ ASSET_URL }}" type="text/javascript"></script>
+    {% endassets %}
+
+    <script type="text/javascript">
+
+        var dom = document.getElementById("charts");
+        var myChart = echarts.init(dom, 'shine');
+
+        window.onresize = myChart.resize;
+        var app = {};
+        var option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+
+            legend: {
+                data: []
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    dataZoom: {
+                        title: {
+                            zoom: 'Area Zoom',
+                            back: 'Area Zoom Restore'
+                        },
+                        yAxisIndex: 'none'
+                    },
+                    magicType: {
+                        title: {'bar': 'Switch To Histogram'},
+                        type: ['bar']
+                    },
+                    restore: {title: 'Reset'},
+                    saveAsImage: {title: 'Save As Image'}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value',
+                splitNumber: 15
+
+            },
+
+            series: []
+
+        };
+
+        $(document).ready(function () {
+
+            var resultDataTable = null;
+
+            $.ajax({
+                type: 'GET',
+                url: '/report/daily_monitoring',
+                dataType: "json",
+
+                success: function (result) {
+
+                    ////////////////////
+
+                    if (resultDataTable !== null) {
+                        resultDataTable.destroy();
+                        $('#result-table').empty();
+                    }
+
+                    $.extend($.fn.dataTable.defaults, {
+                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
+                    });
+
+                    reusltDataTable = $("#result-table").DataTable({
+                        'buttons': [
+                            'copy', 'csv', 'excel', 'pdf'
+                        ],
+                        data: result.tables_result.tables_data,
+                        columns: result.tables_result.tables_title,
+                        "paging": true,
+                        "retrieve": true,
+                        "DisplayLength": 40,
+                        "lengthChange": true,
+                        "searching": true,
+                        "ordering": true,
+                        "info": true,
+                        'scroll': true,
+                        "autoWidth": true
+                    });
+                    ////////////////////
+
+                    for (var c = 0; c < result.charts_result.charts_legend.length; c++) {
+                        option.series.push({
+                            name: result.charts_result.charts_legend[c],
+                            type: 'line',
+                            smooth: true,
+                            data: []
+                        });
+                    }
+
+
+                    var data;
+                    for (var d = 0; d < result.charts_result.charts_data.length; d++) {
+                        data = result.charts_result.charts_data[d];
+                        option.series[d]['data'] = data;
+
+                    }
+
+                    option.xAxis.data = result.charts_result.charts_labels;
+                    option.legend.data = result.charts_result.charts_legend;
+
+                    myChart.setOption(option, true);
+                }
+            })
+            ;
+        })
+        ;
+    </script>
+
+    <style>
+        .table-filter, .table-length {
+            display: inline;
+        }
+
+        .table-filter, .table-button {
+            float: right;
+        }
+
+    </style>
+{% endblock %}
