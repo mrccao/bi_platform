@@ -27,8 +27,8 @@ def visualization_summary_data():
     else:
         day = now.format('YYYY-MM-DD')
 
-    new_registration = db.engine.execute(text("""
-                                              SELECT new_registration
+    new_reg = db.engine.execute(text("""
+                                              SELECT new_reg
                                               FROM   bi_statistic
                                               WHERE  platform = 'All Platform'
                                               AND    game = 'All Game'
@@ -50,8 +50,8 @@ def visualization_summary_data():
                                       AND    on_day = :day
                                       """), day=day).scalar()
 
-    new_registration_game_dau = db.engine.execute(text("""
-                                                       SELECT new_registration_game_dau
+    new_reg_game_dau = db.engine.execute(text("""
+                                                       SELECT new_reg_game_dau
                                                        FROM   bi_statistic
                                                        WHERE  on_day = :day
                                                        AND platform = 'All Platform'
@@ -59,10 +59,10 @@ def visualization_summary_data():
                                                        """), day=day).scalar()
 
     payload = {
-        'new_registration': new_registration,
+        'new_reg': new_reg,
         'revenue': revenue or 0,
         'game_dau': game_dau,
-        'new_registration_game_dau': new_registration_game_dau
+        'new_reg_game_dau': new_reg_game_dau
     }
 
     return jsonify(payload)
@@ -90,7 +90,7 @@ def visualization_executive_data():
 
         proxy = db.engine.execute(text("""
                                        SELECT DATE(on_day),
-                                              new_registration
+                                              new_reg
                                        FROM   bi_statistic
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
@@ -138,7 +138,7 @@ def visualization_executive_data():
 
         proxy = db.engine.execute(text("""
                                        SELECT DATE(on_day),
-                                              new_registration_game_dau
+                                              new_reg_game_dau
                                        FROM   bi_statistic
                                        WHERE  on_day BETWEEN :start_time AND :end_time
                                               AND game = :game
