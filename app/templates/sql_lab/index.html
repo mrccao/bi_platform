@@ -128,6 +128,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
+	
+    <style>
+		
+	#result-table_wrapper {
+		overflow: auto;
+	}
+	
+    #result-table_wrapper .table-button {
+        float: right;
+    }
+	
+    #result-table_wrapper .table-length {
+        float: left;
+    }
+
+    #result-table_wrapper .table-filter {
+        float: right;
+		margin-right: 20px;
+    }
+
+    </style>
 {% endblock %}
 
 
@@ -383,7 +404,7 @@
                             'copy', 'csv', 'excel', 'pdf'
                         ],
 
-                        iDisplayLength: 10,
+                        iDisplayLength: 50,
                         lengthChange: true,
                         scrollX: true,
                         data: result.data,
@@ -449,15 +470,5 @@
 
     });
 </script>
-        <style>
-        .table-filter, .table-length {
-            display: inline;
-        }
-
-        .table-filter, .table-button {
-            float: right;
-        }
-
-        </style>
 
 {% endblock %}
