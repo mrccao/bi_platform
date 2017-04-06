@@ -10,24 +10,36 @@
     </section>
     <section class="content">
         <div class="row">
-            <div id="charts" style="height: 600px; width: 100%;"></div>
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <div id="charts" style="height: 700px; width: 100%;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class='row' style="height: 60px"></div>
+
         <div class="row">
-            <table id="result-table"
-                   class="display responsive no-wrap table table-bordered table-striped table-hover dataTable">
-                <thead>
-                </thead>
-                <tbody>
-                <tr>
-                    <td colspan="999">
-                        <div class="text-center">
-                            There are no items in the result table.
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <table id="result-table"
+                               class="display responsive no-wrap table table-bordered table-striped table-hover dataTable">
+                            <thead>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td colspan="999">
+                                    <div class="text-center">
+                                        There are no items in the result table.
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 {% endblock %}
@@ -121,7 +133,7 @@
                     }
 
                     $.extend($.fn.dataTable.defaults, {
-                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
+                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>'
                     });
 
                     reusltDataTable = $("#result-table").DataTable({
@@ -132,7 +144,8 @@
                         ],
                         data: result.tables_result.tables_data,
                         columns: result.tables_result.tables_title,
-                        lengthChange: true
+                        iDisplayLength: 100,
+                        lengthChange: false
 
                     });
                     ////////////////////
@@ -172,6 +185,10 @@
 
         .table-filter, .table-button {
             float: right;
+        }
+
+        .table-filter {
+            float: left;
         }
 
     </style>
