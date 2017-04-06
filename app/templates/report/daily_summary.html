@@ -2,6 +2,25 @@
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
+		  
+    <style>
+		#result-table_wrapper {
+			overflow: auto;
+		}
+		
+        #result-table_wrapper .table-filter, .table-length {
+            display: inline;
+        }
+
+        #result-table_wrapper .table-filter, .table-button {
+            float: right;
+        }
+
+        #result-table_wrapper .table-filter {
+            float: left;
+        }
+
+    </style>
 {% endblock %}
 
 {% block main_content %}
@@ -177,19 +196,4 @@
         })
         ;
     </script>
-
-    <style>
-        .table-filter, .table-length {
-            display: inline;
-        }
-
-        .table-filter, .table-button {
-            float: right;
-        }
-
-        .table-filter {
-            float: left;
-        }
-
-    </style>
 {% endblock %}
