@@ -26,7 +26,7 @@ def daily_summary_data():
 
     tables_indications = (
         BIStatistic.on_day.label('day'), BIStatistic.game, BIStatistic.platform, BIStatistic.new_registration,
-        BIStatistic.dau, BIStatistic.wau, BIStatistic.mau, BIStatistic.new_registration_game_dau)
+        BIStatistic.dau, BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau)
 
     tables_query = db.session.query(BIStatistic).with_entities(*tables_indications)
     column_names = [column["name"] for column in tables_query.column_descriptions]
@@ -39,7 +39,7 @@ def daily_summary_data():
 
     charts_indications = (
         func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.new_registration, BIStatistic.dau,
-        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_registration_game_dau)
+        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau)
 
     charts_query = db.session.query(BIStatistic).with_entities(*charts_indications)
 

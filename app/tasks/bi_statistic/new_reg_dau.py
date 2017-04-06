@@ -74,18 +74,18 @@ def process_bi_statistic_new_reg_dau(target):
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
             values = {
-                'new_registration_game_dau': bindparam('sum')
+                'new_reg_game_dau': bindparam('sum')
             }
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' New_registration_game_dau_transaction.rollback()')
+                print(target + ' new_reg_game_dau_transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' New_registration_game_dau_transaction.commit()')
+                print(target + ' new_reg_game_dau_transaction.commit()')
             return
 
         with_db_context(db, sync_collection_new_registration_dau)

@@ -29,7 +29,7 @@ class BIStatistic(db.Model):
     dau = db.Column(db.Integer, default=0)
     wau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
-    new_registration_game_dau = db.Column(db.Integer, default=0)
+    new_reg_game_dau = db.Column(db.Integer, default=0)
 
     dollar_paid_user_count = db.Column(db.Integer, default=0)
 
