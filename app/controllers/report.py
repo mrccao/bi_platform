@@ -11,15 +11,15 @@ from app.utils import current_time
 report = Blueprint('report', __name__)
 
 
-@report.route("/report", methods=["GET"])
+@report.route("/report/daily_summary", methods=["GET"])
 @login_required
-def index():
-    return render_template('report/report.html')
+def daily_summary():
+    return render_template('report/daily_summary.html')
 
 
-@report.route("/report/daily_monitoring", methods=["GET"])
+@report.route("/report/daily_summary_data", methods=["GET"])
 @login_required
-def monitoring():
+def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
     start_time = now.replace(days=-30).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')

@@ -6,7 +6,7 @@
 
 {% block main_content %}
     <section class="content-header">
-        <h1>Daily Monitoring</h1>
+        <h1>Daily Summary</h1>
     </section>
     <section class="content">
         <div class="row">
@@ -108,7 +108,7 @@
 
             $.ajax({
                 type: 'GET',
-                url: '/report/daily_monitoring',
+                url: '/report/daily_summary_data',
                 dataType: "json",
 
                 success: function (result) {
