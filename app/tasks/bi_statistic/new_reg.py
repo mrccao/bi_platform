@@ -13,7 +13,7 @@ def process_bi_statistic_new_reg(target):
     today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
-    def collection_new_registration(connection, transaction):
+    def collection_new_reg(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
@@ -60,7 +60,7 @@ def process_bi_statistic_new_reg(target):
                                            GROUP  BY platform
                                            """), on_day=today, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_new_registration)
+    result_proxy = with_db_context(db, collection_new_reg)
 
     if target == 'yesterday':
 
@@ -75,30 +75,30 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
-        def sync_collection_new_registration(connection, transaction):
+        def sync_collection_new_reg(connection, transaction):
             where = and_(
                 BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.platform == bindparam('_platform'),
                 BIStatistic.__table__.c.game == 'All Game'
             )
             values = {
-                'new_registration': bindparam('sum')
+                'new_reg': bindparam('sum')
             }
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' New_registration transaction.rollback()')
+                print(target + ' new_reg transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' New_registration for every platform transaction.commit()')
+                print(target + ' new_reg for every platform transaction.commit()')
             return
 
-        with_db_context(db, sync_collection_new_registration)
+        with_db_context(db, sync_collection_new_reg)
 
-    def collection_new_registration_all_platforms(connection, transaction):
+    def collection_new_reg_all_platforms(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
@@ -121,7 +121,7 @@ def process_bi_statistic_new_reg(target):
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=today, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_new_registration_all_platforms)
+    result_proxy = with_db_context(db, collection_new_reg_all_platforms)
 
     if target == 'yesterday':
 
@@ -135,25 +135,25 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
-        def sync_collection_new_registration(connection, transaction):
+        def sync_collection_new_reg(connection, transaction):
             where = and_(
                 BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.platform == 'All Platform',
                 BIStatistic.__table__.c.game == 'All Game'
             )
             values = {
-                'new_registration': bindparam('sum')
+                'new_reg': bindparam('sum')
             }
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' New_registration transaction.rollback()')
+                print(target + ' new_reg transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' New_registration for all platforms transaction.commit()')
+                print(target + ' new_reg for all platforms transaction.commit()')
             return
 
-        with_db_context(db, sync_collection_new_registration)
+        with_db_context(db, sync_collection_new_reg)

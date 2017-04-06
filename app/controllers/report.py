@@ -25,8 +25,8 @@ def daily_summary_data():
     end_time = now.format('YYYY-MM-DD')
 
     tables_indications = (
-        BIStatistic.on_day.label('day'), BIStatistic.game, BIStatistic.platform, BIStatistic.new_registration,
-        BIStatistic.dau, BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau)
+        BIStatistic.on_day.label('day'), BIStatistic.game, BIStatistic.platform,
+        BIStatistic.dau, BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau, BIStatistic.new_reg)
 
     tables_query = db.session.query(BIStatistic).with_entities(*tables_indications)
     column_names = [column["name"] for column in tables_query.column_descriptions]
@@ -38,8 +38,8 @@ def daily_summary_data():
     ###################
 
     charts_indications = (
-        func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.new_registration, BIStatistic.dau,
-        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau)
+        func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.dau,
+        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau, BIStatistic.new_reg)
 
     charts_query = db.session.query(BIStatistic).with_entities(*charts_indications)
 
@@ -49,7 +49,7 @@ def daily_summary_data():
 
     transpose_charts_query_result = list(map(list, zip(*charts_query_result)))
 
-    retention_rate = array(transpose_charts_query_result[5]) / array(transpose_charts_query_result[1])
+    retention_rate = array(transpose_charts_query_result[4]) / array(transpose_charts_query_result[5])
     # retention_rate_percentage = ["{:.2%}".format(i) for i in retention_rate]
 
     charts_labels = transpose_charts_query_result[0]

@@ -16,7 +16,7 @@ def process_bi_statistic_new_reg_dau(target):
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
-    def collection_new_registration_dau(connection, transaction):
+    def collection_new_reg_dau(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
@@ -52,7 +52,7 @@ def process_bi_statistic_new_reg_dau(target):
                                            """), on_day=today, timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
-    result_proxy = with_db_context(db, collection_new_registration_dau)
+    result_proxy = with_db_context(db, collection_new_reg_dau)
 
     if target == 'yesterday':
 
@@ -67,7 +67,7 @@ def process_bi_statistic_new_reg_dau(target):
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
-        def sync_collection_new_registration_dau(connection, transaction):
+        def sync_collection_new_reg_dau(connection, transaction):
             where = and_(
                 BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',
@@ -88,4 +88,4 @@ def process_bi_statistic_new_reg_dau(target):
                 print(target + ' new_reg_game_dau_transaction.commit()')
             return
 
-        with_db_context(db, sync_collection_new_registration_dau)
+        with_db_context(db, sync_collection_new_reg_dau)

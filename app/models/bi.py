@@ -25,7 +25,7 @@ class BIStatistic(db.Model):
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
-    new_registration = db.Column(db.Integer, default=0)
+    new_reg = db.Column(db.Integer, default=0)
     dau = db.Column(db.Integer, default=0)
     wau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
