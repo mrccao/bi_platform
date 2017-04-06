@@ -93,7 +93,7 @@ class AdminUserActivity(db.Model):
 class AdminUserQuery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_user_id = db.Column(db.Integer, nullable=False, index=True)
-    database = db.Column(db.String(255), index=True)
+    target_db = db.Column(db.String(255))
     sql = db.Column(db.Text)
     status = db.Column(db.String(255))
     rows = db.Column(db.Integer)
@@ -106,7 +106,7 @@ class AdminUserQuery(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'database': self.database or 'bi',
+            'database': self.target_db or 'bi',
             'sql': self.sql,
             'status': self.status,
             'rows': self.rows,

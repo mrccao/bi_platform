@@ -59,7 +59,7 @@ def execute_sql():
     query = db.session.query(AdminUserQuery).filter_by(sql_key=sql_key).first()
     if query is None:
         query = AdminUserQuery(
-            database=database,
+            target_db=database,
             sql=formatted_sql,
             sql_key=sql_key,
             status=ADMIN_USER_QUERY_STATUSES.PENDING.value,
