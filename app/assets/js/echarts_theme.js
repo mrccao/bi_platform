@@ -16,7 +16,6 @@
         }
     };
     if (!echarts) {
-        log('ECharts is not Loaded');
         return;
     }
 
