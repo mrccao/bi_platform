@@ -26,7 +26,8 @@ class BIStatistic(db.Model):
     platform = db.Column(db.String(255), nullable=False, index=True)
 
     new_reg = db.Column(db.Integer, default=0)
-    new_email_reg = db.Column(db.Integer, default=0)
+    email_reg = db.Column(db.Integer, default=0)
+    email_validate = db.Column(db.Integer, default=0)
     dau = db.Column(db.Integer, default=0)
     wau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
