@@ -28,6 +28,7 @@ class BIStatistic(db.Model):
     new_reg = db.Column(db.Integer, default=0)
     email_reg = db.Column(db.Integer, default=0)
     email_validate = db.Column(db.Integer, default=0)
+
     dau = db.Column(db.Integer, default=0)
     wau = db.Column(db.Integer, default=0)
     mau = db.Column(db.Integer, default=0)
@@ -36,8 +37,11 @@ class BIStatistic(db.Model):
     dollar_paid_user_count = db.Column(db.Integer, default=0)
     dollar_paid_amount = db.Column(db.Float, default=0)
     dollar_paid_count = db.Column(db.Integer, default=0)
-
     revenue = db.Column(db.Float, default=0)
+
+
+    free_gold = db.Column(db.Integer, default=0)
+    free_silver = db.Column(db.Integer, default=0)
 
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
