@@ -34,9 +34,11 @@ class BIStatistic(db.Model):
     new_reg_game_dau = db.Column(db.Integer, default=0)
 
     dollar_paid_user_count = db.Column(db.Integer, default=0)
-
     dollar_paid_amount = db.Column(db.Float, default=0)
     dollar_paid_count = db.Column(db.Integer, default=0)
+
+    revenue = db.Column(db.Float, default=0)
+
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
     # amount_of_masterpoint_exchanged_for_gold = db.Column(db.Float, default=0)
