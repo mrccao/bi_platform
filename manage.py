@@ -311,9 +311,6 @@ def sync_bi_statistic_for_today():
 
 @manager.command
 def sync_bi_statistic_for_someday(target):
-    if app.config['ENV'] == 'prod':
-        process_bi_statistic.delay(target)
-    else:
         process_bi_statistic(target)
 
 @manager.command
