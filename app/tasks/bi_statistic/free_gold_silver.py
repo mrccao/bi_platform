@@ -93,7 +93,7 @@ def process_bi_statistic_free_transaction(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = { 'free_silver': bindparam('sum') }
+            values = {'free_silver': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)

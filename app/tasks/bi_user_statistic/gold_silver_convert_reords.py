@@ -9,21 +9,21 @@ from app.constants import PRODUCT_AND_PRODUCT_ORIG_MAPPING
 from app.extensions import db
 from app.models.bi import BIUserStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import current_time, generate_sql_date
 
 
 def process_bi_user_statistic_convert_records(target):
-    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
-    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
+    someday, index_time, timezone_offset = generate_sql_date(target)
+    now = current_time(app.config['APP_TIMEZONE'])
+    today = now.format('YYYY-MM-DD')
 
     def collection_user_convert_records(connection, transaction, day, product_orig):
         if target == 'lifetime':
             return connection.execute(text("""
-                                            SELECT                              user_id,
-                                                                                sum(currency_amount) AS  convert_amount,
-                                                                                count(*)             AS  convert_count,
-                                                                                sum(quantity)        AS  convert_quantity
+                                            SELECT      user_id,
+                                                        sum(currency_amount)       AS  convert_amount,
+                                                        count(*)                   AS  convert_count,
+                                                        sum(quantity)              AS  convert_quantity
                                             FROM  bi_user_bill
                                             WHERE currency_type = 'gold'
                                             AND   product_orig IN :product_orig
@@ -43,59 +43,29 @@ def process_bi_user_statistic_convert_records(target):
                 product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
                 product_convert_record = with_db_context(db, collection_user_convert_records, day=day,
                                                          product_orig=product_orig)
-                every_product_convert_record_rows = [
-                    {'on_day': str(day),
-                     'user_id': row['user_id'],
-                     'convert_{}_gold'.format(product): row['convert_amount'],
-                     'convert_{}_count'.format(product): row['convert_count'],
-                     'convert_{}'.format(product): row['convert_quantity']}
-                    for row in product_convert_record]
+                every_product_convert_record_row = [{'on_day': str(day), 'user_id': row['user_id'],
+                                                     'convert_{}_gold'.format(product): row['convert_amount'],
+                                                     'convert_{}_count'.format(product): row['convert_count'],
+                                                     'convert_{}'.format(product): row['convert_quantity']}
+                                                    for row in product_convert_record]
+                all_product_convert_records = dict([(product, every_product_convert_record_row)])
 
-                product_convert_record_rows = dict([(product, every_product_convert_record_rows)])
+                result_proxy.append(all_product_convert_records)
 
-                result_proxy.append(product_convert_record_rows)
-
-        if target == 'today':
-            day = today
-
+        else:
             product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
-            product_convert_record = with_db_context(db, collection_user_convert_records, day=day,
+            product_convert_record = with_db_context(db, collection_user_convert_records, day=someday,
                                                      product_orig=product_orig)
 
-            if product_convert_record is None:
-                return None
-            every_product_convert_record_rows = [
-                {'on_day': str(day),
-                 'user_id': row['user_id'],
-                 'convert_{}_gold'.format(product): row['convert_amount'],
-                 'convert_{}_count'.format(product): row['Consumption'],
-                 'convert_{}'.format(product): row['convert_quantity']}
-                for row in product_convert_record]
+            every_product_convert_record_row = [{'on_day': str(someday), 'user_id': row['user_id'],
+                                                 'convert_{}_gold'.format(product): row['convert_amount'],
+                                                 'convert_{}_count'.format(product): row['Consumption'],
+                                                 'convert_{}'.format(product): row['convert_quantity']}
+                                                for row in product_convert_record]
 
-            product_convert_record_rows = dict([(product, every_product_convert_record_rows)])
+            all_product_convert_records = dict([(product, every_product_convert_record_row)])
 
-            result_proxy.append(product_convert_record_rows)
-
-        if target == 'yesterday':
-            day = yesterday
-
-            product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
-            product_convert_record = with_db_context(db, collection_user_convert_records, day=day,
-                                                     product_orig=product_orig)
-
-            if product_convert_record is None:
-                return None
-            every_product_convert_record_rows = [
-                {'on_day': str(day),
-                 'user_id': row['user_id'],
-                 'convert_{}_gold'.format(product): row['convert_amount'],
-                 'convert_{}_count'.format(product): row['Consumption'],
-                 'convert_{}'.format(product): row['convert_quantity']}
-                for row in product_convert_record]
-
-            product_convert_record_rows = dict([(product, every_product_convert_record_rows)])
-
-            result_proxy.append(product_convert_record_rows)
+            result_proxy.append(all_product_convert_records)
 
         return result_proxy
 
@@ -105,28 +75,27 @@ def process_bi_user_statistic_convert_records(target):
 
         for product_convert_record_rows in result_proxy_for_convert:
 
-            for product, rows in product_convert_record_rows.items():
+            for product_name, rows in product_convert_record_rows.items():
 
                 if rows:
 
                     def sync_collection_user_convert_records(connection, transaction):
 
-                        values = {
-                            'on_day': bindparam('on_day'),
-                            'user_id': bindparam('user_id'),
-                            'convert_{}_gold'.format(product): bindparam('convert_{}_gold'.format(product)),
-                            'convert_{}_count'.format(product): bindparam('convert_{}_count'.format(product)),
-                            'convert_{}'.format(product): bindparam('convert_{}'.format(product)),
-                        }
+                        values = {'on_day': bindparam('on_day'), 'user_id': bindparam('user_id'),
+                                  'convert_{}_gold'.format(product_name): bindparam(
+                                      'convert_{}_gold'.format(product_name)),
+                                  'convert_{}_count'.format(product_name): bindparam(
+                                      'convert_{}_count'.format(product_name)),
+                                  'convert_{}'.format(product_name): bindparam('convert_{}'.format(product_name)), }
 
                         try:
                             connection.execute(BIUserStatistic.__table__.insert().values(values), rows)
                         except:
-                            print('Convert history  transaction.rollback()')
+                            print(target + ' Convert history  transaction.rollback()')
                             transaction.rollback()
                             raise
                         else:
-                            print('Convert history transaction.commit()')
+                            print(target + ' Convert history transaction.commit()')
                             transaction.commit()
 
                     with_db_context(db, sync_collection_user_convert_records)
