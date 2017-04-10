@@ -13,10 +13,10 @@ from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
 from app.tasks.bi_statistic import process_bi_statistic
-from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
+from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi
 
@@ -243,6 +243,7 @@ def reset_bi_statistic():
                                            new_registration_game_dau=new_registration_game_dau))
     db.session.commit()
 
+
 @manager.command
 def reset_bi_user_statistic():
     """ ReCreate Database and Seed """
@@ -255,7 +256,7 @@ def reset_bi_user_statistic():
     import pandas as pd
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                db.session.add(BIUserStatistic(on_day=day.strftime("%Y-%m-%d"), platform=platform))
+            db.session.add(BIUserStatistic(on_day=day.strftime("%Y-%m-%d"), platform=platform))
     db.session.commit()
 
 
@@ -343,7 +344,6 @@ def sync_bi_statistic_for_today():
         process_bi_statistic('today')
 
 
-
 @manager.command
 def sync_bi_user_statistic_for_lifetime():
     if app.config['ENV'] == 'prod':
@@ -366,7 +366,6 @@ def sync_bi_user_statistic_for_today():
         process_bi_user_statistic.delay('today')
     else:
         process_bi_user_statistic('today')
-
 
 
 @manager.command

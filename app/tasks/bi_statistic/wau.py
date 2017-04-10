@@ -59,11 +59,9 @@ def process_bi_statistic_wau(target):
         if rows:
             def sync_collection_wau_every_game(connection, transaction):
 
-                where = and_(
-                    BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                    BIStatistic.__table__.c.game == bindparam('_game'),
-                    BIStatistic.__table__.c.platform == 'All Platform'
-                )
+                where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                             BIStatistic.__table__.c.game == bindparam('_game'),
+                             BIStatistic.__table__.c.platform == 'All Platform')
                 values = {'wau': bindparam('sum')}
 
                 try:
@@ -112,11 +110,9 @@ def process_bi_statistic_wau(target):
         if rows:
             def sync_collection_wau_all_games(connection, transaction):
 
-                where = and_(
-                    BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                    BIStatistic.__table__.c.game == 'All Game',
-                    BIStatistic.__table__.c.platform == 'All Platform'
-                )
+                where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                             BIStatistic.__table__.c.game == 'All Game',
+                             BIStatistic.__table__.c.platform == 'All Platform')
                 values = {'wau': bindparam('sum')}
 
                 try:

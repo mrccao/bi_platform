@@ -39,11 +39,9 @@ def process_bi_statistic_dau(target):
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_dau_all_games(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.game == 'All Game',
-                BIStatistic.__table__.c.platform == 'All Platform'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.game == 'All Game',
+                         BIStatistic.__table__.c.platform == 'All Platform')
             values = {'dau': bindparam('sum')}
 
             try:
@@ -97,11 +95,9 @@ def process_bi_statistic_dau(target):
         rows = [{'_on_day': someday, '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_dau_every_game(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.game == bindparam('_game'),
-                BIStatistic.__table__.c.platform == 'All Platform'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.game == bindparam('_game'),
+                         BIStatistic.__table__.c.platform == 'All Platform')
             values = {'dau': bindparam('sum')}
 
             try:

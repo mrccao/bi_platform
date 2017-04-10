@@ -50,11 +50,10 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_new_reg(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == bindparam('_platform'),
-                BIStatistic.__table__.c.game == 'All Game'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('_platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+
             values = {'new_reg': bindparam('sum')}
 
             try:
@@ -93,11 +92,9 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_new_reg_all_platforms(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == 'All Platform',
-                BIStatistic.__table__.c.game == 'All Game'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == 'All Platform',
+                         BIStatistic.__table__.c.game == 'All Game')
             values = {'new_reg': bindparam('sum')}
 
             try:
@@ -154,14 +151,10 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_new_email_reg(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == bindparam('_platform'),
-                BIStatistic.__table__.c.game == 'All Game'
-            )
-            values = {
-                'new_email_reg': bindparam('sum')
-            }
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('_platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'new_email_reg': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -202,11 +195,9 @@ def process_bi_statistic_new_reg(target):
 
     if rows:
         def sync_collection_new_email_reg_all_platforms(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == 'All Platform',
-                BIStatistic.__table__.c.game == 'All Game'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == 'All Platform',
+                         BIStatistic.__table__.c.game == 'All Game')
             values = {'email_reg': bindparam('sum')}
 
             try:
@@ -265,14 +256,10 @@ def process_bi_statistic_new_reg(target):
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_email_validate(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == bindparam('_platform'),
-                BIStatistic.__table__.c.game == 'All Game'
-            )
-            values = {
-                'email_validate': bindparam('sum')
-            }
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('_platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'email_validate': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)

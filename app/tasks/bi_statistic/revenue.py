@@ -36,11 +36,9 @@ def process_bi_statistic_revenue(target):
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
     if rows:
         def sync_collection_revenue(connection, transaction):
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.game == 'All Game',
-                BIStatistic.__table__.c.platform == 'All Platform'
-            )
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.game == 'All Game',
+                         BIStatistic.__table__.c.platform == 'All Platform')
             values = {'revenue': bindparam('sum')}
 
             try:
