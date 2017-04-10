@@ -9,15 +9,13 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import generate_sql_date, current_time
 
 
 def process_bi_statistic_wau(target):
+    someday, index_time, timezone_offset = generate_sql_date(target)
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-(7 + 3)).format('YYYY-MM-DD')
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
 
     def collection_wau_every_game(connection, transaction, day):
 
@@ -49,21 +47,11 @@ def process_bi_statistic_wau(target):
 
             return result_proxy
 
-        if target == 'yesterday':
-            result_proxy = []
-            day = yesterday
-            every_week_result = with_db_context(db, collection_wau_every_game, day=yesterday)
-            every_week_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
-                                      every_week_result]
+        else:
 
-            result_proxy.append(every_week_result_rows)
-            return result_proxy
-
-        if target == 'today':
             result_proxy = []
-            day = yesterday
-            every_week_result = with_db_context(db, collection_wau_every_game, day=today)
-            every_week_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_week_result = with_db_context(db, collection_wau_every_game, day=someday)
+            every_week_result_rows = [{'_on_day': str(someday), '_game': row['game'], 'sum': row['sum']} for row in
                                       every_week_result]
 
             result_proxy.append(every_week_result_rows)
@@ -123,20 +111,10 @@ def process_bi_statistic_wau(target):
                 result_proxy.append(every_week_result_rows)
             return result_proxy
 
-        if target == 'yesterday':
+        else:
             result_proxy = []
-            day = yesterday
-            every_week_result = with_db_context(db, collection_wau_all_games, day=yesterday)
-            every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
-
-            result_proxy.append(every_week_result_rows)
-            return result_proxy
-
-        if target == 'today':
-            result_proxy = []
-            day = yesterday
-            every_week_result = with_db_context(db, collection_wau_all_games, day=today)
-            every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
+            every_week_result = with_db_context(db, collection_wau_all_games, day=someday)
+            every_week_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_week_result]
 
             result_proxy.append(every_week_result_rows)
             return result_proxy

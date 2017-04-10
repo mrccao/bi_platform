@@ -1,11 +1,39 @@
-import importlib
 import logging
 import signal
 from calendar import monthrange
 
 import arrow
+import importlib
+from flask import current_app as app
 
 from app.exceptions import TimeoutException
+
+
+def generate_sql_date(target):
+    now = current_time(app.config['APP_TIMEZONE'])
+    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    today = now.format('YYYY-MM-DD')
+
+    timezone_offset = app.config['APP_TIMEZONE']
+    day = {'today': today, 'yesterday': yesterday}
+    someday = day.get(target, target)
+
+    if target == 'lifetime':
+        day = None
+        index_date = None
+        sql_date = someday, index_date, timezone_offset
+        return sql_date
+
+    elif target in ['today', 'yesterday']:
+        index_date = now.replace(days=-3).format('YYYY-MM-DD')
+        sql_date = someday, index_date, timezone_offset
+        return sql_date
+
+    else:
+        target_date = arrow.Arrow.strptime(target, '%Y-%m-%d', app.config['APP_TIMEZONE'])
+        index_date = target_date.replace(days=-3).format('YYYY-MM-DD')
+        sql_date = someday, index_date, timezone_offset
+        return sql_date
 
 
 def current_time(timezone=None):

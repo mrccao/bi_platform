@@ -1,19 +1,15 @@
-from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
-from app.constants import GOLD_FREE_TRANSACTION_TYPES_TUPLE, SILVER_FREE_TRANSACTION_TYPES_TUPLE_
+from app.constants import GOLD_FREE_TRANSACTION_TYPES_TUPLE, SILVER_FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import generate_sql_date
 
 
 def process_bi_statistic_free_transaction(target):
-    now = current_time(app.config['APP_TIMEZONE'])
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
-    today = now.format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
+    someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_gold_free_transaction(connection, transaction):
         if target == 'lifetime':
@@ -26,37 +22,23 @@ def process_bi_statistic_free_transaction(target):
                                            """), timezone_offset=timezone_offset,
                                       gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                             SELECT SUM(transaction_amount)                        AS sum
                                             FROM   bi_user_currency
                                             WHERE  transaction_type IN  :gold_free_transaction_types
+                                            AND  created_at > :index_time
                                             AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                           """), timezone_offset=timezone_offset, on_day=yesterday,
-                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                            SELECT SUM(transaction_amount)                        AS sum
-                                            FROM   bi_user_currency
-                                            WHERE  transaction_type IN  :gold_free_transaction_types
-                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                           """), timezone_offset=timezone_offset, on_day=today,
+                                           """), timezone_offset=timezone_offset, on_day=someday,
                                       gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_gold_free_transaction)
 
-    if target == 'yesterday':
-
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
-
-    else:
+    if target == 'lifetime':
 
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+    else:
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_gold_free_transaction(connection, transaction):
@@ -91,39 +73,28 @@ def process_bi_statistic_free_transaction(target):
                                                 WHERE  transaction_type IN  :silver_free_transaction_types
                                                 GROUP  BY on_day
                                                """), timezone_offset=timezone_offset,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
+                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE)
 
-        if target == 'yesterday':
+        else:
+
             return connection.execute(text("""
                                                 SELECT SUM(transaction_amount)                        AS sum
                                                 FROM   bi_user_currency
                                                 WHERE  transaction_type IN  :silver_free_transaction_types
+                                                AND  created_at > :index_time
                                                 AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                               """), timezone_offset=timezone_offset, on_day=yesterday,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                                SELECT SUM(transaction_amount)                        AS sum
-                                                FROM   bi_user_currency
-                                                WHERE  transaction_type IN  :silver_free_transaction_types
-                                                AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                               """), timezone_offset=timezone_offset, on_day=today,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
+                                               """), timezone_offset=timezone_offset, on_day=someday,
+                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_silver_free_transaction)
 
-    if target == 'yesterday':
+    if target == 'lifetime':
 
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     else:
 
-        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_silver_free_transaction(connection, transaction):

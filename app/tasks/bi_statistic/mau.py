@@ -9,15 +9,13 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import generate_sql_date, current_time
 
 
 def process_bi_statistic_mau(target):
+    someday, index_time, timezone_offset = generate_sql_date(target)
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-(30 + 3)).format('YYYY-MM-DD')
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
 
     def collection_mau_every_game(connection, transaction, day):
 
@@ -49,21 +47,10 @@ def process_bi_statistic_mau(target):
 
             return result_proxy
 
-        if target == 'yesterday':
+        else:
             result_proxy = []
-            day = yesterday
-            every_month_result = with_db_context(db, collection_mau_every_game, day=yesterday)
-            every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
-                                       every_month_result]
-
-            result_proxy.append(every_month_result_rows)
-            return result_proxy
-
-        if target == 'today':
-            result_proxy = []
-            day = yesterday
-            every_month_result = with_db_context(db, collection_mau_every_game, day=today)
-            every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_month_result = with_db_context(db, collection_mau_every_game, day=someday)
+            every_month_result_rows = [{'_on_day': str(someday), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
 
             result_proxy.append(every_month_result_rows)
@@ -123,20 +110,10 @@ def process_bi_statistic_mau(target):
                 result_proxy.append(every_month_result_rows)
             return result_proxy
 
-        if target == 'yesterday':
+        else:
             result_proxy = []
-            day = yesterday
-            every_month_result = with_db_context(db, collection_mau_all_games, day=yesterday)
-            every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
-
-            result_proxy.append(every_month_result_rows)
-            return result_proxy
-
-        if target == 'today':
-            result_proxy = []
-            day = yesterday
-            every_month_result = with_db_context(db, collection_mau_all_games, day=today)
-            every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
+            every_month_result = with_db_context(db, collection_mau_all_games, day=someday)
+            every_month_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_month_result]
 
             result_proxy.append(every_month_result_rows)
             return result_proxy

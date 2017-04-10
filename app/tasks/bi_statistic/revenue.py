@@ -1,18 +1,14 @@
-from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import generate_sql_date
 
 
 def process_bi_statistic_revenue(target):
-    now = current_time(app.config['APP_TIMEZONE'])
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
-    today = now.format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
+    someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_revenue(connection, transaction):
         if target == 'lifetime':
@@ -23,37 +19,23 @@ def process_bi_statistic_revenue(target):
                                            WHERE  currency_type = 'Dollar'
                                            GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
-
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT 
                                                   ROUND(SUM(currency_amount), 2)                           AS sum
                                            FROM   bi_user_bill
                                            WHERE  currency_type = 'Dollar'
                                            AND  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
-                                            """), timezone_offset=timezone_offset, on_day=yesterday)
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT 
-                                                  ROUND(SUM(currency_amount), 2)                           AS sum
-                                           FROM   bi_user_bill
-                                           WHERE  currency_type = 'Dollar'
-                                           AND  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
-                                            """), timezone_offset=timezone_offset, on_day=today)
+                                            """), timezone_offset=timezone_offset, on_day=someday)
 
     result_proxy = with_db_context(db, collection_revenue)
 
-    if target == 'yesterday':
-
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
-
-    else:
+    if target == 'lifetime':
 
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_revenue(connection, transaction):

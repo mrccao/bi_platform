@@ -54,6 +54,10 @@ class ProdConfig(Config):
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
         },
+        'process_scheduled_bi_currency': {
+            'task': 'app.tasks.scheduled.process_bi_currency',
+            'schedule': timedelta(seconds=120 * 60)
+        },
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
@@ -65,7 +69,7 @@ class ProdConfig(Config):
 
         'process_scheduled_bi_statistic_for_today': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_today',
-            'schedule': timedelta(seconds=8 * 60)
+            'schedule': timedelta(seconds=15 * 60)
         },
 
     }
@@ -128,6 +132,10 @@ class DevConfig(Config):
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
         },
+        'process_scheduled_bi_currency': {
+            'task': 'app.tasks.scheduled.process_bi_currency',
+            'schedule': timedelta(seconds=120 * 60)
+        },
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
@@ -139,7 +147,7 @@ class DevConfig(Config):
 
         'process_scheduled_bi_statistic_for_today': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_today',
-            'schedule': timedelta(seconds=8 * 60)
+            'schedule': timedelta(seconds=15 * 60)
         },
 
     }
@@ -192,6 +200,10 @@ class TestConfig(Config):
             'task': 'app.tasks.scheduled.process_bi',
             'schedule': timedelta(seconds=8 * 60)
         },
+        'process_scheduled_bi_currency': {
+            'task': 'app.tasks.scheduled.process_bi_currency',
+            'schedule': timedelta(seconds=120 * 60)
+        },
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
@@ -203,7 +215,7 @@ class TestConfig(Config):
 
        'process_scheduled_bi_statistic_for_today': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_today',
-            'schedule': timedelta(seconds=8 * 60)
+            'schedule': timedelta(seconds=15 * 60)
         },
     }
 

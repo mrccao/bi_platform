@@ -1,17 +1,14 @@
-from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import generate_sql_date
 
 
 def process_bi_statistic_new_reg(target):
-    yesterday = current_time(app.config['APP_TIMEZONE']).replace(days=-1).format('YYYY-MM-DD')
-    today = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
-    timezone_offset = app.config['APP_TIMEZONE']
+    someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_new_reg(connection, transaction):
         if target == 'lifetime':
@@ -30,7 +27,7 @@ def process_bi_statistic_new_reg(target):
                                                      platform
                                             """), timezone_offset=timezone_offset)
 
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -43,36 +40,17 @@ def process_bi_statistic_new_reg(target):
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            GROUP  BY platform
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT CASE
-                                                    WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-                                                    WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-                                                    WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-                                                    WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-                                                    WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                  END                                                   AS platform,
-                                                  COUNT(*)                                              AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           GROUP  BY platform
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_reg)
 
-    if target == 'yesterday':
+    if target == 'lifetime':
 
-        rows = [{'_on_day': yesterday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     else:
 
-        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_reg(connection, transaction):
@@ -107,32 +85,19 @@ def process_bi_statistic_new_reg(target):
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
 
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT COUNT(*)                                               AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_reg_all_platforms)
 
-    if target == 'yesterday':
-
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
-
-    else:
+    if target == 'lifetime':
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+    else:
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_reg_all_platforms(connection, transaction):
@@ -176,7 +141,7 @@ def process_bi_statistic_new_reg(target):
                                                      platform
                                             """), timezone_offset=timezone_offset)
 
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -190,37 +155,17 @@ def process_bi_statistic_new_reg(target):
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            AND    facebook_id IS NULL
                                            GROUP  BY platform
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT CASE
-                                                    WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-                                                    WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-                                                    WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-                                                    WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-                                                    WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                  END                                                   AS platform,
-                                                  COUNT(*)                                              AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           AND    facebook_id IS NULL
-                                           GROUP  BY platform
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_email_reg)
 
-    if target == 'yesterday':
+    if target == 'lietime':
 
-        rows = [{'_on_day': yesterday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     else:
 
-        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_email_reg(connection, transaction):
@@ -255,34 +200,21 @@ def process_bi_statistic_new_reg(target):
                                             WHERE facebook_id IS NULL
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            AND    facebook_id IS NULL
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT COUNT(*)                                               AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           AND    facebook_id IS NULL
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_new_email_reg_all_platforms)
 
-    if target == 'yesterday':
-
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
+    if target == 'lifetime':
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     else:
-        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_email_reg_all_platforms(connection, transaction):
@@ -327,7 +259,7 @@ def process_bi_statistic_new_reg(target):
                                                      platform
                                             """), timezone_offset=timezone_offset)
 
-        if target == 'yesterday':
+        else:
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -342,38 +274,15 @@ def process_bi_statistic_new_reg(target):
                                            AND    facebook_id IS NULL
                                            AND    email_validate_time  IS NOT NULL 
                                            GROUP  BY platform
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
-
-        if target == 'today':
-            return connection.execute(text("""
-                                           SELECT CASE
-                                                    WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-                                                    WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-                                                    WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-                                                    WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-                                                    WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                  END                                                   AS platform,
-                                                  COUNT(*)                                              AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           AND    facebook_id IS NULL
-                                           AND    email_validate_time  IS NOT NULL 
-                                           GROUP  BY platform
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_email_validate)
 
-    if target == 'yesterday':
-
-        rows = [{'_on_day': yesterday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+    if target == 'lifetime':
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     else:
-
-        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_email_validate(connection, transaction):
@@ -409,36 +318,25 @@ def process_bi_statistic_new_reg(target):
                                             AND    email_validate_time  IS NOT NULL 
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
-        if target == 'yesterday':
-            return connection.execute(text("""
-                                           SELECT COUNT(*)                                               AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           AND    email_validate_time  IS NOT NULL 
-                                           AND    facebook_id IS NULL
-                                           """), on_day=yesterday, timezone_offset=timezone_offset)
+        else:
 
-        if target == 'today':
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            AND    facebook_id IS NULL
                                            AND    email_validate_time  IS NOT NULL 
-                                           """), on_day=today, timezone_offset=timezone_offset)
+                                           """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_email_validate_all_platforms)
 
-    if target == 'yesterday':
+    if target == 'lifetime':
 
-        rows = [{'_on_day': yesterday, 'sum': row['sum']} for row in result_proxy]
-
-    elif target == 'today':
-
-        rows = [{'_on_day': today, 'sum': row['sum']} for row in result_proxy]
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     else:
-        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
         def sync_collection_new_email_reg_all_platforms(connection, transaction):

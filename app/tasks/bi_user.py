@@ -1625,19 +1625,19 @@ def process_user_mall_order_newly_added_records():
                 'count_of_masterpoint_exchanged_for_gold': bindparam('count_of_masterpoint_exchanged_for_gold'),
                 'amount_of_masterpoint_exchanged_for_gold': bindparam('amount_of_masterpoint_exchanged_for_gold'),
                 'last_time_of_masterpoint_exchanged_for_gold': bindparam('last_time_of_masterpoint_exchanged_for_gold'),
-                
+
                 'count_of_dollar_exchanged_for_gold': bindparam('count_of_dollar_exchanged_for_gold'),
                 'amount_of_dollar_exchanged_for_gold': bindparam('amount_of_dollar_exchanged_for_gold'),
                 'last_time_of_dollar_exchanged_for_gold': bindparam('last_time_of_dollar_exchanged_for_gold'),
-                
+
                 'count_of_gold_exchanged_for_silver': bindparam('count_of_gold_exchanged_for_silver'),
                 'amount_of_gold_exchanged_for_silver': bindparam('amount_of_gold_exchanged_for_silver'),
                 'last_time_of_gold_exchanged_for_silver': bindparam('last_time_of_gold_exchanged_for_silver'),
-                
+
                 'count_of_dollar_exchanged_for_silver': bindparam('count_of_dollar_exchanged_for_silver'),
                 'amount_of_dollar_exchanged_for_silver': bindparam('amount_of_dollar_exchanged_for_silver'),
                 'last_time_of_dollar_exchanged_for_silver': bindparam('last_time_of_dollar_exchanged_for_silver'),
-                
+
                 'count_of_dollar_exchanged_for_lucky_spin': bindparam('count_of_dollar_exchanged_for_lucky_spin'),
                 'amount_of_dollar_exchanged_for_lucky_spin': bindparam('amount_of_dollar_exchanged_for_lucky_spin'),
                 'last_time_of_dollar_exchanged_for_lucky_spin': bindparam('last_time_of_dollar_exchanged_for_lucky_spin'),
@@ -2362,5 +2362,5 @@ def process_bi_user():
         process_user_reward_point_related_records()
         print('process_user_reward_point_related_records() done.')
 
-    process_user_promotion_time()
-    print('process_user_promotion_time() done.')
+    # process_user_promotion_time()
+    # print('process_user_promotion_time() done.')
