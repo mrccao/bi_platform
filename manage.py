@@ -310,6 +310,10 @@ def sync_bi_statistic_for_today():
 
 
 @manager.command
+def sync_bi_statistic_for_someday(target):
+        process_bi_statistic(target)
+
+@manager.command
 def process_promotion_push():
     if app.config['ENV'] == 'prod':
         process_promotion_facebook_notification.delay()
