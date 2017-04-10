@@ -1,11 +1,18 @@
-import importlib
+import datetime
 import logging
 import signal
 from calendar import monthrange
 
 import arrow
+import importlib
 
 from app.exceptions import TimeoutException
+
+
+def generate_index_date(target):
+    target_date = datetime.datetime.strptime(target, "%Y-%m-%d")
+    index_date = target_date + datetime.timedelta(days=-3)
+    return  index_date.strftime("%Y-%m-%d")
 
 
 def current_time(timezone=None):

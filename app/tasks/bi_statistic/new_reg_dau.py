@@ -6,7 +6,7 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time
+from app.utils import current_time, generate_index_date
 
 
 def process_bi_statistic_new_reg_dau(target):
@@ -15,6 +15,12 @@ def process_bi_statistic_new_reg_dau(target):
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
+
+    # process sync_bi_statistic_for_someday
+    if target not in ['lifetime', 'today', 'yesterday']:
+        index_time = generate_index_date(target)
+        today = target
+        target = 'today'
 
     def collection_new_reg_dau(connection, transaction):
         if target == 'lifetime':
