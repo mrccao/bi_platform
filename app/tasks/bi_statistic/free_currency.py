@@ -2,7 +2,7 @@ from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
-from app.constants import GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
+from app.constants import GOLD_FREE_TRANSACTION_TYPES_TUPLE, SILVER_FREE_TRANSACTION_TYPES_TUPLE_
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
@@ -24,7 +24,7 @@ def process_bi_statistic_free_transaction(target):
                                             WHERE  transaction_type IN  :gold_free_transaction_types
                                             GROUP  BY on_day
                                            """), timezone_offset=timezone_offset,
-                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES)
+                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'yesterday':
             return connection.execute(text("""
@@ -33,7 +33,7 @@ def process_bi_statistic_free_transaction(target):
                                             WHERE  transaction_type IN  :gold_free_transaction_types
                                             AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
                                            """), timezone_offset=timezone_offset, on_day=yesterday,
-                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES)
+                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
         if target == 'today':
             return connection.execute(text("""
@@ -42,7 +42,7 @@ def process_bi_statistic_free_transaction(target):
                                             WHERE  transaction_type IN  :gold_free_transaction_types
                                             AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
                                            """), timezone_offset=timezone_offset, on_day=today,
-                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES)
+                                      gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_gold_free_transaction)
 
@@ -91,7 +91,7 @@ def process_bi_statistic_free_transaction(target):
                                                 WHERE  transaction_type IN  :silver_free_transaction_types
                                                 GROUP  BY on_day
                                                """), timezone_offset=timezone_offset,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES)
+                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
 
         if target == 'yesterday':
             return connection.execute(text("""
@@ -100,7 +100,7 @@ def process_bi_statistic_free_transaction(target):
                                                 WHERE  transaction_type IN  :silver_free_transaction_types
                                                 AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
                                                """), timezone_offset=timezone_offset, on_day=yesterday,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES)
+                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
 
         if target == 'today':
             return connection.execute(text("""
@@ -109,7 +109,7 @@ def process_bi_statistic_free_transaction(target):
                                                 WHERE  transaction_type IN  :silver_free_transaction_types
                                                 AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
                                                """), timezone_offset=timezone_offset, on_day=today,
-                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES)
+                                      silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE_)
 
     result_proxy = with_db_context(db, collection_silver_free_transaction)
 

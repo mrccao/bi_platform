@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-
 import os
-
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
+from random import randrange
 
 from app import create_app
 from app.extensions import db
@@ -121,7 +120,6 @@ def reset_bi():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         db.drop_all(bind=None)
         db.create_all(bind=None)
 
@@ -147,7 +145,6 @@ def reset_bi_admin():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         AdminUserActivity.__table__.drop(db.engine, checkfirst=True)
         AdminUserQuery.__table__.drop(db.engine, checkfirst=True)
 
@@ -161,7 +158,6 @@ def reset_bi_promotion():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         PromotionPush.__table__.drop(db.engine, checkfirst=True)
         PromotionPushHistory.__table__.drop(db.engine, checkfirst=True)
 
@@ -175,7 +171,6 @@ def reset_bi_user():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         BIUser.__table__.drop(db.engine, checkfirst=True)
 
         BIUser.__table__.create(db.engine, checkfirst=True)
@@ -189,7 +184,6 @@ def reset_bi_user_bill():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         BIUserBill.__table__.drop(db.engine, checkfirst=True)
 
         BIUserBill.__table__.create(db.engine, checkfirst=True)
@@ -203,7 +197,6 @@ def reset_bi_user_currency():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-
         BIUserCurrency.__table__.drop(db.engine, checkfirst=True)
 
         BIUserCurrency.__table__.create(db.engine, checkfirst=True)
@@ -217,7 +210,6 @@ def reset_bi_clubwpt_user():
 
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
-    
         BIClubWPTUser.__table__.drop(db.engine, checkfirst=True)
 
         BIClubWPTUser.__table__.create(db.engine, checkfirst=True)
@@ -229,20 +221,45 @@ def reset_bi_clubwpt_user():
 def reset_bi_statistic():
     """ ReCreate Database and Seed """
 
-    answer = input("Do you want? (yes/no) ")
-    if answer == 'yes':
+    BIStatistic.__table__.drop(db.engine, checkfirst=True)
 
-        BIStatistic.__table__.drop(db.engine, checkfirst=True)
+    BIStatistic.__table__.create(db.engine, checkfirst=True)
 
-        BIStatistic.__table__.create(db.engine, checkfirst=True)
+    from datetime import date
+    import pandas as pd
+    for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+        for game in ['All Game', 'TexasPoker', 'TimeSlots']:
+            for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
+                new_registration = randrange(1000, 2000)
+                dau = randrange(2000)
+                mau = randrange(4000)
+                wau = randrange(3000)
+                new_registration_game_dau = randrange(1000)
+                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
+                                           new_registration=new_registration,
+                                           dau=dau, mau=mau, wau=wau,
+                                           new_registration_game_dau=new_registration_game_dau))
+    db.session.commit()
 
-        from datetime import date
-        import pandas as pd
-        for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
-            for game in ['All Game', 'TexasPoker', 'TimeSlots']:
-                for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                    db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
-        db.session.commit()
+
+# @manager.command
+# def reset_bi_statistic():
+#     """ ReCreate Database and Seed """
+#
+#     answer = input("Do you want? (yes/no) ")
+#     if answer == 'yes':
+#
+#         BIStatistic.__table__.drop(db.engine, checkfirst=True)
+#
+#         BIStatistic.__table__.create(db.engine, checkfirst=True)
+#
+#         from datetime import date
+#         import pandas as pd
+#         for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
+#             for game in ['All Game', 'TexasPoker', 'TimeSlots']:
+#                 for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
+#                     db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+#         db.session.commit()
 
 
 @manager.command
@@ -307,6 +324,14 @@ def sync_bi_statistic_for_today():
         process_bi_statistic.delay('today')
     else:
         process_bi_statistic('today')
+
+
+@manager.command
+def sync_bi_statistic_for_someday(target):
+    if app.config['ENV'] == 'prod':
+        process_bi_statistic.delay(target)
+    else:
+        process_bi_statistic(target)
 
 
 @manager.command

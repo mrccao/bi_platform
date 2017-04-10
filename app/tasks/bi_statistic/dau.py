@@ -16,6 +16,10 @@ def process_bi_statistic_dau(target):
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
+    if target not in ['lifetime', 'today', 'yesterday']:
+        today = target
+        target = 'today'
+
     def collection_dau_all_games(connection, transaction):
         if target == 'lifetime':
             return connection.execute(text("""

@@ -77,17 +77,3 @@ def process_bi_statistic_revenue(target):
             return
 
         with_db_context(db, sync_collection_revenue)
-
-        SELECT
-        DATE(CONVERT_TZ(created_at, '+00:00', '-04:00'))
-        AS
-        on_day,
-        ROUND(SUM(currency_amount), 2)
-        AS
-        sum
-    FROM
-    bi_user_bill
-    WHERE
-    currency_type = 'Dollar'
-    AND
-    on_day = '2017-02-01'
