@@ -1,5 +1,4 @@
 from app.tasks import celery
-
 from .dau import process_bi_statistic_dau
 from .mau import process_bi_statistic_mau
 from .new_reg import process_bi_statistic_new_reg

@@ -6,6 +6,7 @@ from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
+from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.promotion import process_promotion_facebook_notification
 
 
@@ -33,3 +34,13 @@ def process_bi_statistic_for_yesterday():
 @celery.task
 def process_bi_statistic_for_today():
     process_bi_statistic('today')
+
+@celery.task
+def process_bi_user_statistic_for_yesterday():
+    process_bi_user_statistic('yesterday')
+
+
+@celery.task
+def process_bi_user_statistic_for_today():
+    process_bi_user_statistic('yesterday')
+
