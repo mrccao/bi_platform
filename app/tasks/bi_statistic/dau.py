@@ -22,7 +22,6 @@ def process_bi_statistic_dau(target):
                                            """), timezone_offset=timezone_offset,
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
         else:
-
             return connection.execute(text("""
                                            SELECT COUNT(DISTINCT user_id)                                  AS sum
                                            FROM   bi_user_currency
@@ -35,13 +34,9 @@ def process_bi_statistic_dau(target):
     result_proxy = with_db_context(db, collection_dau_all_games)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-
     else:
-
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_dau_all_games(connection, transaction):
             where = and_(
@@ -49,9 +44,7 @@ def process_bi_statistic_dau(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'dau': bindparam('sum')
-            }
+            values = {'dau': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -62,7 +55,6 @@ def process_bi_statistic_dau(target):
             else:
                 transaction.commit()
                 print(target + ' DAU for all games transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_dau_all_games)
 
@@ -100,13 +92,9 @@ def process_bi_statistic_dau(target):
     result_proxy = with_db_context(db, collection_dau_every_game)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
-
-
     else:
         rows = [{'_on_day': someday, '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_dau_every_game(connection, transaction):
             where = and_(
@@ -114,9 +102,7 @@ def process_bi_statistic_dau(target):
                 BIStatistic.__table__.c.game == bindparam('_game'),
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'dau': bindparam('sum')
-            }
+            values = {'dau': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -127,6 +113,5 @@ def process_bi_statistic_dau(target):
             else:
                 transaction.commit()
                 print(target + ' DAU  for every game transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_dau_every_game)

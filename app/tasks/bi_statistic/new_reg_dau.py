@@ -39,12 +39,9 @@ def process_bi_statistic_new_reg_dau(target):
     result_proxy = with_db_context(db, collection_new_reg_dau)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-
     else:
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_new_reg_dau(connection, transaction):
             where = and_(
@@ -52,9 +49,7 @@ def process_bi_statistic_new_reg_dau(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'new_reg_game_dau': bindparam('sum')
-            }
+            values = {'new_reg_game_dau': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -65,6 +60,5 @@ def process_bi_statistic_new_reg_dau(target):
             else:
                 transaction.commit()
                 print(target + ' new_reg_game_dau_transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_new_reg_dau)

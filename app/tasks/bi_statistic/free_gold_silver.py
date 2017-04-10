@@ -35,11 +35,9 @@ def process_bi_statistic_free_transaction(target):
     result_proxy = with_db_context(db, collection_gold_free_transaction)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
     else:
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_gold_free_transaction(connection, transaction):
             where = and_(
@@ -47,9 +45,7 @@ def process_bi_statistic_free_transaction(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'free_gold': bindparam('sum')
-            }
+            values = {'free_gold': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -60,7 +56,6 @@ def process_bi_statistic_free_transaction(target):
             else:
                 transaction.commit()
                 print(target + ' free gold transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_gold_free_transaction)
 
@@ -76,7 +71,6 @@ def process_bi_statistic_free_transaction(target):
                                       silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE)
 
         else:
-
             return connection.execute(text("""
                                                 SELECT SUM(transaction_amount)                        AS sum
                                                 FROM   bi_user_currency
@@ -89,13 +83,9 @@ def process_bi_statistic_free_transaction(target):
     result_proxy = with_db_context(db, collection_silver_free_transaction)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-
     else:
-
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_silver_free_transaction(connection, transaction):
             where = and_(
@@ -103,9 +93,7 @@ def process_bi_statistic_free_transaction(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'free_silver': bindparam('sum')
-            }
+            values = { 'free_silver': bindparam('sum') }
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -116,6 +104,5 @@ def process_bi_statistic_free_transaction(target):
             else:
                 transaction.commit()
                 print(target + ' free silver transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_silver_free_transaction)

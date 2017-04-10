@@ -36,30 +36,26 @@ def process_bi_statistic_mau(target):
                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_mau_every_game():
+        result_proxy = []
         if target == 'lifetime':
-            result_proxy = []
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_every_game, day=day)
                 every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
                                            every_month_result]
                 result_proxy.append(every_month_result_rows)
-
             return result_proxy
 
         else:
-            result_proxy = []
             every_month_result = with_db_context(db, collection_mau_every_game, day=someday)
             every_month_result_rows = [{'_on_day': str(someday), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
-
             result_proxy.append(every_month_result_rows)
             return result_proxy
 
     result_proxy_for_every_game = get_mau_every_game()
 
     for rows in result_proxy_for_every_game:
-
         if rows:
 
             def sync_collection_mau_every_game(connection, transaction):
@@ -69,9 +65,7 @@ def process_bi_statistic_mau(target):
                     BIStatistic.__table__.c.game == bindparam('_game'),
                     BIStatistic.__table__.c.platform == 'All Platform'
                 )
-                values = {
-                    'mau': bindparam('sum')
-                }
+                values = {'mau': bindparam('sum')}
 
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -82,7 +76,6 @@ def process_bi_statistic_mau(target):
                 else:
                     transaction.commit()
                     print(target + ' MAU for every game transaction.commit()')
-                return
 
             with_db_context(db, sync_collection_mau_every_game)
 
@@ -100,9 +93,8 @@ def process_bi_statistic_mau(target):
                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_mau_all_games():
+        result_proxy = []
         if target == 'lifetime':
-
-            result_proxy = []
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_all_games, day=day)
@@ -111,7 +103,6 @@ def process_bi_statistic_mau(target):
             return result_proxy
 
         else:
-            result_proxy = []
             every_month_result = with_db_context(db, collection_mau_all_games, day=someday)
             every_month_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_month_result]
 
@@ -119,9 +110,7 @@ def process_bi_statistic_mau(target):
             return result_proxy
 
     result_proxy_for_all_game = get_mau_all_games()
-
     for rows in result_proxy_for_all_game:
-
         if rows:
             def sync_collection_mau_all_games(connection, transaction):
 
@@ -130,9 +119,7 @@ def process_bi_statistic_mau(target):
                     BIStatistic.__table__.c.game == 'All Game',
                     BIStatistic.__table__.c.platform == 'All Platform'
                 )
-                values = {
-                    'mau': bindparam('sum')
-                }
+                values = {'mau': bindparam('sum')}
 
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -143,6 +130,5 @@ def process_bi_statistic_mau(target):
                 else:
                     transaction.commit()
                     print(target + ' MAU for all games transaction.commit()')
-                return
 
             with_db_context(db, sync_collection_mau_all_games)

@@ -31,12 +31,9 @@ def process_bi_statistic_revenue(target):
     result_proxy = with_db_context(db, collection_revenue)
 
     if target == 'lifetime':
-
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-
     else:
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
     if rows:
         def sync_collection_revenue(connection, transaction):
             where = and_(
@@ -44,9 +41,8 @@ def process_bi_statistic_revenue(target):
                 BIStatistic.__table__.c.game == 'All Game',
                 BIStatistic.__table__.c.platform == 'All Platform'
             )
-            values = {
-                'revenue': bindparam('sum')
-            }
+            values = {'revenue': bindparam('sum')}
+
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
@@ -56,6 +52,5 @@ def process_bi_statistic_revenue(target):
             else:
                 transaction.commit()
                 print(target + ' revenue transaction.commit()')
-            return
 
         with_db_context(db, sync_collection_revenue)

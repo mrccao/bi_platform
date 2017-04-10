@@ -19,7 +19,7 @@ def generate_sql_date(target):
     someday = day.get(target, target)
 
     if target == 'lifetime':
-        day = None
+        someday = None
         index_date = None
         sql_date = someday, index_date, timezone_offset
         return sql_date

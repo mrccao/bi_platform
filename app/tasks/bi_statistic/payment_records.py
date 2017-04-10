@@ -53,7 +53,6 @@ def process_bi_statistic_revenue(target, timezone_offset):
         rows = [{'_on_day': someday, 'dollar_paid_user_count': row['dollar_paid_user_count'],
                  'dollar_paid_count': row['dollar_paid_count'], 'dollar_paid_amount': row['dollar_paid_amount'], } for
                 row in result_proxy]
-
     if rows:
         def sync_collection_revenue(connection, transaction):
             where = and_(
