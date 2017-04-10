@@ -233,8 +233,9 @@ class BIUserCurrency(db.Model):
     game_id = db.Column(db.Integer, nullable=False, index=True)
     currency_type = db.Column(db.String(50), nullable=False, index=True)
     transaction_type = db.Column(db.Integer, nullable=False, index=True)
-    transaction_amount = db.Column(db.BIGINT, nullable=False, index=True)
-    balance = db.Column(db.BIGINT, nullable=False, index=True)
+    transaction_amount = db.Column(db.BIGINT)
+    balance = db.Column(db.BIGINT)
+    user_id_updated = db.Column(db.Boolean, nullable=False, default=False, index=True)
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
     __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)

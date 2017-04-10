@@ -15,8 +15,13 @@ def process_bi():
     process_bi_user_bill()
 
     if app.config['ENV'] == 'prod':
-        process_bi_user_currency()
         process_bi_clubwpt_user()
+
+
+@celery.task
+def process_bi_currency():
+    if app.config['ENV'] == 'prod':
+        process_bi_user_currency()
 
 
 @celery.task
