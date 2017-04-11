@@ -15,18 +15,19 @@ from app.utils import current_time
 
 def process_bi_statistic_mau(target):
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-(30 + 3)).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = arrow.get(target).replace(days=-(30 + 3)).format('YYYY-MM-DD')
         today = target
         target = 'today'
 
     def collection_mau_every_game(connection, transaction, day):
+        
+        start_index_time = arrow.get(day).replace(days=-(30 + 3)).format('YYYY-MM-DD')
+        end_index_time = arrow.get(day).replace(days=+(30 + 3)).format('YYYY-MM-DD')
 
         return connection.execute(text("""
                                        SELECT COUNT(DISTINCT user_id) AS sum,
@@ -35,14 +36,14 @@ def process_bi_statistic_mau(target):
                                                 WHEN game_id = 23118 THEN 'TimeSlots'
                                               END                     AS game
                                        FROM   bi_user_currency
-                                       WHERE  created_at > :index_time
+                                       WHERE  created_at > :start_index_time AND created_at < :end_index_time
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                   DATE_ADD(:on_day, INTERVAL - 30 DAY)
                                               AND transaction_type NOT IN :free_transaction_types
                                        GROUP  BY game
                                        """), on_day=day, timezone_offset=timezone_offset,
-                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
+                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, start_index_time=start_index_time, end_index_time=end_index_time)
 
     def get_mau_every_game():
         if target == 'lifetime':
@@ -105,17 +106,20 @@ def process_bi_statistic_mau(target):
             with_db_context(db, sync_collection_mau_every_game)
 
     def collection_mau_all_games(connection, transaction, day):
+        
+        start_index_time = arrow.get(day).replace(days=-(30 + 3)).format('YYYY-MM-DD')
+        end_index_time = arrow.get(day).replace(days=+(30 + 3)).format('YYYY-MM-DD')
 
         return connection.execute(text("""
                                        SELECT COUNT(DISTINCT user_id) AS sum
                                        FROM   bi_user_currency
-                                       WHERE  created_at > :index_time
+                                       WHERE  created_at > :start_index_time AND created_at < :end_index_time
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
                                                   DATE_ADD(:on_day, INTERVAL - 30 DAY)
                                               AND transaction_type NOT IN :free_transaction_types
                                        """), on_day=day, timezone_offset=timezone_offset,
-                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
+                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, start_index_time=start_index_time, end_index_time=end_index_time)
 
     def get_mau_all_games():
         if target == 'lifetime':

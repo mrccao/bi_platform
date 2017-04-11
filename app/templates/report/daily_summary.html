@@ -1,4 +1,7 @@
 {% extends "layout/app.html" %}
+
+{% block page_title %}Daily Summary{% endblock %}
+
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
@@ -74,11 +77,6 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-
-
-    {% assets "common_js" %}
-        <script src="{{ ASSET_URL }}" type="text/javascript"></script>
-    {% endassets %}
 
     <script type="text/javascript">
 

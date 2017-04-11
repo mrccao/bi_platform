@@ -12,14 +12,16 @@ from app.utils import current_time
 
 def process_bi_statistic_new_reg_dau(target):
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-3).format('YYYY-MM-DD')
+    start_index_time = now.replace(days=-3).format('YYYY-MM-DD')
+    end_index_time = now.replace(days=+3).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = arrow.get(target).replace(days=-3).format('YYYY-MM-DD')
+        start_index_time = arrow.get(target).replace(days=-3).format('YYYY-MM-DD')
+        end_index_time = arrow.get(target).replace(days=+3).format('YYYY-MM-DD')
         today = target
         target = 'today'
 
@@ -42,22 +44,22 @@ def process_bi_statistic_new_reg_dau(target):
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
-                                           WHERE  uc.created_at > :index_time
+                                           WHERE  uc.created_at > :start_index_time AND uc.created_at < :end_index_time
                                                   AND DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) = :on_day
                                                   AND uc.transaction_type NOT IN :free_transaction_types
                                            """), on_day=yesterday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, start_index_time=start_index_time, end_index_time=end_index_time)
         if target == 'today':
             return connection.execute(text("""
                                            SELECT COUNT(DISTINCT uc.user_id)                               AS sum
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
-                                           WHERE  uc.created_at > :index_time
+                                           WHERE  uc.created_at > :start_index_time AND uc.created_at < :end_index_time
                                                   AND DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) = :on_day
                                                   AND uc.transaction_type NOT IN :free_transaction_types
                                            """), on_day=today, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, start_index_time=start_index_time, end_index_time=end_index_time)
 
     result_proxy = with_db_context(db, collection_new_reg_dau)
 
