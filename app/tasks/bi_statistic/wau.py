@@ -1,3 +1,4 @@
+import arrow
 from datetime import date, timedelta, datetime
 
 import pandas as pd
@@ -14,16 +15,14 @@ from app.utils import current_time
 
 def process_bi_statistic_wau(target):
     now = current_time(app.config['APP_TIMEZONE'])
+    index_time = now.replace(days=-(7 + 3)).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        target_date = datetime.strptime(target, "%Y-%m-%d")
-        index_date = target_date + timedelta(days=-10)
-        index_time = index_date.strftime("%Y-%m-%d")
-
+        index_time = arrow.get(target).replace(days=-(7 + 3)).format('YYYY-MM-DD')
         today = target
         target = 'today'
 
@@ -59,9 +58,8 @@ def process_bi_statistic_wau(target):
 
         if target == 'yesterday':
             result_proxy = []
-            day = yesterday
             every_week_result = with_db_context(db, collection_wau_every_game, day=yesterday)
-            every_week_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_week_result_rows = [{'_on_day': str(yesterday), '_game': row['game'], 'sum': row['sum']} for row in
                                       every_week_result]
 
             result_proxy.append(every_week_result_rows)
@@ -69,9 +67,8 @@ def process_bi_statistic_wau(target):
 
         if target == 'today':
             result_proxy = []
-            day = today
             every_week_result = with_db_context(db, collection_wau_every_game, day=today)
-            every_week_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_week_result_rows = [{'_on_day': str(today), '_game': row['game'], 'sum': row['sum']} for row in
                                       every_week_result]
 
             result_proxy.append(every_week_result_rows)
@@ -97,12 +94,12 @@ def process_bi_statistic_wau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print(target + ' Wau for every game transaction.rollback()')
+                    print(target + ' WAU for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:
                     transaction.commit()
-                    print(target + ' Wau for every game transaction.commit()')
+                    print(target + ' WAU for every game transaction.commit()')
                 return
 
             with_db_context(db, sync_collection_wau_every_game)
@@ -133,18 +130,16 @@ def process_bi_statistic_wau(target):
 
         if target == 'yesterday':
             result_proxy = []
-            day = yesterday
             every_week_result = with_db_context(db, collection_wau_all_games, day=yesterday)
-            every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
+            every_week_result_rows = [{'_on_day': str(yesterday), 'sum': row['sum']} for row in every_week_result]
 
             result_proxy.append(every_week_result_rows)
             return result_proxy
 
         if target == 'today':
             result_proxy = []
-            day = today
             every_week_result = with_db_context(db, collection_wau_all_games, day=today)
-            every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
+            every_week_result_rows = [{'_on_day': str(today), 'sum': row['sum']} for row in every_week_result]
 
             result_proxy.append(every_week_result_rows)
             return result_proxy

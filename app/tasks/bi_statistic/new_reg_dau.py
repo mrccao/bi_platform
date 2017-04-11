@@ -1,3 +1,4 @@
+import arrow
 from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
@@ -6,7 +7,7 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time, generate_index_date
+from app.utils import current_time
 
 
 def process_bi_statistic_new_reg_dau(target):
@@ -18,7 +19,7 @@ def process_bi_statistic_new_reg_dau(target):
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = generate_index_date(target)
+        index_time = arrow.get(target).replace(days=-3).format('YYYY-MM-DD')
         today = target
         target = 'today'
 

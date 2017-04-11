@@ -5,7 +5,7 @@ from sqlalchemy.sql.expression import bindparam
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time, generate_index_date
+from app.utils import current_time
 
 
 def process_bi_statistic_new_reg(target):
@@ -15,7 +15,6 @@ def process_bi_statistic_new_reg(target):
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = generate_index_date(target)
         today = target
         target = 'today'
 

@@ -1,3 +1,4 @@
+import arrow
 from datetime import date, datetime, timedelta
 
 import pandas as pd
@@ -14,16 +15,14 @@ from app.utils import current_time
 
 def process_bi_statistic_mau(target):
     now = current_time(app.config['APP_TIMEZONE'])
+    index_time = now.replace(days=-(30 + 3)).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        target_date = datetime.strptime(target, "%Y-%m-%d")
-        index_date = target_date + timedelta(days=-33)
-        index_time = index_date.strftime("%Y-%m-%d")
-
+        index_time = arrow.get(target).replace(days=-(30 + 3)).format('YYYY-MM-DD')
         today = target
         target = 'today'
 
@@ -59,9 +58,8 @@ def process_bi_statistic_mau(target):
 
         if target == 'yesterday':
             result_proxy = []
-            day = yesterday
             every_month_result = with_db_context(db, collection_mau_every_game, day=yesterday)
-            every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_month_result_rows = [{'_on_day': str(yesterday), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
 
             result_proxy.append(every_month_result_rows)
@@ -69,9 +67,8 @@ def process_bi_statistic_mau(target):
 
         if target == 'today':
             result_proxy = []
-            day = today
             every_month_result = with_db_context(db, collection_mau_every_game, day=today)
-            every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
+            every_month_result_rows = [{'_on_day': str(today), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
 
             result_proxy.append(every_month_result_rows)
@@ -133,18 +130,16 @@ def process_bi_statistic_mau(target):
 
         if target == 'yesterday':
             result_proxy = []
-            day = yesterday
             every_month_result = with_db_context(db, collection_mau_all_games, day=yesterday)
-            every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
+            every_month_result_rows = [{'_on_day': str(yesterday), 'sum': row['sum']} for row in every_month_result]
 
             result_proxy.append(every_month_result_rows)
             return result_proxy
 
         if target == 'today':
             result_proxy = []
-            day = today
             every_month_result = with_db_context(db, collection_mau_all_games, day=today)
-            every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
+            every_month_result_rows = [{'_on_day': str(today), 'sum': row['sum']} for row in every_month_result]
 
             result_proxy.append(every_month_result_rows)
             return result_proxy
