@@ -232,15 +232,15 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                new_registration = randrange(1000, 2000)
+                new_reg = randrange(1000, 2000)
                 dau = randrange(2000)
                 mau = randrange(4000)
                 wau = randrange(3000)
-                new_registration_game_dau = randrange(1000)
+                new_reg_game_dau = randrange(1000)
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
-                                           new_registration=new_registration,
+                                           new_reg=new_reg,
                                            dau=dau, mau=mau, wau=wau,
-                                           new_registration_game_dau=new_registration_game_dau))
+                                           new_reg_game_dau=new_reg_game_dau))
     db.session.commit()
 
 

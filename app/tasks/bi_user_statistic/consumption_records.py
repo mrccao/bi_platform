@@ -18,7 +18,9 @@ def process_bi_user_statistic_consumption_records(target):
     today = now.format('YYYY-MM-DD')
 
     def collection_user_consumption_records(connection, transaction, product_orig, day):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                             SELECT user_id, sum(currency_amount) AS consumption_amount
                                             FROM bi_user_bill
@@ -30,7 +32,9 @@ def process_bi_user_statistic_consumption_records(target):
                                       product_orig=tuple(product_orig))
 
     def get_user_consumption_records():
+
         result_proxy = []
+
         if target == 'lifetime':
 
             for day in pd.date_range(date(2016, 6, 1), today):

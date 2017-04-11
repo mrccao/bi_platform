@@ -1,7 +1,6 @@
 from datetime import date
 
 import pandas as pd
-from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -9,13 +8,11 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import generate_sql_date, current_time
+from app.utils import generate_sql_date
 
 
 def process_bi_statistic_mau(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
-    now = current_time(app.config['APP_TIMEZONE'])
-    today = now.format('YYYY-MM-DD')
+    today, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_mau_every_game(connection, transaction, day):
 
@@ -36,8 +33,11 @@ def process_bi_statistic_mau(target):
                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_mau_every_game():
+
         result_proxy = []
+
         if target == 'lifetime':
+
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_every_game, day=day)
@@ -47,6 +47,7 @@ def process_bi_statistic_mau(target):
             return result_proxy
 
         else:
+
             every_month_result = with_db_context(db, collection_mau_every_game, day=someday)
             every_month_result_rows = [{'_on_day': str(someday), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
@@ -56,6 +57,7 @@ def process_bi_statistic_mau(target):
     result_proxy_for_every_game = get_mau_every_game()
 
     for rows in result_proxy_for_every_game:
+
         if rows:
 
             def sync_collection_mau_every_game(connection, transaction):
@@ -91,16 +93,21 @@ def process_bi_statistic_mau(target):
                                   free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
 
     def get_mau_all_games():
+
         result_proxy = []
+
         if target == 'lifetime':
+
             for day in pd.date_range(date(2016, 6, 1), today):
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_all_games, day=day)
                 every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
                 result_proxy.append(every_month_result_rows)
+
             return result_proxy
 
         else:
+
             every_month_result = with_db_context(db, collection_mau_all_games, day=someday)
             every_month_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_month_result]
 
@@ -108,8 +115,11 @@ def process_bi_statistic_mau(target):
             return result_proxy
 
     result_proxy_for_all_game = get_mau_all_games()
+
     for rows in result_proxy_for_all_game:
+
         if rows:
+
             def sync_collection_mau_all_games(connection, transaction):
 
                 where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),

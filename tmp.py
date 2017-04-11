@@ -19,5 +19,7 @@ PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
                54],
     'emoji': [46], 'gold': [1], 'sliver': [2], 'spin_cccelerator': [8], 'spin_ticket': [9], 'lucky_spin': [-1]}
 
+CURRENCY_TYPE = ['Dollar', 'Gold', 'MasterPoints']
 
-CURRENCY_TYPE=['Dollar','Gold','MasterPoints']
+
+

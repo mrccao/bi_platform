@@ -8,10 +8,12 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_new_reg(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_new_reg(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
@@ -28,6 +30,7 @@ def process_bi_statistic_new_reg(target):
                                             """), timezone_offset=timezone_offset)
 
         else:
+
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -45,11 +48,17 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_new_reg)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_new_reg(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == bindparam('_platform'),
                          BIStatistic.__table__.c.game == 'All Game')
@@ -69,7 +78,9 @@ def process_bi_statistic_new_reg(target):
         with_db_context(db, sync_collection_new_reg)
 
     def collection_new_reg_all_platforms(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
@@ -78,6 +89,7 @@ def process_bi_statistic_new_reg(target):
                                             """), timezone_offset=timezone_offset)
 
         else:
+
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
@@ -87,10 +99,15 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_new_reg_all_platforms)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_new_reg_all_platforms(connection, transaction):
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == 'All Platform',
@@ -110,7 +127,9 @@ def process_bi_statistic_new_reg(target):
         with_db_context(db, sync_collection_new_reg_all_platforms)
 
     def collection_new_email_reg(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
@@ -128,6 +147,7 @@ def process_bi_statistic_new_reg(target):
                                             """), timezone_offset=timezone_offset)
 
         else:
+
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -146,15 +166,20 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_new_email_reg)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_new_email_reg(connection, transaction):
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == bindparam('_platform'),
                          BIStatistic.__table__.c.game == 'All Game')
-            values = {'new_email_reg': bindparam('sum')}
+            values = {'email_reg': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -169,7 +194,9 @@ def process_bi_statistic_new_reg(target):
         with_db_context(db, sync_collection_new_email_reg)
 
     def collection_new_email_reg_all_platforms(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
@@ -178,6 +205,7 @@ def process_bi_statistic_new_reg(target):
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
         else:
+
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
@@ -188,13 +216,17 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_new_email_reg_all_platforms)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
 
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
+
         def sync_collection_new_email_reg_all_platforms(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == 'All Platform',
                          BIStatistic.__table__.c.game == 'All Game')
@@ -213,7 +245,9 @@ def process_bi_statistic_new_reg(target):
         with_db_context(db, sync_collection_new_email_reg_all_platforms)
 
     def collection_email_validate(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
@@ -232,6 +266,7 @@ def process_bi_statistic_new_reg(target):
                                             """), timezone_offset=timezone_offset)
 
         else:
+
             return connection.execute(text("""
                                            SELECT CASE
                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
@@ -251,11 +286,17 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_email_validate)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_email_validate(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == bindparam('_platform'),
                          BIStatistic.__table__.c.game == 'All Game')
@@ -274,7 +315,9 @@ def process_bi_statistic_new_reg(target):
         with_db_context(db, sync_collection_email_validate)
 
     def collection_email_validate_all_platforms(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
@@ -296,12 +339,17 @@ def process_bi_statistic_new_reg(target):
     result_proxy = with_db_context(db, collection_email_validate_all_platforms)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
+
         def sync_collection_new_email_reg_all_platforms(connection, transaction):
+
             where = and_(
                 BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.platform == 'All Platform',

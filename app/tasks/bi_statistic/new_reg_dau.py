@@ -9,10 +9,12 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_new_reg_dau(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_new_reg_dau(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                             SELECT DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(DISTINCT uc.user_id)                               AS sum
@@ -25,6 +27,7 @@ def process_bi_statistic_new_reg_dau(target):
                                       free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE)
 
         else:
+
             return connection.execute(text("""
                                            SELECT COUNT(DISTINCT uc.user_id)                               AS sum
                                            FROM   bi_user u
@@ -39,11 +42,17 @@ def process_bi_statistic_new_reg_dau(target):
     result_proxy = with_db_context(db, collection_new_reg_dau)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_new_reg_dau(connection, transaction):
+
             where = and_(
                 BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                 BIStatistic.__table__.c.game == 'All Game',

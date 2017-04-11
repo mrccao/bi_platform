@@ -12,7 +12,9 @@ def process_bi_statistic_dau(target):
     someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_dau_all_games(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                   COUNT(DISTINCT user_id)                                  AS sum
@@ -34,10 +36,14 @@ def process_bi_statistic_dau(target):
     result_proxy = with_db_context(db, collection_dau_all_games)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_dau_all_games(connection, transaction):
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.game == 'All Game',
@@ -90,11 +96,17 @@ def process_bi_statistic_dau(target):
     result_proxy = with_db_context(db, collection_dau_every_game)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, '_game': row['game'], 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_dau_every_game(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.game == bindparam('_game'),
                          BIStatistic.__table__.c.platform == 'All Platform')

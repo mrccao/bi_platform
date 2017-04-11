@@ -43,6 +43,15 @@ class BIStatistic(db.Model):
     free_silver = db.Column(db.Integer, default=0)
 
 
+    one_day_retention = db.Column(db.Integer, default=0)
+    seven_day_retention = db.Column(db.Integer, default=0)
+    thirty_day_retention = db.Column(db.Integer, default=0)
+
+    # 1_day_retention = db.Column(db.Integer, default=0)
+    # 7_day_retention = db.Column(db.Integer, default=0)
+    # 30_day_retention = db.Column(db.Integer, default=0)
+
+
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
     # amount_of_masterpoint_exchanged_for_gold = db.Column(db.Float, default=0)
     # count_of_dollar_exchanged_for_gold = db.Column(db.Integer, default=0)
