@@ -1,4 +1,4 @@
-from datetime import date,timedelta
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 from flask import current_app as app
@@ -9,21 +9,21 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time, generate_index_date
+from app.utils import current_time
 
 
 def process_bi_statistic_mau(target):
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-(30 + 3)).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
-
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = generate_index_date(target)
-        index_time = index_time + timedelta(days=-30)
+        target_date = datetime.strptime(target, "%Y-%m-%d")
+        index_date = target_date + timedelta(days=-33)
+        index_time = index_date.strftime("%Y-%m-%d")
+
         today = target
         target = 'today'
 
@@ -69,7 +69,7 @@ def process_bi_statistic_mau(target):
 
         if target == 'today':
             result_proxy = []
-            day = yesterday
+            day = today
             every_month_result = with_db_context(db, collection_mau_every_game, day=today)
             every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
                                        every_month_result]
@@ -142,7 +142,7 @@ def process_bi_statistic_mau(target):
 
         if target == 'today':
             result_proxy = []
-            day = yesterday
+            day = today
             every_month_result = with_db_context(db, collection_mau_all_games, day=today)
             every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
 

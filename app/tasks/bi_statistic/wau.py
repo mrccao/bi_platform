@@ -1,4 +1,5 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+
 import pandas as pd
 from flask import current_app as app
 from sqlalchemy import text, and_
@@ -8,20 +9,21 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import current_time, generate_index_date
+from app.utils import current_time
 
 
 def process_bi_statistic_wau(target):
     now = current_time(app.config['APP_TIMEZONE'])
-    index_time = now.replace(days=-(7 + 3)).format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
     timezone_offset = app.config['APP_TIMEZONE']
 
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
-        index_time = generate_index_date(target)
-        index_time = index_time + datetime.timedelta(days=-7)
+        target_date = datetime.strptime(target, "%Y-%m-%d")
+        index_date = target_date + timedelta(days=-10)
+        index_time = index_date.strftime("%Y-%m-%d")
+
         today = target
         target = 'today'
 
@@ -67,7 +69,7 @@ def process_bi_statistic_wau(target):
 
         if target == 'today':
             result_proxy = []
-            day = yesterday
+            day = today
             every_week_result = with_db_context(db, collection_wau_every_game, day=today)
             every_week_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
                                       every_week_result]
@@ -140,7 +142,7 @@ def process_bi_statistic_wau(target):
 
         if target == 'today':
             result_proxy = []
-            day = yesterday
+            day = today
             every_week_result = with_db_context(db, collection_wau_all_games, day=today)
             every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
 
