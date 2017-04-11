@@ -1,5 +1,4 @@
-from datetime import date
-
+from datetime import date, timedelta
 import pandas as pd
 from flask import current_app as app
 from sqlalchemy import text, and_
@@ -22,6 +21,7 @@ def process_bi_statistic_wau(target):
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
         index_time = generate_index_date(target)
+        index_time = index_time + datetime.timedelta(days=-7)
         today = target
         target = 'today'
 
