@@ -23,6 +23,7 @@ def process_bi_statistic_mau(target):
     # process sync_bi_statistic_for_someday
     if target not in ['lifetime', 'today', 'yesterday']:
         index_time = generate_index_date(target)
+        index_time = index_time + datetime.timedelta(days=-30)
         today = target
         target = 'today'
 
