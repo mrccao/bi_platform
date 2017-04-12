@@ -27,7 +27,7 @@ def process_bi_statistic_wau(target):
     def collection_wau_every_game(connection, transaction, day):
         
         start_index_time = arrow.get(day).replace(days=-(7 + 3)).format('YYYY-MM-DD')
-        end_index_time = arrow.get(day).replace(days=+(7 + 3)).format('YYYY-MM-DD')
+        end_index_time = arrow.get(day).replace(days=+3).format('YYYY-MM-DD')
 
         return connection.execute(text("""
                                        SELECT COUNT(DISTINCT user_id) AS sum,
@@ -108,7 +108,7 @@ def process_bi_statistic_wau(target):
     def collection_wau_all_games(connection, transaction, day):
         
         start_index_time = arrow.get(day).replace(days=-(7 + 3)).format('YYYY-MM-DD')
-        end_index_time = arrow.get(day).replace(days=+(7 + 3)).format('YYYY-MM-DD')
+        end_index_time = arrow.get(day).replace(days=+3).format('YYYY-MM-DD')
 
         return connection.execute(text("""
                                        SELECT COUNT(DISTINCT user_id) AS sum
