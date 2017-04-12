@@ -1,11 +1,14 @@
-#!/usr/bin/env python
+from datetime import date
+
 import os
+import pandas as pd
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
-from random import randrange
+from random import choice
 
 from app import create_app
+from app.constants import TRANSACTION_TYPES
 from app.extensions import db
 from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
     BIUserStatistic
@@ -232,15 +235,15 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                new_reg = randrange(1000, 2000)
-                dau = randrange(2000)
-                mau = randrange(4000)
-                wau = randrange(3000)
-                new_reg_game_dau = randrange(1000)
-                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
-                                           new_reg=new_reg,
-                                           dau=dau, mau=mau, wau=wau,
-                                           new_reg_game_dau=new_reg_game_dau))
+                # new_reg = randrange(1000, 2000)
+                # dau = randrange(2000)
+                # mau = randrange(4000)
+                # wau = randrange(3000)
+                # new_reg_game_dau = randrange(1000)
+                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+                # new_reg=new_reg,
+                # dau=dau, mau=mau, wau=wau,
+                # new_reg_game_dau=new_reg_game_dau))
     db.session.commit()
 
 
@@ -384,6 +387,62 @@ def process_promotion_push():
     else:
         process_promotion_facebook_notification()
         process_promotion_email()
+
+
+@manager.command
+def create_bi_user_currency_mock_data():
+    game_id_list = [0, 22083, 23118, 38880, 39990]
+    transaction_type_list = list(TRANSACTION_TYPES)
+    currency_type_list = ['Gold', 'Silver']
+
+    user_id_list = db.session.query(BIUser.user_id).all()
+    day_range_1 = pd.date_range(date(2016, 6, 1), date(2016, 8, 30))
+    day_range_2 = pd.date_range(date(2016, 8, 30), date(2016, 12, 30))
+    day_range_3 = pd.date_range(date(2016, 12, 30), date(2017, 4, 30))
+
+    transaction_amount_list = range(10000)
+
+    for i in range(1000):
+        created_at = choice(day_range_1)
+        user_id_tuple = choice(user_id_list)
+        user_id = user_id_tuple[0]
+        currency_type = choice(currency_type_list)
+        transaction_type = choice(transaction_type_list)
+        transaction_amount = choice(transaction_amount_list)
+        game_id = choice(game_id_list)
+
+        db.session.add(BIUserCurrency(created_at=created_at, game_id=game_id, currency_type=currency_type,
+                                      user_id=user_id,
+                                      transaction_type=transaction_type, transaction_amount=transaction_amount))
+    db.session.commit()
+
+    for i in range(2000):
+        created_at = choice(day_range_2)
+        user_id_tuple = choice(user_id_list)
+        user_id = user_id_tuple[0]
+        currency_type = choice(currency_type_list)
+        transaction_type = choice(transaction_type_list)
+        transaction_amount = choice(transaction_amount_list)
+        game_id = choice(game_id_list)
+
+        db.session.add(BIUserCurrency(created_at=created_at, game_id=game_id, currency_type=currency_type,
+                                      user_id=user_id,
+                                      transaction_type=transaction_type, transaction_amount=transaction_amount))
+    db.session.commit()
+
+    for i in range(3000):
+        created_at = choice(day_range_3)
+        user_id_tuple = choice(user_id_list)
+        user_id = user_id_tuple[0]
+        currency_type = choice(currency_type_list)
+        transaction_type = choice(transaction_type_list)
+        transaction_amount = choice(transaction_amount_list)
+        game_id = choice(game_id_list)
+
+        db.session.add(BIUserCurrency(created_at=created_at, game_id=game_id, currency_type=currency_type,
+                                      user_id=user_id,
+                                      transaction_type=transaction_type, transaction_amount=transaction_amount))
+    db.session.commit()
 
 
 if __name__ == "__main__":

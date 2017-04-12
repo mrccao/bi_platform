@@ -9,7 +9,7 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_dau(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_dau_all_games(connection, transaction):
 

@@ -7,36 +7,46 @@ from app.tasks import with_db_context
 from app.utils import generate_sql_date
 
 
+# TODO : to be confirmed sql
 def process_bi_statistic_gold_silver_consumption(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_gold_silver_consumption(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
-            
-            
-            
-            
-            
-            
-                                            """), timezone_offset=timezone_offset)
+                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                   SUM(transaction_amount)                          AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  currency_type = 'gold'
+                                            GROUP  BY on_day
+                                           """), timezone_offset=timezone_offset)
         else:
+
             return connection.execute(text("""
-            
-            
-            
-            
-            
-                                            """), timezone_offset=timezone_offset, on_day=someday)
+                                            SELECT SUM(transaction_amount)                          AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  currency_type = 'gold'
+                                            AND    created_at > :index_time
+                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :on_day
+                                            """), timezone_offset=timezone_offset, on_day=someday,
+                                      index_time=index_time)
 
     result_proxy = with_db_context(db, collection_gold_silver_consumption)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
     if rows:
+
         def sync_collection_gold_consumption(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.game == 'All Game',
                          BIStatistic.__table__.c.platform == 'All Platform')
@@ -55,34 +65,41 @@ def process_bi_statistic_gold_silver_consumption(target):
         with_db_context(db, sync_collection_gold_consumption)
 
     def collection_silver_consumption(connection, transaction):
+
         if target == 'lifetime':
+
             return connection.execute(text("""
-            
-            
-            
-            
-                                            """), timezone_offset=timezone_offset)
+                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                   SUM(transaction_amount)                                  AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  currency_type = 'silver'
+                                            GROUP  BY on_day
+                                           """), timezone_offset=timezone_offset)
         else:
+
             return connection.execute(text("""
-            
-            
-            
-            
-            
-            
-            
-            
-                                            """), timezone_offset=timezone_offset, on_day=someday)
+                                            SELECT SUM(transaction_amount)                                  AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  currency_type = 'silver'
+                                            AND    created_at > :index_time
+                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :on_day
+                                            """), timezone_offset=timezone_offset, on_day=someday,
+                                      index_time=index_time)
 
     result_proxy = with_db_context(db, collection_silver_consumption)
 
     if target == 'lifetime':
+
         rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
     else:
+
         rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
 
     if rows:
+
         def sync_collection_silver_consumption(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.game == 'All Game',
                          BIStatistic.__table__.c.platform == 'All Platform')

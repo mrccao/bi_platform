@@ -13,7 +13,7 @@ from app.utils import current_time, generate_sql_date
 
 
 def process_bi_user_statistic_convert_records(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    someday, _, timezone_offset = generate_sql_date(target)
     now = current_time(app.config['APP_TIMEZONE'])
     today = now.format('YYYY-MM-DD')
 

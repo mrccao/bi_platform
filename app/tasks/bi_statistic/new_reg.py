@@ -8,7 +8,7 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_new_reg(target):
-    _, someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, _, timezone_offset = generate_sql_date(target)
 
     def collection_new_reg(connection, transaction):
 

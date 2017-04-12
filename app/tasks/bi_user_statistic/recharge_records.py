@@ -13,7 +13,7 @@ from app.utils import current_time, generate_sql_date
 
 
 def process_bi_user_statistic_recharge_records(target):
-    someday, index_time, timezone_offset = generate_sql_date(target)
+    someday, _, timezone_offset = generate_sql_date(target)
     now = current_time(app.config['APP_TIMEZONE'])
     today = now.format('YYYY-MM-DD')
 
@@ -49,7 +49,7 @@ def process_bi_user_statistic_recharge_records(target):
                                                         'purchase_{}'.format(product): row['purchase_quantity']}
                                                        for row in product_sales_record]
 
-                    all_product_sales_records = dict([(i, every_product_sales_record_rows)])
+                    all_product_sales_records = dict([(product, every_product_sales_record_rows)])
 
                     result_proxy.append(all_product_sales_records)
         else:
@@ -63,7 +63,7 @@ def process_bi_user_statistic_recharge_records(target):
                                                     'purchase_{}'.format(product): row['purchase_quantity']}
                                                    for row in product_sales_record]
 
-                all_product_sales_records = dict([(i, every_product_sales_record_rows)])
+                all_product_sales_records = dict([(product, every_product_sales_record_rows)])
 
                 result_proxy.append(all_product_sales_records)
 

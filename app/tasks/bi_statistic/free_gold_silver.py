@@ -31,8 +31,8 @@ def process_bi_statistic_free_transaction(target):
                                             FROM   bi_user_currency
                                             WHERE  transaction_type IN  :gold_free_transaction_types
                                             AND    created_at > :index_time
-                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                           """), timezone_offset=timezone_offset, on_day=someday,
+                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                           """), timezone_offset=timezone_offset, on_day=someday, index_time=index_time,
                                       gold_free_transaction_types=GOLD_FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_gold_free_transaction)
@@ -70,23 +70,24 @@ def process_bi_statistic_free_transaction(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-                                                SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
-                                                       SUM(transaction_amount)                        AS sum
-                                                FROM   bi_user_currency
-                                                WHERE  transaction_type IN  :silver_free_transaction_types
-                                                GROUP  BY on_day
-                                               """), timezone_offset=timezone_offset,
+                                            SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
+                                                   SUM(transaction_amount)                                  AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  transaction_type IN  :silver_free_transaction_types
+                                            GROUP  BY on_day
+                                            """), timezone_offset=timezone_offset,
                                       silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE)
 
         else:
 
             return connection.execute(text("""
-                                                SELECT SUM(transaction_amount)                        AS sum
-                                                FROM   bi_user_currency
-                                                WHERE  transaction_type IN  :silver_free_transaction_types
-                                                AND    created_at > :index_time
-                                                AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = : on_day
-                                               """), timezone_offset=timezone_offset, on_day=someday,
+                                            SELECT SUM(transaction_amount)                                      AS sum
+                                            FROM   bi_user_currency
+                                            WHERE  transaction_type IN  :silver_free_transaction_types
+                                            AND    created_at > :index_time
+                                            AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
+                                            """), timezone_offset=timezone_offset, on_day=someday,
+                                      index_time=index_time,
                                       silver_free_transaction_types=SILVER_FREE_TRANSACTION_TYPES_TUPLE)
 
     result_proxy = with_db_context(db, collection_silver_free_transaction)

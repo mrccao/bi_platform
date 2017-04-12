@@ -8,7 +8,7 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_revenue(target):
-    _, someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, _, timezone_offset = generate_sql_date(target)
 
     def collection_revenue(connection, transaction):
 
@@ -28,7 +28,7 @@ def process_bi_statistic_revenue(target):
                                            FROM   bi_user_bill
                                            WHERE  currency_type = 'Dollar'
                                            AND  DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset))  = :on_day
-                                            """), timezone_offset=timezone_offset, on_day=someday)
+                                           """), timezone_offset=timezone_offset, on_day=someday)
 
     result_proxy = with_db_context(db, collection_revenue)
 
