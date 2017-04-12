@@ -16,7 +16,7 @@
                 <!-- small box -->
                 <div class="small-box bg-yellow summary-box">
                     <div class="inner">
-                        <h3><span class="recent-sparkline" id="recent-new-registration"></span><span id="summary-new-registration">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-yday" title="Yesterday">--</span></h3>
+                        <h3><span id="summary-new-registration">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-yday" title="Yesterday">--</span></h3>
                         <p>New Registration</p>
                     </div>
                     <div class="icon">
@@ -29,7 +29,7 @@
                 <!-- small box -->
                 <div class="small-box bg-aqua summary-box">
                     <div class="inner">
-                        <h3><span class="recent-sparkline" id="recent-revenue"></span><span id="summary-revenue">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-revenue-yday" title="Yesterday">--</span></h3>
+                        <h3><span id="summary-revenue">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-revenue-yday" title="Yesterday">--</span></h3>
                         <p>Revenue</p>
                     </div>
                     <div class="icon">
@@ -42,7 +42,7 @@
                 <!-- small box -->
                 <div class="small-box bg-green summary-box">
                     <div class="inner">
-                        <h3><span class="recent-sparkline" id="recent-game-dau"></span><span id="summary-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-game-dau-yday" title="Yesterday">--</span></h3>
+                        <h3><span id="summary-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-game-dau-yday" title="Yesterday">--</span></h3>
                         <p>Game DAU</p>
                     </div>
                     <div class="icon" style="top: -8px;">
@@ -55,7 +55,7 @@
                 <!-- small box -->
                 <div class="small-box bg-teal summary-box">
                     <div class="inner">
-                        <h3><span class="recent-sparkline" id="recent-new-registration-game-dau"></span><span id="summary-new-registration-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-game-dau-yday" title="Yesterday">--</span></h3>
+                        <h3><span id="summary-new-registration-game-dau">--</span> <span class="summary-separater">/</span> <span class="summary-yday" id="summary-new-registration-game-dau-yday" title="Yesterday">--</span></h3>
                         <p>New Reg Game DAU</p>
                     </div>
                     <div class="icon">
@@ -170,8 +170,6 @@
 {% block body_tail %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -336,59 +334,6 @@
             });
             $('#btn-executive-apply').trigger('click');
 
-            ////////////////////
-
-            var summarySparklineOption = {
-                type: 'bar',
-                height: '25px',
-                chartRangeMin: 10,
-                chartRangeMax: 10,
-                barColor: 'white',
-                barWidth: '5px',
-                tooltipFormat: $.spformat('\{\{value:values\}\}  -  \{\{value\}\}', 'sparkline-tooltip'),
-                tooltipValueLookups: {
-                    // values: $.range_map({ '412': '3/2/2017', '512': '4/2/2017', '613': '5/2/2017' })
-                }
-            };
-
-            function getSummarySparklineData(days_ago, report_type) {
-                $.ajax({
-                    type: 'GET',
-                    url: '/dashboard/visualization/executive_data',
-                    data: {
-                        days_ago: 7,
-                        report_type: report_type
-                    },
-                    dataType: 'json',
-                    success: function(result) {
-
-                        var sparklineTooltipValues = {};
-                        var resultData = result.data;
-                        jQuery.each(result.labels, function(index, item) {
-                            sparklineTooltipValues[resultData[index]] = item;
-                        });
-                        summarySparklineOption.tooltipValueLookups = {values: $.range_map(sparklineTooltipValues)};
-
-                        if (report_type == 'New Registration') {
-                            $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
-                        } else if (report_type == 'Game DAU') {
-                            $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
-                        } else if (report_type == 'New Reg Game DAU') {
-                            $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
-                        } else if (report_type == 'Revenue') {
-                            $('#recent-new-registration').sparkline(resultData, summarySparklineOption);
-                        }
-
-                    },
-                    error: function(xhr) {
-                    }
-                });
-            }
-
-            // var queryTypes = ["New Registration", "Revenue", "New Reg Game DAU", "Game DAU"];
-            // jQuery.each(queryTypes, function(index, item) {
-            //   getSummarySparklineData(7, item);
-            // });
         });
     </script>
 {% endblock %}

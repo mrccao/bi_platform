@@ -8,7 +8,6 @@ common_css = Bundle(
 
 common_js = Bundle(
     '../assets/js/adminlte.js',
-    '../assets/js/echarts_theme.js',
     filters='jsmin',
     output='static/js/common.js'
 )
