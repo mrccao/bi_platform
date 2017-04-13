@@ -1,3 +1,4 @@
+import arrow
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -9,9 +10,12 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_new_reg_dau(target):
-    _, someday, index_time, timezone_offset = generate_sql_date(target)
+    _, someday, _, timezone_offset = generate_sql_date(target)
 
     def collection_new_reg_dau(connection, transaction):
+
+        start_index_time = arrow.get(someday).replace(days=-3).format('YYYY-MM-DD')
+        end_index_time = arrow.get(someday).replace(days=+3).format('YYYY-MM-DD')
 
         if target == 'lifetime':
 
@@ -37,7 +41,8 @@ def process_bi_statistic_new_reg_dau(target):
                                                   AND DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) = :on_day
                                                   AND uc.transaction_type NOT IN :free_transaction_types
                                            """), on_day=someday, timezone_offset=timezone_offset,
-                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE, index_time=index_time)
+                                      free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE,
+                                      start_index_time=start_index_time, end_index_time=end_index_time)
 
     result_proxy = with_db_context(db, collection_new_reg_dau)
 
