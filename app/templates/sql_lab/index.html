@@ -2,6 +2,38 @@
 
 {% block page_title %}SQL Lab{% endblock %}
 
+{% block head_tail %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
+	
+    <style>
+		
+	#result-table_wrapper {
+		overflow: auto;
+	}
+	
+    #result-table_wrapper .table-button {
+        float: right;
+    }
+	
+    #result-table_wrapper .table-button .btn {
+        padding: 4px 12px;
+    }
+	
+    #result-table_wrapper .table-length {
+        float: left;
+    }
+
+    #result-table_wrapper .table-filter {
+        float: right;
+		margin-right: 10px;
+    }
+
+    </style>
+{% endblock %}
+
 {% block main_content %}
     <section class="content-header">
         <h1>SQL Lab</h1>
@@ -122,40 +154,6 @@
     <iframe style="display:none;" id="hiddenIframe"></iframe>
 {% endblock %}
 
-
-{% block head_tail %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/addon/hint/show-hint.css">
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
-	
-    <style>
-		
-	#result-table_wrapper {
-		overflow: auto;
-	}
-	
-    #result-table_wrapper .table-button {
-        float: right;
-    }
-	
-    #result-table_wrapper .table-button .btn {
-        padding: 4px 12px;
-    }
-	
-    #result-table_wrapper .table-length {
-        float: left;
-    }
-
-    #result-table_wrapper .table-filter {
-        float: right;
-		margin-right: 10px;
-    }
-
-    </style>
-{% endblock %}
-
-
 {% block body_tail %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/codemirror.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.21.0/mode/sql/sql.min.js" type="text/javascript"></script>
@@ -165,7 +163,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js" type="text/javascript"></script>
 
-    <script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/buttons.html5.min.js"></script>

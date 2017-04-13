@@ -56,6 +56,7 @@ def process_bi_statistic_wau(target):
 
             every_week_result = with_db_context(db, collection_wau_every_game, day=someday)
             every_week_result_rows = [{'_on_day': str(someday), '_game': row['game'], 'sum': row['sum']} for row in
+
                                       every_week_result]
 
             result_proxy.append(every_week_result_rows)
@@ -77,7 +78,7 @@ def process_bi_statistic_wau(target):
                 try:
                     connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
                 except:
-                    print(target + ' Wau for every game transaction.rollback()')
+                    print(target + ' WAU for every game transaction.rollback()')
                     transaction.rollback()
                     raise
                 else:

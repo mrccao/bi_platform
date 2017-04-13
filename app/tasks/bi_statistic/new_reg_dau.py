@@ -33,7 +33,7 @@ def process_bi_statistic_new_reg_dau(target):
                                            FROM   bi_user u
                                                   LEFT JOIN bi_user_currency uc
                                                          ON u.user_id = uc.user_id
-                                           WHERE  uc.created_at > :index_time
+                                           WHERE  uc.created_at > :start_index_time AND uc.created_at < :end_index_time
                                                   AND DATE(CONVERT_TZ(u.reg_time, '+00:00', :timezone_offset)) = :on_day
                                                   AND uc.transaction_type NOT IN :free_transaction_types
                                            """), on_day=someday, timezone_offset=timezone_offset,
