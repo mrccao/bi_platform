@@ -1,7 +1,6 @@
 from datetime import date
 
 import pandas as pd
-from flask import current_app as app
 from sqlalchemy import bindparam
 from sqlalchemy import text
 
@@ -9,13 +8,11 @@ from app.constants import PRODUCT_AND_PRODUCT_ORIG_MAPPING
 from app.extensions import db
 from app.models.bi import BIUserStatistic
 from app.tasks import with_db_context
-from app.utils import current_time, generate_sql_date
+from app.utils import generate_sql_date
 
 
 def process_bi_user_statistic_convert_records(target):
-    someday, _, timezone_offset = generate_sql_date(target)
-    now = current_time(app.config['APP_TIMEZONE'])
-    today = now.format('YYYY-MM-DD')
+    today, someday, _, timezone_offset = generate_sql_date(target)
 
     def collection_user_convert_records(connection, transaction, day, product_orig):
         if target == 'lifetime':
