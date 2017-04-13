@@ -25,25 +25,26 @@ def daily_summary_data():
 
     charts_indications = (func.date_format(BIStatistic.on_day, '%Y-%m-%d'),
                           BIStatistic.dau,
-                          BIStatistic.wau, BIStatistic.mau,
+                          BIStatistic.wau,
+                          BIStatistic.mau,
                           BIStatistic.new_reg,
                           BIStatistic.new_reg_game_dau,
                           BIStatistic.email_reg,
                           BIStatistic.email_validate,
                           BIStatistic.revenue,
-                          BIStatistic.dollar_paid_amount,
-                          BIStatistic.dollar_paid_count,
-                          BIStatistic.dollar_paid_user_count,
+                          BIStatistic.dollar_paid_count.label('paid_count'),
+                          BIStatistic.dollar_paid_user_count.label('paid_user_count'),
                           BIStatistic.free_gold,
+                          BIStatistic.dollar_paid_amount.label('paid_amount'),
                           BIStatistic.free_silver,
-                          BIStatistic.one_day_retention,
-                          BIStatistic.seven_day_retention,
-                          BIStatistic.thirty_day_retention)
+                          BIStatistic.one_day_retention.label('1_retention'),
+                          BIStatistic.seven_day_retention.label('7_retention'),
+                          BIStatistic.thirty_day_retention.label('30_retention'))
 
     charts_query = db.session.query(BIStatistic).with_entities(*charts_indications)
 
-    charts_query_result = charts_query.filter(and_(BIStatistic.on_day > start_time,
-                                                   BIStatistic.on_day < end_time,
+    charts_query_result = charts_query.filter(and_(BIStatistic.on_day >= start_time,
+                                                   BIStatistic.on_day <= end_time,
                                                    BIStatistic.game == 'All Game',
                                                    BIStatistic.platform == 'All Platform'))
 
@@ -71,16 +72,15 @@ def daily_summary_data():
                           BIStatistic.new_reg_game_dau,
                           BIStatistic.email_reg,
                           BIStatistic.email_validate,
-                          BIStatistic.new_reg,
                           BIStatistic.revenue,
-                          BIStatistic.dollar_paid_amount,
-                          BIStatistic.dollar_paid_count,
-                          BIStatistic.dollar_paid_user_count,
+                          BIStatistic.dollar_paid_count.label('paid_count'),
+                          BIStatistic.dollar_paid_user_count.label('paid_user_count'),
                           BIStatistic.free_gold,
+                          BIStatistic.dollar_paid_amount.label('paid_amount'),
                           BIStatistic.free_silver,
-                          BIStatistic.one_day_retention,
-                          BIStatistic.seven_day_retention,
-                          BIStatistic.thirty_day_retention)
+                          BIStatistic.one_day_retention.label('1_retention'),
+                          BIStatistic.seven_day_retention.label('7_retention'),
+                          BIStatistic.thirty_day_retention.label('30_retention'))
 
     tables_query = db.session.query(BIStatistic).with_entities(*tables_indications)
 
@@ -88,8 +88,8 @@ def daily_summary_data():
     tables_title = [{'title': column_name} for column_name in column_names]
     tables_title.insert(0, {'title': 'day'})
 
-    tables_query_result = tables_query.filter(and_(BIStatistic.on_day > start_time,
-                                                   BIStatistic.on_day < end_time,
+    tables_query_result = tables_query.filter(and_(BIStatistic.on_day >= start_time,
+                                                   BIStatistic.on_day <= end_time,
                                                    BIStatistic.game == 'All Game',
                                                    BIStatistic.platform == 'All Platform'))
 

@@ -2,19 +2,19 @@
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
-		  
+
     <style>
-		#result-table_wrapper {
-			overflow: auto;
-		}
+        #result-table_wrapper {
+            overflow: auto;
+        }
 
         #result-table_wrapper .table-button {
             float: right;
         }
-		
-	    #result-table_wrapper .table-button .btn {
-	        padding: 4px 12px;
-	    }
+
+        #result-table_wrapper .table-button .btn {
+            padding: 4px 12px;
+        }
 
         #result-table_wrapper .table-filter {
             float: left;
@@ -41,7 +41,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
-                    <div class="box-body">
+                    <div class="box-body" style="overflow:auto;">
                         <table id="result-table"
                                class="display responsive no-wrap table table-bordered table-striped table-hover dataTable">
                             <thead>
@@ -64,16 +64,20 @@
 {% endblock %}
 
 {% block body_tail %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
 
 
     {% assets "common_js" %}
@@ -103,6 +107,8 @@
             toolbox: {
                 show: true,
                 orient: 'vertical',
+                itemSize: '18',
+                top: '60',
                 feature: {
                     dataZoom: {
                         title: {
@@ -157,16 +163,14 @@
                     });
 
                     reusltDataTable = $("#result-table").DataTable({
-                        retrieve: true,
-                        searching: true,
                         'buttons': [
                             'copy', 'csv', 'excel', 'pdf'
                         ],
+                        {#                        'scrollX':  true,#}
                         data: result.tables_result.tables_data,
                         columns: result.tables_result.tables_title,
-                        iDisplayLength: 100,
-                        "order": [[ 0, "desc" ]],
-                        lengthChange: false
+                        iDisplayLength: 15,
+                        "order": [[0, "desc"]]
 
                     });
                     ////////////////////
