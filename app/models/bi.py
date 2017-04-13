@@ -45,10 +45,6 @@ class BIStatistic(db.Model):
     seven_day_retention = db.Column(db.Integer, default=0)
     thirty_day_retention = db.Column(db.Integer, default=0)
 
-    # 1_day_retention = db.Column(db.Integer, default=0)
-    # 7_day_retention = db.Column(db.Integer, default=0)
-    # 30_day_retention = db.Column(db.Integer, default=0)
-
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
     # amount_of_masterpoint_exchanged_for_gold = db.Column(db.Float, default=0)
@@ -253,7 +249,7 @@ class BIUserCurrency(db.Model):
     user_id_updated = db.Column(db.Boolean, nullable=False, default=False, index=True)
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
-    __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
+    # __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
 
     def transaction_type_display(self):
         value = TRANSACTION_TYPES[self.transaction_type]

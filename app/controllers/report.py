@@ -23,13 +23,27 @@ def daily_summary_data():
     start_time = now.replace(days=-30).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
 
-    charts_indications = (
-        func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.dau,
-        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau, BIStatistic.new_reg)
+    charts_indications = (func.date_format(BIStatistic.on_day, '%Y-%m-%d'),
+                          BIStatistic.dau,
+                          BIStatistic.wau, BIStatistic.mau,
+                          BIStatistic.new_reg,
+                          BIStatistic.new_reg_game_dau,
+                          BIStatistic.email_reg,
+                          BIStatistic.email_validate,
+                          BIStatistic.revenue,
+                          BIStatistic.dollar_paid_amount,
+                          BIStatistic.dollar_paid_count,
+                          BIStatistic.dollar_paid_user_count,
+                          BIStatistic.free_gold,
+                          BIStatistic.free_silver,
+                          BIStatistic.one_day_retention,
+                          BIStatistic.seven_day_retention,
+                          BIStatistic.thirty_day_retention)
 
     charts_query = db.session.query(BIStatistic).with_entities(*charts_indications)
 
-    charts_query_result = charts_query.filter(and_(BIStatistic.on_day > start_time, BIStatistic.on_day < end_time,
+    charts_query_result = charts_query.filter(and_(BIStatistic.on_day > start_time,
+                                                   BIStatistic.on_day < end_time,
                                                    BIStatistic.game == 'All Game',
                                                    BIStatistic.platform == 'All Platform'))
 
@@ -50,8 +64,23 @@ def daily_summary_data():
 
     ###################
 
-    tables_indications = (BIStatistic.dau, BIStatistic.wau, BIStatistic.mau,
-                          BIStatistic.new_reg_game_dau, BIStatistic.new_reg)
+    tables_indications = (BIStatistic.dau,
+                          BIStatistic.wau,
+                          BIStatistic.mau,
+                          BIStatistic.new_reg,
+                          BIStatistic.new_reg_game_dau,
+                          BIStatistic.email_reg,
+                          BIStatistic.email_validate,
+                          BIStatistic.new_reg,
+                          BIStatistic.revenue,
+                          BIStatistic.dollar_paid_amount,
+                          BIStatistic.dollar_paid_count,
+                          BIStatistic.dollar_paid_user_count,
+                          BIStatistic.free_gold,
+                          BIStatistic.free_silver,
+                          BIStatistic.one_day_retention,
+                          BIStatistic.seven_day_retention,
+                          BIStatistic.thirty_day_retention)
 
     tables_query = db.session.query(BIStatistic).with_entities(*tables_indications)
 
@@ -59,9 +88,10 @@ def daily_summary_data():
     tables_title = [{'title': column_name} for column_name in column_names]
     tables_title.insert(0, {'title': 'day'})
 
-    tables_query_result = tables_query.filter(
-        and_(BIStatistic.on_day > start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game',
-             BIStatistic.platform == 'All Platform'))
+    tables_query_result = tables_query.filter(and_(BIStatistic.on_day > start_time,
+                                                   BIStatistic.on_day < end_time,
+                                                   BIStatistic.game == 'All Game',
+                                                   BIStatistic.platform == 'All Platform'))
 
     transpose_tables_data_query_result = list(map(list, zip(*tables_query_result)))
     transpose_tables_data_query_result.insert(0, charts_labels)
