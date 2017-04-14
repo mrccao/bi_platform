@@ -22,8 +22,17 @@ def daily_summary():
 def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
 
+<<<<<<< Updated upstream
     start_time = now.replace(days=-100).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
+=======
+    charts_indications = (
+        func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.dau,
+        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau, BIStatistic.new_reg,
+        BIStatistic.free_gold, BIStatistic.free_silver, BIStatistic.email_reg,
+        BIStatistic.email_validate, BIStatistic.seven_day_retention, BIStatistic.thirty_day_retention,
+        BIStatistic.one_day_retention, BIStatistic.revenue)
+>>>>>>> Stashed changes
 
     get_metrics = attrgetter('dau', 'wau', 'mau', 'new_reg', 'email_reg', 'email_validate', 'new_reg_game_dau',
                              'dollar_paid_user_count', 'dollar_paid_count', 'revenue', 'free_silver', 'free_gold',
@@ -52,6 +61,7 @@ def daily_summary_data():
     transpose_tables_data_query_result = list(map(list, zip(*tables_query_result)))
     tables_data = list(map(list, zip(*transpose_charts_query_result)))
 
+<<<<<<< Updated upstream
     # add extra_calculate_metrics
 
     # new_reg_game_dau = transpose_charts_query_result[7]
@@ -71,6 +81,13 @@ def daily_summary_data():
     # extra_operational_metrics = [reg_retention, ARPDAU, ARPPU, ARPU]
 
     # process the labels and columns_name of charts and tables
+=======
+    tables_indications = (BIStatistic.dau, BIStatistic.wau, BIStatistic.mau,
+                          BIStatistic.new_reg_game_dau, BIStatistic.new_reg,
+                          BIStatistic.free_gold, BIStatistic.free_silver, BIStatistic.email_reg,
+                          BIStatistic.email_validate, BIStatistic.seven_day_retention, BIStatistic.thirty_day_retention,
+                          BIStatistic.one_day_retention, BIStatistic.revenue)
+>>>>>>> Stashed changes
 
     charts_legend = [column["name"] for column in charts_query.column_descriptions][1:]
     charts_legend.extend(extra_column_names)
