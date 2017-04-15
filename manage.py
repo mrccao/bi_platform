@@ -1,4 +1,5 @@
 import os
+
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
@@ -349,14 +350,13 @@ def sync_bi_statistic_for_someday(target):
     else:
         process_bi_statistic(target)
 
+
 @manager.command
 def sync_bi_user_statistic_for_lifetime():
     if app.config['ENV'] == 'prod':
         process_bi_user_statistic.delay('lifetime')
     else:
         process_bi_user_statistic('lifetime')
-
-
 
 
 @manager.command
@@ -381,7 +381,6 @@ def sync_bi_user_statistic_for_someday(target):
         process_bi_user_statistic.delay(target)
     else:
         process_bi_user_statistic(target)
-
 
 
 @manager.command

@@ -1,8 +1,12 @@
+from datetime import datetime
+from operator import attrgetter
+
 from flask import Blueprint, render_template, jsonify
 from flask import current_app as app
 from flask_login import login_required
-from operator import attrgetter
-from sqlalchemy import and_, func
+from numpy import array
+from sqlalchemy import and_
+from sqlalchemy.sql import text
 
 from app.extensions import db
 from app.models.bi import BIStatistic
@@ -21,105 +25,96 @@ def daily_summary():
 @login_required
 def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
-
-<<<<<<< Updated upstream
-    start_time = now.replace(days=-100).format('YYYY-MM-DD')
+    start_time = now.replace(days=-30).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
-=======
-    charts_indications = (
-        func.date_format(BIStatistic.on_day, '%Y-%m-%d'), BIStatistic.dau,
-        BIStatistic.wau, BIStatistic.mau, BIStatistic.new_reg_game_dau, BIStatistic.new_reg,
-        BIStatistic.free_gold, BIStatistic.free_silver, BIStatistic.email_reg,
-        BIStatistic.email_validate, BIStatistic.seven_day_retention, BIStatistic.thirty_day_retention,
-        BIStatistic.one_day_retention, BIStatistic.revenue)
->>>>>>> Stashed changes
 
-    get_metrics = attrgetter('dau', 'wau', 'mau', 'new_reg', 'email_reg', 'email_validate', 'new_reg_game_dau',
-                             'dollar_paid_user_count', 'dollar_paid_count', 'revenue', 'free_silver', 'free_gold',
-                             'one_day_retention',
-                             'seven_day_retention', 'thirty_day_retention')
+    get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'one_day_retention', 'seven_day_retention',
+                             'thirty_day_retention', 'paid_user_count', 'paid_count', 'revenue',
+                             'new_reg', 'email_reg', 'email_validate', 'new_reg_game_dau', 'free_silver', 'free_gold')
+
     metrics = get_metrics(BIStatistic)
+    query = db.session.query(BIStatistic).with_entities(*metrics)
 
-    charts_metrics = (func.date_format(BIStatistic.on_day, '%Y-%m-%d'), *metrics)
-    charts_query = db.session.query(BIStatistic).with_entities(*charts_metrics)
-    charts_query_result = charts_query.filter(and_(BIStatistic.on_day >= start_time,
-                                                   BIStatistic.on_day <= end_time,
-                                                   BIStatistic.game == 'All Game',
-                                                   BIStatistic.platform == 'All Platform'))
+    query_result = query.filter(and_(BIStatistic.on_day >= start_time,
+                                     BIStatistic.on_day <= end_time,
+                                     BIStatistic.game == 'All Game',
+                                     BIStatistic.platform == 'All Platform'))
 
-    tables_query = db.session.query(BIStatistic).with_entities(*metrics)
-    tables_query_result = tables_query.filter(and_(BIStatistic.on_day >= start_time,
-                                                   BIStatistic.on_day <= end_time,
-                                                   BIStatistic.game == 'All Game',
-                                                   BIStatistic.platform == 'All Platform'))
+    charts_data = list(map(list, zip(*query_result)))
+    tables_data = [row for row in query_result]
 
-    # process the charts and tables
+    dau = charts_data[1]
+    new_reg = charts_data[10]
+    email_reg = charts_data[11]
+    new_reg_game_dau = charts_data[13]
+    paid_user_count = charts_data[7]
+    revenue = charts_data[9]
 
-    transpose_charts_query_result = list(map(list, zip(*charts_query_result)))
-    charts_data = transpose_charts_query_result[1:]
+    cumulative_revenue_sum = db.session.query('cumulative_revenue_sum').from_statement(
+        text(""" 
+            SELECT (SELECT Sum(x.revenue)
+                    FROM   bi_statistic x
+                    WHERE  x.on_day < t.on_day
+                           AND x.game = 'All Game'
+                           AND x.platform = 'All Platform') AS cumulative_revenue_sum
+            FROM   bi_statistic t
+            WHERE  t.game = 'All Game'
+                   AND t.platform = 'All Platform'
+                   AND t.on_day >= :start_time
+                   AND on_day <= :end_time 
+                         """
+             )).params(start_time=start_time, end_time=end_time).all()
 
-    transpose_tables_data_query_result = list(map(list, zip(*tables_query_result)))
-    tables_data = list(map(list, zip(*transpose_charts_query_result)))
+    cumulative_revenue_sum = [int(each_cumulative_revenue_sum[0]) for each_cumulative_revenue_sum in
+                              cumulative_revenue_sum]
 
-<<<<<<< Updated upstream
-    # add extra_calculate_metrics
+    cumulative_user_sum = db.session.query('cumulative_user_sum').from_statement(
+        text(""" 
+            SELECT (SELECT Sum(x.new_reg)
+                    FROM   bi_statistic x
+                    WHERE  x.on_day < t.on_day
+                           AND x.game = 'All Game'
+                           AND x.platform = 'All Platform') AS cumulative_user_sum
+            FROM   bi_statistic t
+            WHERE  t.game = 'All Game'
+                   AND t.platform = 'All Platform'
+                   AND t.on_day >= :start_time
+                   AND on_day <= :end_time 
+             """
+             )).params(start_time=start_time, end_time=end_time).all()
 
-    # new_reg_game_dau = transpose_charts_query_result[7]
-    # new_reg = transpose_charts_query_result[4]
-    # revenue = transpose_charts_query_result[10]
-    # DAU = transpose_charts_query_result[1]
-    # paid_user_count = transpose_charts_query_result[9]
-    # users_numbers = db.session.query(BIUser.reg_time,func.count(BIUser.user_id)).group_by(cast(BIUser.reg_time,Date)).having(
-    #     and_(BIUser.reg_time >= start_time, BIUser.reg_time <= end_time)).all()
-    #
-    # reg_retention = array(new_reg_game_dau) / array(new_reg)
-    # ARPDAU = array(revenue) / array(DAU)
-    # ARPPU = array(revenue) / array(paid_user_count)
-    # ARPU = array(revenue) / array(users_numbers)
-    #
-    # extra_column_names = ['reg_retention', 'ARPDAU', 'ARPPU', 'ARPU']
-    # extra_operational_metrics = [reg_retention, ARPDAU, ARPPU, ARPU]
+    cumulative_user_sum = [int(each_cumulative_user_sum[0]) for each_cumulative_user_sum in cumulative_user_sum]
 
-    # process the labels and columns_name of charts and tables
-=======
-    tables_indications = (BIStatistic.dau, BIStatistic.wau, BIStatistic.mau,
-                          BIStatistic.new_reg_game_dau, BIStatistic.new_reg,
-                          BIStatistic.free_gold, BIStatistic.free_silver, BIStatistic.email_reg,
-                          BIStatistic.email_validate, BIStatistic.seven_day_retention, BIStatistic.thirty_day_retention,
-                          BIStatistic.one_day_retention, BIStatistic.revenue)
->>>>>>> Stashed changes
+    #  calculate_extra_metrics
 
-    charts_legend = [column["name"] for column in charts_query.column_descriptions][1:]
-    charts_legend.extend(extra_column_names)
-    charts_labels = transpose_charts_query_result[0]
-    charts_data.extend(*extra_operational_metrics)
+    facebook_reg = array(new_reg) - array(email_reg)
+    reg_retention = array(new_reg_game_dau) / array(new_reg)
+    ARPDAU = array(revenue) / array(dau)
+    ARPPU = array(revenue) / array(paid_user_count)
+    ARPU = array(cumulative_revenue_sum) / array(cumulative_user_sum)
 
-    tables_column_names = [column["name"] for column in tables_query.column_descriptions]
-    tables_column_names.extend(extra_column_names)
-    tables_title = [{'title': column_name} for column_name in tables_column_names]
-    tables_title.insert(0, {'title': 'day'})
+    extra_metrics = [facebook_reg, reg_retention, ARPDAU, ARPPU, ARPU]
+    transpose_extra_operational_metrics = list(map(list, zip(*extra_metrics)))
 
-    transpose_tables_data_query_result.insert(0, charts_labels)
-    tables_data.extend((list(map(list, zip(*extra_operational_metrics)))))
+    # process tables and charts of the metrics
+
+    column_names = [column["name"] for column in query.column_descriptions]
+    column_names.extend(['facebook_reg', 'reg_retention', 'ARPDAU', 'ARPPU', 'ARPU'])
+
+    charts_labels = [datetime.strftime(day, "%Y-%m-%d") for day in charts_data[0]]
+    charts_legend = column_names[1:]
+    charts_data = charts_data[1:]
+    charts_data.extend(extra_metrics)
 
     charts_result = dict(charts_labels=charts_labels, charts_data=charts_data, charts_legend=charts_legend)
+
+    tables_column_names = column_names
+    tables_title = [{'title': column_name} for column_name in tables_column_names]
+    transpose_tables_data = list(map(list, zip(*tables_data)))
+    transpose_tables_data[0] = charts_labels
+    transpose_tables_data.extend(extra_metrics)
+    tables_data = list(map(list, zip(*transpose_tables_data)))
+
     tables_result = dict(tables_title=tables_title, tables_data=tables_data)
 
     return jsonify(charts_result=charts_result, tables_result=tables_result)
-
-
-select
-t.on_day, t.new_reg, (select
-sum(x.new_reg)
-where
-x.on_day < t.on_day and x.game = 'All Game' and x.platform = 'All Platform'  ) as cumulative_sum
-where
-t.game = 'All Game' and t.platform = 'All Platform' and t.on_day > '2017-02-01' and on_day < '2017-04-23';
-
-select
-t.on_day, t.revenue, (select
-sum(x.revenue)
-where
-x.on_day < t.on_day and x.game = 'All Game' and x.platform = 'All Platform'  ) as cumulative_sum
-where
-t.game = 'All Game' and t.platform = 'All Platform' and t.on_day > '2017-02-01' and on_day < '2017-04-23';

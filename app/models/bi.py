@@ -33,9 +33,9 @@ class BIStatistic(db.Model):
     mau = db.Column(db.Integer, default=0)
     new_reg_game_dau = db.Column(db.Integer, default=0)
 
-    dollar_paid_user_count = db.Column(db.Integer, default=0)
-    dollar_paid_amount = db.Column(db.Float, default=0)
-    dollar_paid_count = db.Column(db.Integer, default=0)
+    paid_user_count = db.Column(db.Integer, default=0)
+    paid_amount = db.Column(db.Float, default=0)
+    paid_count = db.Column(db.Integer, default=0)
     revenue = db.Column(db.Float, default=0)
 
     free_gold = db.Column(db.Integer, default=0)
@@ -70,7 +70,6 @@ class BIStatistic(db.Model):
     # amount_of_dollar_exchanged_for_spin_ticket = db.Column(db.Float, default=0)
     # count_of_dollar_exchanged_for_spin_booster = db.Column(db.Integer, default=0)
     # amount_of_dollar_exchanged_for_spin_booster = db.Column(db.Float, default=0)
-
 
 class BIUser(db.Model):
     __tablename__ = 'bi_user'
