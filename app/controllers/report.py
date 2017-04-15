@@ -44,11 +44,14 @@ def daily_summary_data():
     tables_data = [row for row in query_result]
 
     dau = charts_data[1]
+    one_day_retention_count = charts_data[4]
+    seven_day_retention_count = charts_data[5]
+    thirty_day_retention_count = charts_data[6]
+    paid_user_count = charts_data[7]
+    revenue = charts_data[9]
     new_reg = charts_data[10]
     email_reg = charts_data[11]
     new_reg_game_dau = charts_data[13]
-    paid_user_count = charts_data[7]
-    revenue = charts_data[9]
 
     cumulative_revenue_sum = db.session.query('cumulative_revenue_sum').from_statement(
         text(""" 
@@ -92,26 +95,34 @@ def daily_summary_data():
     ARPDAU = array(revenue) / array(dau)
     ARPPU = array(revenue) / array(paid_user_count)
     ARPU = array(cumulative_revenue_sum) / array(cumulative_user_sum)
+    one_day_retention = array(one_day_retention_count) / array(new_reg_game_dau)
+    seven_day_retention = array(seven_day_retention_count) / array(new_reg_game_dau)
+    thirty_day_retention = array(thirty_day_retention_count) / array(new_reg_game_dau)
 
     extra_metrics = [facebook_reg, reg_retention, ARPDAU, ARPPU, ARPU]
     transpose_extra_operational_metrics = list(map(list, zip(*extra_metrics)))
 
-    # process tables and charts of the metrics
+    # process charts
 
     column_names = [column["name"] for column in query.column_descriptions]
     column_names.extend(['facebook_reg', 'reg_retention', 'ARPDAU', 'ARPPU', 'ARPU'])
 
     charts_labels = [datetime.strftime(day, "%Y-%m-%d") for day in charts_data[0]]
     charts_legend = column_names[1:]
+
+    charts_data[4:7] = [one_day_retention, seven_day_retention, thirty_day_retention]
     charts_data = charts_data[1:]
     charts_data.extend(extra_metrics)
 
     charts_result = dict(charts_labels=charts_labels, charts_data=charts_data, charts_legend=charts_legend)
 
-    tables_column_names = column_names
-    tables_title = [{'title': column_name} for column_name in tables_column_names]
+    # process tables
+
+    tables_title = [{'title': column_name} for column_name in column_names]
+
     transpose_tables_data = list(map(list, zip(*tables_data)))
     transpose_tables_data[0] = charts_labels
+    transpose_tables_data[4:7] = [one_day_retention, seven_day_retention_count, thirty_day_retention_count]
     transpose_tables_data.extend(extra_metrics)
     tables_data = list(map(list, zip(*transpose_tables_data)))
 
