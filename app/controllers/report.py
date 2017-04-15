@@ -99,7 +99,6 @@ def daily_summary_data():
     thirty_day_retention = array(thirty_day_retention_count) / array(new_reg_game_dau)
 
     extra_metrics = [facebook_reg, reg_retention, ARPDAU, ARPPU, ARPU]
-    transpose_extra_operational_metrics = list(map(list, zip(*extra_metrics)))
 
     # process charts
 
