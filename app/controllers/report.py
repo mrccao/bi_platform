@@ -90,18 +90,19 @@ def daily_summary_data():
     #  calculate_extra_metrics
 
     facebook_reg = array(new_reg) - array(email_reg)
-    reg_retention = array(new_reg_game_dau) / array(new_reg)
-    ARPDAU = array(revenue) / array(dau)
-    ARPPU = array(revenue) / array(paid_user_count)
-    ARPU = array(cumulative_revenue_sum) / array(cumulative_user_sum)
-    one_day_retention = array(one_day_retention_count) / array(new_reg_game_dau)
-    seven_day_retention = array(seven_day_retention_count) / array(new_reg_game_dau)
-    thirty_day_retention = array(thirty_day_retention_count) / array(new_reg_game_dau)
+    reg_retention = ['{:.2f}'.format(i) for i in array(new_reg_game_dau) / array(new_reg)]
+
+    ARPDAU = ['{:.2f}'.format(i) for i in array(revenue) / array(dau)]
+    ARPPU = ['{:.2f}'.format(i) for i in array(revenue) / array(paid_user_count)]
+    ARPU = ['{:.2f}'.format(i) for i in array(cumulative_revenue_sum) / array(cumulative_user_sum)]
+
+    one_day_retention = ['{:.2f}'.format(i) for i in array(one_day_retention_count) / array(new_reg_game_dau)]
+    seven_day_retention = ['{:.2f}'.format(i) for i in array(seven_day_retention_count) / array(new_reg_game_dau)]
+    thirty_day_retention = ['{:.2f}'.format(i) for i in array(thirty_day_retention_count) / array(new_reg_game_dau)]
 
     extra_metrics = [facebook_reg, reg_retention, ARPDAU, ARPPU, ARPU]
 
     # process charts
-
 
     column_names = [column["name"] for column in query.column_descriptions]
     column_names.extend(['facebook_reg', 'reg_retention', 'ARPDAU', 'ARPPU', 'ARPU'])
