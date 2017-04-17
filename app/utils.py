@@ -14,8 +14,8 @@ def generate_sql_date(target):
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
 
-    # timezone_offset = app.config['APP_TIMEZONE']
-    timezone_offset = '-04:00'
+    timezone_offset = app.config['APP_TIMEZONE']
+    # timezone_offset = '-04:00'
     day = {'today': today, 'yesterday': yesterday}
     someday = day.get(target, target)
 

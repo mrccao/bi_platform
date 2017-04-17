@@ -81,7 +81,7 @@ class BIUser(db.Model):
     og_account = db.Column(db.String(255), index=True)
     facebook_id = db.Column(db.String(255))
     email = db.Column(db.String(255), index=True)
-    email_validated_time = db.Column(OGInsertableAwareDateTime, index=True)
+    email_validate_time = db.Column(OGInsertableAwareDateTime, index=True)
     email_promotion_allowed = db.Column(db.Boolean)
 
     account_status = db.Column(db.String(255))
