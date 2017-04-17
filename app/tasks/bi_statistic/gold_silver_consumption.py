@@ -19,7 +19,7 @@ def process_bi_statistic_gold_silver_consumption(target):
                                             SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                    SUM(transaction_amount)                          AS sum
                                             FROM   bi_user_currency
-                                            WHERE  currency_type = 'gold'
+                                            WHERE  currency_type = 'Gold'
                                             GROUP  BY on_day
                                            """), timezone_offset=timezone_offset)
         else:
@@ -27,7 +27,7 @@ def process_bi_statistic_gold_silver_consumption(target):
             return connection.execute(text("""
                                             SELECT SUM(transaction_amount)                          AS sum
                                             FROM   bi_user_currency
-                                            WHERE  currency_type = 'gold'
+                                            WHERE  currency_type = 'Gold'
                                             AND    created_at > :index_time
                                             AND    DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :on_day
                                             """), timezone_offset=timezone_offset, on_day=someday,
@@ -72,7 +72,7 @@ def process_bi_statistic_gold_silver_consumption(target):
                                             SELECT DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS on_day,
                                                    SUM(transaction_amount)                                  AS sum
                                             FROM   bi_user_currency
-                                            WHERE  currency_type = 'silver'
+                                            WHERE  currency_type = 'Silver'
                                             GROUP  BY on_day
                                            """), timezone_offset=timezone_offset)
         else:
