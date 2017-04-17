@@ -26,24 +26,24 @@ class BIStatistic(db.Model):
 
     new_reg = db.Column(db.Integer, nullable=False, default=0)
     email_reg = db.Column(db.Integer, nullable=False, default=0)
-    email_validate = db.Column(db.Integer, nullable=False, default=0)
+    email_validated = db.Column(db.Integer, nullable=False, default=0)
 
     dau = db.Column(db.Integer, nullable=False, default=0)
     wau = db.Column(db.Integer, nullable=False, default=0)
     mau = db.Column(db.Integer, nullable=False, default=0)
     new_reg_game_dau = db.Column(db.Integer, nullable=False, default=0)
 
-    paid_user_count = db.Column(db.Integer, nullable=False, default=0)
+    paid_user_count = db.Column(db.Integer, default=0)
     paid_amount = db.Column(db.Float, default=0)
-    paid_count = db.Column(db.Integer, nullable=False, default=0)
-    revenue = db.Column(db.Float, nullable=False, default=0)
+    paid_count = db.Column(db.Integer, default=0)
+    revenue = db.Column(db.Float, default=0)
 
-    free_gold = db.Column(db.Integer, nullable=False, default=0)
-    free_silver = db.Column(db.Integer, nullable=False, default=0)
+    free_gold = db.Column(db.Integer, default=0)
+    free_silver = db.Column(db.Integer, default=0)
 
-    one_day_retention = db.Column(db.Integer, nullable=False, default=0)
-    seven_day_retention = db.Column(db.Integer, nullable=False, default=0)
-    thirty_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    one_day_retention = db.Column(db.Integer, default=0)
+    seven_day_retention = db.Column(db.Integer, default=0)
+    thirty_day_retention = db.Column(db.Integer, default=0)
 
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
@@ -81,7 +81,7 @@ class BIUser(db.Model):
     og_account = db.Column(db.String(255), index=True)
     facebook_id = db.Column(db.String(255))
     email = db.Column(db.String(255), index=True)
-    email_validate_time = db.Column(OGInsertableAwareDateTime, index=True)
+    email_validated_time = db.Column(OGInsertableAwareDateTime, index=True)
     email_promotion_allowed = db.Column(db.Boolean)
 
     account_status = db.Column(db.String(255))
@@ -281,7 +281,7 @@ class BIUserBill(db.Model):
     product = db.Column(db.String(255), nullable=False)
     product_orig = db.Column(db.Integer, nullable=False)
 
-    goods = db.Column(db.String(255), default='')
+    goods = db.Column(db.String(255))
     goods_orig = db.Column(db.Integer, nullable=False)
 
     quantity = db.Column(db.Integer, nullable=False)

@@ -6,7 +6,6 @@ from flask_login import login_required
 from numpy import array
 from operator import attrgetter
 from sqlalchemy import and_
-from sqlalchemy.sql import text
 
 from app.extensions import db
 from app.models.bi import BIStatistic
@@ -30,7 +29,7 @@ def daily_summary_data():
 
     get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'one_day_retention', 'seven_day_retention',
                              'thirty_day_retention', 'paid_user_count', 'paid_count', 'revenue',
-                             'new_reg', 'email_reg', 'email_validate', 'new_reg_game_dau', 'free_silver', 'free_gold')
+                             'new_reg', 'email_reg', 'email_validated', 'new_reg_game_dau')
 
     metrics = get_metrics(BIStatistic)
     query = db.session.query(BIStatistic).with_entities(*metrics)
@@ -42,71 +41,24 @@ def daily_summary_data():
 
     transpose_query_result = list(map(list, zip(*query_result)))
 
-    dau = transpose_query_result[1]
     one_day_retention_count = transpose_query_result[4]
     seven_day_retention_count = transpose_query_result[5]
     thirty_day_retention_count = transpose_query_result[6]
-    paid_user_count = transpose_query_result[7]
-    revenue = transpose_query_result[9]
     new_reg = transpose_query_result[10]
     email_reg = transpose_query_result[11]
     new_reg_game_dau = transpose_query_result[13]
 
-    cumulative_revenue_sum = db.session.query('cumulative_revenue_sum').from_statement(
-        text(""" 
-            SELECT (SELECT Sum(x.revenue)
-                    FROM   bi_statistic x
-                    WHERE  x.on_day < t.on_day
-                           AND x.game = 'All Game'
-                           AND x.platform = 'All Platform') AS cumulative_revenue_sum
-            FROM   bi_statistic t
-            WHERE  t.game = 'All Game'
-                   AND t.platform = 'All Platform'
-                   AND t.on_day >= :start_time
-                   AND on_day <= :end_time 
-                         """
-             )).params(start_time=start_time, end_time=end_time).all()
-
-    cumulative_revenue_sum = [int(each_cumulative_revenue_sum[0]) for each_cumulative_revenue_sum in
-                              cumulative_revenue_sum]
-
-    cumulative_user_sum = db.session.query('cumulative_user_sum').from_statement(
-        text(""" 
-            SELECT (SELECT Sum(x.new_reg)
-                    FROM   bi_statistic x
-                    WHERE  x.on_day < t.on_day
-                           AND x.game = 'All Game'
-                           AND x.platform = 'All Platform') AS cumulative_user_sum
-            FROM   bi_statistic t
-            WHERE  t.game = 'All Game'
-                   AND t.platform = 'All Platform'
-                   AND t.on_day >= :start_time
-                   AND on_day <= :end_time 
-             """
-             )).params(start_time=start_time, end_time=end_time).all()
-
-    cumulative_user_sum = [int(each_cumulative_user_sum[0]) for each_cumulative_user_sum in cumulative_user_sum]
-
-    #  calculate_extra_metrics
-
     facebook_reg = array(new_reg) - array(email_reg)
-
-    reg_retention = ['{:.2f}'.format(i) for i in array(new_reg_game_dau) / array(new_reg)]
-
-    ARPDAU = ['{:.2f}'.format(i) for i in array(revenue) / array(dau)]
-    ARPPU = ['{:.2f}'.format(i) for i in array(revenue) / array(paid_user_count)]
-    ARPU = ['{:.2f}'.format(i) for i in array(cumulative_revenue_sum) / array(cumulative_user_sum)]
-
     one_day_retention = ['{:.2f}'.format(i) for i in array(one_day_retention_count) / array(new_reg_game_dau)]
     seven_day_retention = ['{:.2f}'.format(i) for i in array(seven_day_retention_count) / array(new_reg_game_dau)]
     thirty_day_retention = ['{:.2f}'.format(i) for i in array(thirty_day_retention_count) / array(new_reg_game_dau)]
 
-    extra_metrics = [facebook_reg, reg_retention, ARPDAU, ARPPU, ARPU]
+    extra_metrics = [facebook_reg]
 
     # process charts
 
     column_names = [column["name"] for column in query.column_descriptions]
-    column_names.extend(['facebook_reg', 'reg_retention', 'ARPDAU', 'ARPPU', 'ARPU'])
+    column_names.extend(['facebook_reg'])
     charts_legend = column_names[1:]
 
     charts_data = transpose_query_result

@@ -244,7 +244,7 @@ def process_bi_statistic_new_reg(target):
 
         with_db_context(db, sync_collection_new_email_reg)
 
-    def collection_email_validate_all_platforms(connection, transaction):
+    def collection_email_validated_all_platforms(connection, transaction):
 
         if target == 'lifetime':
 
@@ -266,7 +266,7 @@ def process_bi_statistic_new_reg(target):
                                            AND    email_validate_time  IS NOT NULL 
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_email_validate_all_platforms)
+    result_proxy = with_db_context(db, collection_email_validated_all_platforms)
 
     if target == 'lifetime':
 
@@ -285,21 +285,21 @@ def process_bi_statistic_new_reg(target):
                 BIStatistic.__table__.c.platform == 'All Platform',
                 BIStatistic.__table__.c.game == 'All Game'
             )
-            values = {'email_validate': bindparam('sum')}
+            values = {'email_validated': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' email_validate for all platforms transaction.rollback()')
+                print(target + ' email_validated for all platforms transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' email_validate for all platforms transaction.commit()')
+                print(target + ' email_validated for all platforms transaction.commit()')
 
         with_db_context(db, sync_collection_new_email_reg_all_platforms)
 
-    def collection_email_validate(connection, transaction):
+    def collection_email_validated(connection, transaction):
 
         if target == 'lifetime':
 
@@ -338,7 +338,7 @@ def process_bi_statistic_new_reg(target):
                                            GROUP  BY platform
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_email_validate)
+    result_proxy = with_db_context(db, collection_email_validated)
 
     if target == 'lifetime':
 
@@ -350,12 +350,12 @@ def process_bi_statistic_new_reg(target):
 
     if rows:
 
-        def sync_collection_email_validate(connection, transaction):
+        def sync_collection_email_validated(connection, transaction):
 
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == bindparam('_platform'),
                          BIStatistic.__table__.c.game == 'All Game')
-            values = {'email_validate': bindparam('sum')}
+            values = {'email_validated': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
@@ -365,6 +365,6 @@ def process_bi_statistic_new_reg(target):
                 raise
             else:
                 transaction.commit()
-                print(target + ' email_validate for every platform transaction.commit()')
+                print(target + ' email_validated for every platform transaction.commit()')
 
-        with_db_context(db, sync_collection_email_validate)
+        with_db_context(db, sync_collection_email_validated)
