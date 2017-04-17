@@ -10,6 +10,55 @@ from app.utils import generate_sql_date
 def process_bi_statistic_new_reg(target):
     _, someday, _, timezone_offset = generate_sql_date(target)
 
+    def collection_new_reg_all_platforms(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
+                                                   COUNT(*)                                               AS sum
+                                            FROM   bi_user
+                                            GROUP  BY on_day
+                                            """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                           SELECT COUNT(*)                                               AS sum
+                                           FROM   bi_user
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_new_reg_all_platforms)
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_new_reg_all_platforms(connection, transaction):
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == 'All Platform',
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'new_reg': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' new_reg transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' new_reg for all platforms transaction.commit()')
+
+        with_db_context(db, sync_collection_new_reg_all_platforms)
+
     def collection_new_reg(connection, transaction):
 
         if target == 'lifetime':
@@ -77,7 +126,7 @@ def process_bi_statistic_new_reg(target):
 
         with_db_context(db, sync_collection_new_reg)
 
-    def collection_new_reg_all_platforms(connection, transaction):
+    def collection_new_email_reg_all_platforms(connection, transaction):
 
         if target == 'lifetime':
 
@@ -85,18 +134,19 @@ def process_bi_statistic_new_reg(target):
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
+                                            WHERE facebook_id IS NULL
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
-
         else:
 
             return connection.execute(text("""
                                            SELECT COUNT(*)                                               AS sum
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           AND    facebook_id IS NULL
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_new_reg_all_platforms)
+    result_proxy = with_db_context(db, collection_new_email_reg_all_platforms)
 
     if target == 'lifetime':
 
@@ -108,23 +158,24 @@ def process_bi_statistic_new_reg(target):
 
     if rows:
 
-        def sync_collection_new_reg_all_platforms(connection, transaction):
+        def sync_collection_new_email_reg_all_platforms(connection, transaction):
+
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == 'All Platform',
                          BIStatistic.__table__.c.game == 'All Game')
-            values = {'new_reg': bindparam('sum')}
+            values = {'email_reg': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' new_reg transaction.rollback()')
+                print(target + ' new_email_reg transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' new_reg for all platforms transaction.commit()')
+                print(target + ' new_email_reg for all platforms transaction.commit()')
 
-        with_db_context(db, sync_collection_new_reg_all_platforms)
+        with_db_context(db, sync_collection_new_email_reg_all_platforms)
 
     def collection_new_email_reg(connection, transaction):
 
@@ -193,7 +244,7 @@ def process_bi_statistic_new_reg(target):
 
         with_db_context(db, sync_collection_new_email_reg)
 
-    def collection_new_email_reg_all_platforms(connection, transaction):
+    def collection_email_validate_all_platforms(connection, transaction):
 
         if target == 'lifetime':
 
@@ -201,7 +252,8 @@ def process_bi_statistic_new_reg(target):
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
-                                            WHERE facebook_id IS NULL
+                                            WHERE  facebook_id IS NULL
+                                            AND    email_validate_time  IS NOT NULL 
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
         else:
@@ -211,9 +263,10 @@ def process_bi_statistic_new_reg(target):
                                            FROM   bi_user
                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            AND    facebook_id IS NULL
+                                           AND    email_validate_time  IS NOT NULL 
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_new_email_reg_all_platforms)
+    result_proxy = with_db_context(db, collection_email_validate_all_platforms)
 
     if target == 'lifetime':
 
@@ -227,20 +280,22 @@ def process_bi_statistic_new_reg(target):
 
         def sync_collection_new_email_reg_all_platforms(connection, transaction):
 
-            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                         BIStatistic.__table__.c.platform == 'All Platform',
-                         BIStatistic.__table__.c.game == 'All Game')
-            values = {'email_reg': bindparam('sum')}
+            where = and_(
+                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                BIStatistic.__table__.c.platform == 'All Platform',
+                BIStatistic.__table__.c.game == 'All Game'
+            )
+            values = {'email_validate': bindparam('sum')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
             except:
-                print(target + ' new_email_reg transaction.rollback()')
+                print(target + ' email_validate for all platforms transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
                 transaction.commit()
-                print(target + ' new_email_reg for all platforms transaction.commit()')
+                print(target + ' email_validate for all platforms transaction.commit()')
 
         with_db_context(db, sync_collection_new_email_reg_all_platforms)
 
@@ -313,58 +368,3 @@ def process_bi_statistic_new_reg(target):
                 print(target + ' email_validate for every platform transaction.commit()')
 
         with_db_context(db, sync_collection_email_validate)
-
-    def collection_email_validate_all_platforms(connection, transaction):
-
-        if target == 'lifetime':
-
-            return connection.execute(text("""
-                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-                                                   COUNT(*)                                               AS sum
-                                            FROM   bi_user
-                                            WHERE  facebook_id IS NULL
-                                            AND    email_validate_time  IS NOT NULL 
-                                            GROUP  BY on_day
-                                            """), timezone_offset=timezone_offset)
-        else:
-
-            return connection.execute(text("""
-                                           SELECT COUNT(*)                                               AS sum
-                                           FROM   bi_user
-                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-                                           AND    facebook_id IS NULL
-                                           AND    email_validate_time  IS NOT NULL 
-                                           """), on_day=someday, timezone_offset=timezone_offset)
-
-    result_proxy = with_db_context(db, collection_email_validate_all_platforms)
-
-    if target == 'lifetime':
-
-        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-
-    else:
-
-        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-
-    if rows:
-
-        def sync_collection_new_email_reg_all_platforms(connection, transaction):
-
-            where = and_(
-                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                BIStatistic.__table__.c.platform == 'All Platform',
-                BIStatistic.__table__.c.game == 'All Game'
-            )
-            values = {'email_validate': bindparam('sum')}
-
-            try:
-                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-            except:
-                print(target + ' email_validate for all platforms transaction.rollback()')
-                transaction.rollback()
-                raise
-            else:
-                transaction.commit()
-                print(target + ' email_validate for all platforms transaction.commit()')
-
-        with_db_context(db, sync_collection_new_email_reg_all_platforms)

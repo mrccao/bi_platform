@@ -35,7 +35,7 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-body">
-                        <div id="charts" style="height: 550px; width: 100%;"></div>
+                        <div id="charts" style="height: 750px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -225,17 +225,21 @@
                 trigger: 'axis'
             },
             legend: {
+                width: 1400,
+                itemHeight:16,
+                itemWidth:16,
+                itemGap:15,
                 selected: {
                     'dau': 1,
-                    'wau': 1,
+                    'wau': 0,
                     'mau': 1,
-                    'one_day_retention': 1,
-                    'seven_day_retention': 1,
-                    'thirty_day_retention': 1,
+                    'one_day_retention': 0,
+                    'seven_day_retention': 0,
+                    'thirty_day_retention': 0,
                     'paid_user_count': 0,
                     'paid_count': 0,
-                    'revenue': 0,
-                    'new_reg': 0,
+                    'revenue': 1,
+                    'new_reg': 1,
                     'email_reg': 0,
                     'email_validate': 0,
                     'new_reg_game_dau': 0,
@@ -250,7 +254,7 @@
                 data: []
             },
             grid: {
-                top: '15%',
+                top: '11%',
                 bottom: '3%',
                 left: '1%',
                 right: '4%',
@@ -259,14 +263,18 @@
             toolbox: {
                 show: true,
                 top: 110,
+                right: 15,
                 orient: 'vertical',
                 itemSize: '16',
                 feature: {
-                    magicType: {
-                        title: {'bar': 'Switch To Histogram'},
-                        type: ['bar']
-                    },
                     restore: {title: 'Reset'},
+                    magicType: {
+                        title: {
+                            'bar': 'Switch To Histogram',
+                            'line': 'Switch To line'
+                        },
+                        type: ['bar', 'line']
+                    },
                     dataZoom: {
                         title: {
                             zoom: 'Area Zoom',
@@ -318,7 +326,7 @@
                         'buttons': [
                             'copy', 'csv', 'excel', 'pdf'
                         ],
-                        iDisplayLength: 15,
+                        iDisplayLength: 20,
                         "order": [[0, "desc"]],
                         lengthChange: true,
                         scrollX: true,

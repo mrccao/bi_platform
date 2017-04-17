@@ -1,10 +1,10 @@
 from datetime import datetime
-from operator import attrgetter
 
 from flask import Blueprint, render_template, jsonify
 from flask import current_app as app
 from flask_login import login_required
 from numpy import array
+from operator import attrgetter
 from sqlalchemy import and_
 from sqlalchemy.sql import text
 
@@ -25,7 +25,7 @@ def daily_summary():
 @login_required
 def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
-    start_time = now.replace(days=-30).format('YYYY-MM-DD')
+    start_time = now.replace(days=-60).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
 
     get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'one_day_retention', 'seven_day_retention',
@@ -90,6 +90,7 @@ def daily_summary_data():
     #  calculate_extra_metrics
 
     facebook_reg = array(new_reg) - array(email_reg)
+
     reg_retention = ['{:.2f}'.format(i) for i in array(new_reg_game_dau) / array(new_reg)]
 
     ARPDAU = ['{:.2f}'.format(i) for i in array(revenue) / array(dau)]

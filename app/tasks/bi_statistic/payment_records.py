@@ -16,15 +16,15 @@ def process_bi_statistic_payment_records(target):
 
             return connection.execute(text(""" 
                                            SELECT Date(Convert_tz(createtime, '+00:00', :timezone_offset)) AS on_day, 
-                                                  COUNT(DISTINCT u_id)                                     AS dollar_paid_user_count, 
+                                                  COUNT(DISTINCT u_id)                                     AS paid_user_count, 
                                                   SUM(CASE 
                                                         WHEN user_paylog_status_id = 3 THEN 1 
                                                         ELSE 0 
-                                                      END)                                                 AS dollar_paid_count, 
+                                                      END)                                                 AS paid_count, 
                                                   ROUND(SUM(CASE 
                                                               WHEN user_paylog_status_id = 3 THEN order_price 
                                                               ELSE 0 
-                                                            END) / 100, 2)                                 AS dollar_paid_amount 
+                                                            END) / 100, 2)                                 AS paid_amount 
                                            FROM   user_paylog 
                                            GROUP  BY on_day 
                                            """), timezone_offset=timezone_offset)
@@ -32,15 +32,15 @@ def process_bi_statistic_payment_records(target):
         else:
 
             return connection.execute(text(""" 
-                                           SELECT COUNT(DISTINCT u_id)                                     AS dollar_paid_user_count, 
+                                           SELECT COUNT(DISTINCT u_id)                                     AS paid_user_count, 
                                                   SUM(CASE 
                                                         WHEN user_paylog_status_id = 3 THEN 1 
                                                         ELSE 0 
-                                                      END)                                                 AS dollar_paid_count, 
+                                                      END)                                                 AS paid_count, 
                                                   ROUND(SUM(CASE 
                                                               WHEN user_paylog_status_id = 3 THEN order_price 
                                                               ELSE 0 
-                                                            END) / 100, 2)                                 AS dollar_paid_amount 
+                                                            END) / 100, 2)                                 AS paid_amount 
                                            FROM   user_paylog 
                                            WHERE Date(Convert_tz(createtime, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=someday, timezone_offset=timezone_offset)
@@ -49,14 +49,14 @@ def process_bi_statistic_payment_records(target):
 
     if target == 'lifetime':
 
-        rows = [{'_on_day': row['on_day'], 'dollar_paid_user_count': row['dollar_paid_user_count'],
-                 'dollar_paid_count': row['dollar_paid_count'], 'dollar_paid_amount': row['dollar_paid_amount'], } for
+        rows = [{'_on_day': row['on_day'], 'paid_user_count': row['paid_user_count'],
+                 'paid_count': row['paid_count'], 'paid_amount': row['paid_amount'], } for
                 row in result_proxy]
 
     else:
 
-        rows = [{'_on_day': someday, 'dollar_paid_user_count': row['dollar_paid_user_count'],
-                 'dollar_paid_count': row['dollar_paid_count'], 'dollar_paid_amount': row['dollar_paid_amount'], } for
+        rows = [{'_on_day': someday, 'paid_user_count': row['paid_user_count'],
+                 'paid_count': row['paid_count'], 'paid_amount': row['paid_amount'], } for
                 row in result_proxy]
     if rows:
         def sync_collection_revenue(connection, transaction):
@@ -64,9 +64,9 @@ def process_bi_statistic_payment_records(target):
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.game == 'All Game',
                          BIStatistic.__table__.c.platform == 'All Platform')
-            values = {'dollar_paid_user_count': bindparam('dollar_paid_user_count'),
-                      'dollar_paid_count': bindparam('dollar_paid_count'),
-                      'dollar_paid_amount': bindparam('dollar_paid_amount')}
+            values = {'paid_user_count': bindparam('paid_user_count'),
+                      'paid_count': bindparam('paid_count'),
+                      'paid_amount': bindparam('paid_amount')}
 
             try:
                 connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)

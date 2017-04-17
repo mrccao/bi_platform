@@ -24,26 +24,26 @@ class BIStatistic(db.Model):
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
-    new_reg = db.Column(db.Integer, default=0)
-    email_reg = db.Column(db.Integer, default=0)
-    email_validate = db.Column(db.Integer, default=0)
+    new_reg = db.Column(db.Integer, nullable=False, default=0)
+    email_reg = db.Column(db.Integer, nullable=False, default=0)
+    email_validate = db.Column(db.Integer, nullable=False, default=0)
 
-    dau = db.Column(db.Integer, default=0)
-    wau = db.Column(db.Integer, default=0)
-    mau = db.Column(db.Integer, default=0)
-    new_reg_game_dau = db.Column(db.Integer, default=0)
+    dau = db.Column(db.Integer, nullable=False, default=0)
+    wau = db.Column(db.Integer, nullable=False, default=0)
+    mau = db.Column(db.Integer, nullable=False, default=0)
+    new_reg_game_dau = db.Column(db.Integer, nullable=False, default=0)
 
-    paid_user_count = db.Column(db.Integer, default=0)
+    paid_user_count = db.Column(db.Integer, nullable=False, default=0)
     paid_amount = db.Column(db.Float, default=0)
-    paid_count = db.Column(db.Integer, default=0)
-    revenue = db.Column(db.Float, default=0)
+    paid_count = db.Column(db.Integer, nullable=False, default=0)
+    revenue = db.Column(db.Float, nullable=False, default=0)
 
-    free_gold = db.Column(db.Integer, default=0)
-    free_silver = db.Column(db.Integer, default=0)
+    free_gold = db.Column(db.Integer, nullable=False, default=0)
+    free_silver = db.Column(db.Integer, nullable=False, default=0)
 
-    one_day_retention = db.Column(db.Integer, default=0)
-    seven_day_retention = db.Column(db.Integer, default=0)
-    thirty_day_retention = db.Column(db.Integer, default=0)
+    one_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    seven_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    thirty_day_retention = db.Column(db.Integer, nullable=False, default=0)
 
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
@@ -70,6 +70,7 @@ class BIStatistic(db.Model):
     # amount_of_dollar_exchanged_for_spin_ticket = db.Column(db.Float, default=0)
     # count_of_dollar_exchanged_for_spin_booster = db.Column(db.Integer, default=0)
     # amount_of_dollar_exchanged_for_spin_booster = db.Column(db.Float, default=0)
+
 
 class BIUser(db.Model):
     __tablename__ = 'bi_user'
@@ -272,7 +273,7 @@ class BIUserBill(db.Model):
     currency_type = db.Column(db.String(255), nullable=False, index=True)
     currency_type_orig = db.Column(db.Integer, nullable=False, index=True)
 
-    currency_amount = db.Column(db.Float, nullable=False)
+    currency_amount = db.Column(db.Float, nullable=False, default=0)
 
     category = db.Column(db.String(255), nullable=False)
     category_orig = db.Column(db.Integer)
@@ -280,7 +281,7 @@ class BIUserBill(db.Model):
     product = db.Column(db.String(255), nullable=False)
     product_orig = db.Column(db.Integer, nullable=False)
 
-    goods = db.Column(db.String(255), nullable=False)
+    goods = db.Column(db.String(255), default='')
     goods_orig = db.Column(db.Integer, nullable=False)
 
     quantity = db.Column(db.Integer, nullable=False)

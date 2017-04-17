@@ -15,6 +15,69 @@ from app.utils import generate_sql_date
 def process_bi_statistic_wau(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
 
+    def collection_wau_all_games(connection, transaction, day):
+
+        start_index_time = arrow.get(day).replace(days=-(7 + 3)).format('YYYY-MM-DD')
+        end_index_time = arrow.get(day).replace(days=+(7 + 3)).format('YYYY-MM-DD')
+
+        return connection.execute(text("""
+                                       SELECT COUNT(DISTINCT user_id) AS sum
+                                       FROM   bi_user_currency
+                                       WHERE  created_at > :start_index_time AND created_at < :end_index_time
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
+                                                  DATE_ADD(:on_day, INTERVAL - 7 DAY)
+                                              AND transaction_type NOT IN :free_transaction_types
+                                       """), on_day=day, timezone_offset=timezone_offset,
+                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE,
+                                  start_index_time=start_index_time, end_index_time=end_index_time)
+
+    def get_wau_all_games():
+
+        result_proxy = []
+
+        if target == 'lifetime':
+
+            for day in pd.date_range(date(2016, 6, 1), today):
+                day = day.strftime("%Y-%m-%d")
+                every_week_result = with_db_context(db, collection_wau_all_games, day=day)
+                every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
+                result_proxy.append(every_week_result_rows)
+            return result_proxy
+
+        else:
+
+            every_week_result = with_db_context(db, collection_wau_all_games, day=someday)
+            every_week_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_week_result]
+
+            result_proxy.append(every_week_result_rows)
+            return result_proxy
+
+    result_proxy_for_all_game = get_wau_all_games()
+
+    for rows in result_proxy_for_all_game:
+
+        if rows:
+
+            def sync_collection_wau_all_games(connection, transaction):
+
+                where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                             BIStatistic.__table__.c.game == 'All Game',
+                             BIStatistic.__table__.c.platform == 'All Platform')
+                values = {'wau': bindparam('sum')}
+
+                try:
+                    connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+                except:
+                    print(target + ' WAU for all games transaction.rollback()')
+                    transaction.rollback()
+                    raise
+                else:
+                    transaction.commit()
+                    print(target + ' WAU for all games transaction.commit()')
+
+            with_db_context(db, sync_collection_wau_all_games)
+
     def collection_wau_every_game(connection, transaction, day):
 
         start_index_time = arrow.get(day).replace(days=-(7 + 3)).format('YYYY-MM-DD')
@@ -86,66 +149,3 @@ def process_bi_statistic_wau(target):
                     print(target + ' Wau for every game transaction.commit()')
 
             with_db_context(db, sync_collection_wau_every_game)
-
-    def collection_wau_all_games(connection, transaction, day):
-
-        start_index_time = arrow.get(day).replace(days=-(7 + 3)).format('YYYY-MM-DD')
-        end_index_time = arrow.get(day).replace(days=+(7 + 3)).format('YYYY-MM-DD')
-
-        return connection.execute(text("""
-                                       SELECT COUNT(DISTINCT user_id) AS sum
-                                       FROM   bi_user_currency
-                                       WHERE  created_at > :start_index_time AND created_at < :end_index_time
-                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) <= :on_day
-                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >
-                                                  DATE_ADD(:on_day, INTERVAL - 7 DAY)
-                                              AND transaction_type NOT IN :free_transaction_types
-                                       """), on_day=day, timezone_offset=timezone_offset,
-                                  free_transaction_types=FREE_TRANSACTION_TYPES_TUPLE,
-                                  start_index_time=start_index_time, end_index_time=end_index_time)
-
-    def get_wau_all_games():
-
-        result_proxy = []
-
-        if target == 'lifetime':
-
-            for day in pd.date_range(date(2016, 6, 1), today):
-                day = day.strftime("%Y-%m-%d")
-                every_week_result = with_db_context(db, collection_wau_all_games, day=day)
-                every_week_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_week_result]
-                result_proxy.append(every_week_result_rows)
-            return result_proxy
-
-        else:
-
-            every_week_result = with_db_context(db, collection_wau_all_games, day=someday)
-            every_week_result_rows = [{'_on_day': str(someday), 'sum': row['sum']} for row in every_week_result]
-
-            result_proxy.append(every_week_result_rows)
-            return result_proxy
-
-    result_proxy_for_all_game = get_wau_all_games()
-
-    for rows in result_proxy_for_all_game:
-
-        if rows:
-
-            def sync_collection_wau_all_games(connection, transaction):
-
-                where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                             BIStatistic.__table__.c.game == 'All Game',
-                             BIStatistic.__table__.c.platform == 'All Platform')
-                values = {'wau': bindparam('sum')}
-
-                try:
-                    connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-                except:
-                    print(target + ' WAU for all games transaction.rollback()')
-                    transaction.rollback()
-                    raise
-                else:
-                    transaction.commit()
-                    print(target + ' WAU for all games transaction.commit()')
-
-            with_db_context(db, sync_collection_wau_all_games)
