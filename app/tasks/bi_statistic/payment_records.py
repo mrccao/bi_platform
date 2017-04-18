@@ -49,15 +49,16 @@ def process_bi_statistic_payment_records(target):
 
     if target == 'lifetime':
 
-        rows = [{'_on_day': row['on_day'], 'paid_user_count': row['paid_user_count'],
-                 'paid_count': row['paid_count'], 'paid_amount': row['paid_amount'], } for
-                row in result_proxy]
+        rows = map(lambda row: {'_on_day': row['on_day'], 'paid_user_count': row['paid_user_count'],
+                                'paid_count': row['paid_count'] if row['paid_count'] else 0,
+                                'paid_amount': row['paid_amount'] if row['paid_amount'] else 0}, result_proxy)
 
     else:
 
-        rows = [{'_on_day': someday, 'paid_user_count': row['paid_user_count'],
-                 'paid_count': row['paid_count'], 'paid_amount': row['paid_amount'], } for
-                row in result_proxy]
+        rows = map(lambda row: {'_on_day': someday, 'paid_user_count': row['paid_user_count'],
+                                'paid_count': row['paid_count'] if row['paid_count'] else 0,
+                                'paid_amount': row['paid_amount'] if row['paid_amount'] else 0}, result_proxy)
+
     if rows:
         def sync_collection_revenue(connection, transaction):
 
@@ -69,7 +70,7 @@ def process_bi_statistic_payment_records(target):
                       'paid_amount': bindparam('paid_amount')}
 
             try:
-                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), list(rows))
             except:
                 print(target + ' Revenue transaction.rollback()')
                 transaction.rollback()

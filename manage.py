@@ -1,5 +1,4 @@
 import os
-
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
@@ -231,15 +230,7 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                # new_reg = randrange(1000, 2000)
-                # dau = randrange(2000)
-                # mau = randrange(4000)
-                # wau = randrange(3000)
-                # new_reg_game_dau = randrange(1000)
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
-                # new_reg=new_reg,
-                # dau=dau, mau=mau, wau=wau,
-                # new_reg_game_dau=new_reg_game_dau))
     db.session.commit()
 
 
@@ -250,13 +241,6 @@ def reset_bi_user_statistic():
     BIUserStatistic.__table__.drop(db.engine, checkfirst=True)
 
     BIUserStatistic.__table__.create(db.engine, checkfirst=True)
-
-    from datetime import date
-    import pandas as pd
-    for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
-        for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-            db.session.add(BIUserStatistic(on_day=day.strftime("%Y-%m-%d"), platform=platform))
-    db.session.commit()
 
 
 # @manager.command
@@ -319,12 +303,29 @@ def sync_bi_clubwpt_user():
         process_bi_clubwpt_user()
 
 
+# process bi_user_statistic
+
+
 @manager.command
 def sync_bi_statistic_for_lifetime():
+    dau = int(input('dau = '))
+    wau = int(input('wau = '))
+    mau = int(input('mau = '))
+    new_reg = int(input('new_reg = '))
+    new_reg_dau = int(input('new_reg_dau = '))
+    free_gold_silver = int(input('dau =free_gold_silver = '))
+    payment_records = int(input('payment_records = '))
+    retention = int(input('retention = '))
+    revenue = int(input('revenue = '))
+
     if app.config['ENV'] == 'prod':
-        process_bi_statistic.delay('lifetime')
+        process_bi_statistic.delay('lifetime', dau=dau, wau=wau, mau=mau, new_reg=new_reg, new_reg_dau=new_reg_dau,
+                                   free_gold_silver=free_gold_silver, payment_records=payment_records,
+                                   retention=retention, revenue=revenue)
     else:
-        process_bi_statistic('lifetime')
+        process_bi_statistic('lifetime', dau=dau, wau=wau, mau=mau, new_reg=new_reg, new_reg_dau=new_reg_dau,
+                             free_gold_silver=free_gold_silver, payment_records=payment_records,
+                             retention=retention, revenue=revenue)
 
 
 @manager.command
@@ -350,6 +351,8 @@ def sync_bi_statistic_for_someday(target):
     else:
         process_bi_statistic(target)
 
+
+# process bi_user_statistic
 
 @manager.command
 def sync_bi_user_statistic_for_lifetime():

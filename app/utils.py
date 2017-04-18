@@ -14,8 +14,7 @@ def generate_sql_date(target):
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
     today = now.format('YYYY-MM-DD')
 
-    # timezone_offset = app.config['APP_TIMEZONE']
-    timezone_offset = '-04:00'
+    timezone_offset = app.config['APP_TIMEZONE']
     day = {'today': today, 'yesterday': yesterday}
     someday = day.get(target, target)
 
@@ -132,6 +131,7 @@ def str_to_class(module_name, class_name):
     kls = getattr(mdl, class_name)
     return kls
 
+
 # def base_json_conv(obj):
 
 #     if isinstance(obj, numpy.int64):
@@ -163,3 +163,6 @@ def str_to_class(module_name, class_name):
 #             "Unserializable object {} of type {}".format(obj, type(obj))
 #         )
 #     return obj
+
+
+

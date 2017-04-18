@@ -20,7 +20,7 @@ class BIStatistic(db.Model):
     __tablename__ = 'bi_statistic'
 
     id = db.Column(db.Integer, primary_key=True)
-    on_day = db.Column(NaiveDateTime, nullable=False, index=True)
+    on_day = db.Column(db.Date, nullable=False, index=True)
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
@@ -33,17 +33,17 @@ class BIStatistic(db.Model):
     mau = db.Column(db.Integer, nullable=False, default=0)
     new_reg_game_dau = db.Column(db.Integer, nullable=False, default=0)
 
-    paid_user_count = db.Column(db.Integer, default=0)
-    paid_amount = db.Column(db.Float, default=0)
-    paid_count = db.Column(db.Integer, default=0)
+    paid_user_count = db.Column(db.Integer, nullable=False, default=0)
+    paid_amount = db.Column(db.Float, nullable=False, default=0)
+    paid_count = db.Column(db.Integer, nullable=False, default=0)
     revenue = db.Column(db.Float, default=0)
 
-    free_gold = db.Column(db.Integer, default=0)
-    free_silver = db.Column(db.Integer, default=0)
+    free_gold = db.Column(db.Integer, nullable=False, default=0)
+    free_silver = db.Column(db.Integer, nullable=False, default=0)
 
-    one_day_retention = db.Column(db.Integer, default=0)
-    seven_day_retention = db.Column(db.Integer, default=0)
-    thirty_day_retention = db.Column(db.Integer, default=0)
+    one_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    seven_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    thirty_day_retention = db.Column(db.Integer, nullable=False, default=0)
 
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
@@ -298,12 +298,11 @@ class BIUserStatistic(db.Model):
     id = db.Column(db.BIGINT, primary_key=True)
     user_id = db.Column(db.BIGINT, index=True)
 
-    on_day = db.Column(NaiveDateTime, index=True)
+    on_day = db.Column(db.Date, index=True)
     platform = db.Column(db.String(255), default='All Platform')
 
     # ring_player = db.Column(db.Integer, nullable=False)
     # ring_won_loss = db.Column(db.Integer, nullable=False)
-    #
     # rake = db.Column(db.String(255), nullable=False)
     #
     # sng_player = db.Column(db.Integer, nullable=False)
@@ -324,7 +323,6 @@ class BIUserStatistic(db.Model):
     # slots_spins = db.Column(db.Integer, nullable=False)
     # slots_wagered = db.Column(db.Integer, nullable=False)
     # slots_won_loss = db.Column(db.Integer, nullable=False)
-
 
 
     purchase_gold_dollar = db.Column(db.Float, default=0)
