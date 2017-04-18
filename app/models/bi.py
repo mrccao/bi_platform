@@ -343,7 +343,6 @@ class BIUserStatistic(db.Model):
 
 
 
-
     convert_silver_gold = db.Column(db.BIGINT, default=0)
     convert_silver_count = db.Column(db.Integer, default=0)
     convert_silver = db.Column(db.BIGINT, default=0)

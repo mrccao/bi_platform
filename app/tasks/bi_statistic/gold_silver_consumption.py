@@ -8,6 +8,13 @@ from app.utils import generate_sql_date
 
 
 # TODO : to be confirmed sql
+
+# we can't calculate Gold consumption because we don't have all consumption data yet.
+# Gold consumption is the total Gold removed from the economy:
+# rake, SNG fee, MTT fee, virtual gift purchase (table gift, avatars, charms, emojis),
+#  and conversion of Gold to Silver. We need to bring in rake, SNG fee, and MTT fee (including rebuys and add-ons).
+# Also need to add insurance but I'm not exactly sure how that data looks like.
+
 def process_bi_statistic_gold_silver_consumption(target):
     _, someday, index_time, timezone_offset = generate_sql_date(target)
 
