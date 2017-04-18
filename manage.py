@@ -313,7 +313,7 @@ def sync_bi_statistic_for_lifetime():
     mau = int(input('mau = '))
     new_reg = int(input('new_reg = '))
     new_reg_dau = int(input('new_reg_dau = '))
-    free_gold_silver = int(input('dau =free_gold_silver = '))
+    free_gold_silver = int(input('free_gold_silver = '))
     payment_records = int(input('payment_records = '))
     retention = int(input('retention = '))
     revenue = int(input('revenue = '))
