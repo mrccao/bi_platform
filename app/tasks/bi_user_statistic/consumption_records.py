@@ -13,6 +13,7 @@ from app.utils import generate_sql_date
 
 def process_bi_user_statistic_consumption_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
+    date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
     def collection_user_consumption_records(connection, transaction, product_orig, day):
 
@@ -33,7 +34,7 @@ def process_bi_user_statistic_consumption_records(target):
 
         if target == 'lifetime':
 
-            for day in pd.date_range(date(2016, 6, 1), today):
+            for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")
                 print('Consumption history on ' + str(day))
                 for product in ['charms', 'avatar', 'emoji']:

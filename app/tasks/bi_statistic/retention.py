@@ -13,6 +13,7 @@ from app.utils import generate_sql_date
 
 def process_bi_statistic_retention(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
+    date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
     def collection_retention(connection, transaction, day, timedelta):
 
@@ -38,7 +39,7 @@ def process_bi_statistic_retention(target):
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
 
-                for day in pd.date_range(date(2016, 6, 1), today):
+                for day in date_range_reversed:
                     day = day.strftime("%Y-%m-%d")
 
                     print(str(timedelta) + ' retention on ' + str(day))

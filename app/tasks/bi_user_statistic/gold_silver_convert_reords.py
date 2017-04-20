@@ -13,6 +13,7 @@ from app.utils import generate_sql_date
 
 def process_bi_user_statistic_convert_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
+    date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
     def collection_user_convert_records(connection, transaction, day, product_orig):
         if target == 'lifetime':
@@ -34,7 +35,7 @@ def process_bi_user_statistic_convert_records(target):
         product = 'silver'
         if target == 'lifetime':
 
-            for day in pd.date_range(date(2016, 4, 22), today):
+            for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")
                 print('Recharge history game on ' + str(day))
                 product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]

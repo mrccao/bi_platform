@@ -14,6 +14,7 @@ from app.utils import generate_sql_date
 
 def process_bi_statistic_mau(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
+    date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
     def collection_mau_all_games(connection, transaction, day):
 
@@ -38,7 +39,7 @@ def process_bi_statistic_mau(target):
 
         if target == 'lifetime':
 
-            for day in pd.date_range(date(2016, 6, 1), today):
+            for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_all_games, day=day)
                 every_month_result_rows = [{'_on_day': str(day), 'sum': row['sum']} for row in every_month_result]
@@ -107,7 +108,7 @@ def process_bi_statistic_mau(target):
 
         if target == 'lifetime':
 
-            for day in pd.date_range(date(2016, 6, 1), today):
+            for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")
                 every_month_result = with_db_context(db, collection_mau_every_game, day=day)
                 every_month_result_rows = [{'_on_day': str(day), '_game': row['game'], 'sum': row['sum']} for row in
