@@ -67,7 +67,7 @@ def daily_summary_data():
 
     charts_data = transpose_query_result
     charts_labels = [datetime.strftime(day, "%Y-%m-%d") for day in charts_data[0]]
-    charts_data[4:7] = [one_day_retention, seven_day_retention, thirty_day_retention]
+    charts_data[11:14] = [one_day_retention, seven_day_retention, thirty_day_retention]
     charts_data = charts_data[1:]
     charts_data.insert(7, facebook_reg)
 
@@ -80,7 +80,7 @@ def daily_summary_data():
     tables_data = [row for row in query_result]
     transpose_tables_data = list(map(list, zip(*tables_data)))
     transpose_tables_data[0] = charts_labels
-    transpose_tables_data[4:7] = [one_day_retention, seven_day_retention, thirty_day_retention]
+    transpose_tables_data[11:14] = [one_day_retention, seven_day_retention, thirty_day_retention]
     transpose_tables_data.insert(7, facebook_reg)
 
     tables_data = list(map(list, zip(*transpose_tables_data)))
