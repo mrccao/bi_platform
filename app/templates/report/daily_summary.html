@@ -5,19 +5,19 @@
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
-		  
+
     <style>
-		#result-table_wrapper {
-			overflow: auto;
-		}
+        #result-table_wrapper {
+            overflow: auto;
+        }
 
         #result-table_wrapper .table-button {
             float: right;
         }
-		
-	    #result-table_wrapper .table-button .btn {
-	        padding: 4px 12px;
-	    }
+
+        #result-table_wrapper .table-button .btn {
+            padding: 4px 12px;
+        }
 
         #result-table_wrapper .table-filter {
             float: left;
@@ -35,7 +35,7 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-body">
-                        <div id="charts" style="height: 700px; width: 100%;"></div>
+                        <div id="charts" style="height: 750px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -67,148 +67,154 @@
 {% endblock %}
 
 {% block body_tail %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js"></script>
-	
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/jquery.dataTables.min.js"
+            type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/js/dataTables.bootstrap.min.js"
+            type="text/javascript"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/dataTables.buttons.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.2/js/buttons.bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.1.0/js/buttons.html5.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
     <script type="text/javascript">
-		
-	    var echartsColorPalette = [
-	        '#c12e34', '#e6b600', '#0098d9', '#2b821d',
-	        '#005eaa', '#339ca8', '#cda819', '#32a487'
-	    ];
 
-	    var echartsTheme = {
-	        color: echartsColorPalette,
-	        title: {
-	            textStyle: {
-	                fontWeight: 'normal'
-	            }
-	        },
-	        visualMap: {
-	            color: ['#1790cf', '#a2d4e6']
-	        },
-	        toolbox: {
-	            iconStyle: {
-	                normal: {
-	                    borderColor: '#06467c'
-	                }
-	            }
-	        },
-	        tooltip: {
-	            backgroundColor: 'rgba(0,0,0,0.6)'
-	        },
-	        dataZoom: {
-	            dataBackgroundColor: '#dedede',
-	            fillerColor: 'rgba(154,217,247,0.2)',
-	            handleColor: '#005eaa'
-	        },
-	        timeline: {
-	            lineStyle: {
-	                color: '#005eaa'
-	            },
-	            controlStyle: {
-	                normal: {
-	                    color: '#005eaa',
-	                    borderColor: '#005eaa'
-	                }
-	            }
-	        },
-	        candlestick: {
-	            itemStyle: {
-	                normal: {
-	                    color: '#c12e34',
-	                    color0: '#2b821d',
-	                    lineStyle: {
-	                        width: 1,
-	                        color: '#c12e34',
-	                        color0: '#2b821d'
-	                    }
-	                }
-	            }
-	        },
+        var echartsColorPalette = [
+            '#c12e34', '#e6b600', '#0098d9', '#2b821d',
+            '#005eaa', '#339ca8', '#cda819', '#32a487',
+            '#E01F54', '#001852', '#f5e8c8', '#b8d2c7', '#c6b38e',
+            '#a4d8c2', '#f3d999', '#d3758f', '#dcc392', '#2e4783',
+            '#82b6e9', '#ff6347', '#a092f1', '#0a915d', '#eaf889',
+            '#6699FF', '#ff6666', '#3cb371', '#d5b158', '#38b6b6'
+        ];
 
-	        graph: {
-	            color: echartsColorPalette
-	        },
+        var echartsTheme = {
+            color: echartsColorPalette,
+            title: {
+                textStyle: {
+                    fontWeight: 'normal'
+                }
+            },
+            visualMap: {
+                color: ['#1790cf', '#a2d4e6']
+            },
+            toolbox: {
+                iconStyle: {
+                    normal: {
+                        borderColor: '#06467c'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.6)'
+            },
+            dataZoom: {
+                dataBackgroundColor: '#dedede',
+                fillerColor: 'rgba(154,217,247,0.2)',
+                handleColor: '#005eaa'
+            },
+            timeline: {
+                lineStyle: {
+                    color: '#005eaa'
+                },
+                controlStyle: {
+                    normal: {
+                        color: '#005eaa',
+                        borderColor: '#005eaa'
+                    }
+                }
+            },
+            candlestick: {
+                itemStyle: {
+                    normal: {
+                        color: '#c12e34',
+                        color0: '#2b821d',
+                        lineStyle: {
+                            width: 1,
+                            color: '#c12e34',
+                            color0: '#2b821d'
+                        }
+                    }
+                }
+            },
 
-	        map: {
-	            label: {
-	                normal: {
-	                    textStyle: {
-	                        color: '#c12e34'
-	                    }
-	                },
-	                emphasis: {
-	                    textStyle: {
-	                        color: '#c12e34'
-	                    }
-	                }
-	            },
-	            itemStyle: {
-	                normal: {
-	                    borderColor: '#eee',
-	                    areaColor: '#ddd'
-	                },
-	                emphasis: {
-	                    areaColor: '#e6b600'
-	                }
-	            }
-	        },
+            graph: {
+                color: echartsColorPalette
+            },
 
-	        gauge: {
-	            axisLine: {
-	                show: true,
-	                lineStyle: {
-	                    color: [[0.2, '#2b821d'], [0.8, '#005eaa'], [1, '#c12e34']],
-	                    width: 5
-	                }
-	            },
-	            axisTick: {
-	                splitNumber: 10,
-	                length: 8,
-	                lineStyle: {
-	                    color: 'auto'
-	                }
-	            },
-	            axisLabel: {
-	                textStyle: {
-	                    color: 'auto'
-	                }
-	            },
-	            splitLine: {
-	                length: 12,
-	                lineStyle: {
-	                    color: 'auto'
-	                }
-	            },
-	            pointer: {
-	                length: '90%',
-	                width: 3,
-	                color: 'auto'
-	            },
-	            title: {
-	                textStyle: {
-	                    color: '#333'
-	                }
-	            },
-	            detail: {
-	                textStyle: {
-	                    color: 'auto'
-	                }
-	            }
-	        }
-	    };
-	    echarts.registerTheme('shine', echartsTheme);
+            map: {
+                label: {
+                    normal: {
+                        textStyle: {
+                            color: '#c12e34'
+                        }
+                    },
+                    emphasis: {
+                        textStyle: {
+                            color: '#c12e34'
+                        }
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        borderColor: '#eee',
+                        areaColor: '#ddd'
+                    },
+                    emphasis: {
+                        areaColor: '#e6b600'
+                    }
+                }
+            },
+
+            gauge: {
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: [[0.2, '#2b821d'], [0.8, '#005eaa'], [1, '#c12e34']],
+                        width: 5
+                    }
+                },
+                axisTick: {
+                    splitNumber: 10,
+                    length: 8,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                },
+                splitLine: {
+                    length: 12,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                pointer: {
+                    length: '90%',
+                    width: 3,
+                    color: 'auto'
+                },
+                title: {
+                    textStyle: {
+                        color: '#333'
+                    }
+                },
+                detail: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                }
+            }
+        };
+        echarts.registerTheme('shine', echartsTheme);
 
         var dom = document.getElementById("charts");
         var myChart = echarts.init(dom, 'shine');
@@ -219,17 +225,56 @@
                 trigger: 'axis'
             },
             legend: {
+                width: 1400,
+                itemHeight:16,
+                itemWidth:16,
+                itemGap:15,
+                selected: {
+                    'dau': 1,
+                    'wau': 0,
+                    'mau': 1,
+                    'one_day_retention': 0,
+                    'seven_day_retention': 0,
+                    'thirty_day_retention': 0,
+                    'paid_user_count': 0,
+                    'paid_count': 0,
+                    'revenue': 1,
+                    'new_reg': 1,
+                    'email_reg': 0,
+                    'email_validated': 0,
+                    'new_reg_game_dau': 0,
+                    'free_silver': 0,
+                    'free_gold': 0,
+                    'facebook_reg': 0,
+                    'reg_retention': 0,
+                    'ARPDAU': 0,
+                    'ARPPU': 0,
+                    'ARPU': 0
+                },
                 data: []
             },
             grid: {
-                left: '3%',
-                right: '4%',
+                top: '11%',
                 bottom: '3%',
+                left: '1%',
+                right: '4%',
                 containLabel: true
             },
             toolbox: {
                 show: true,
+                top: 110,
+                right: 15,
+                orient: 'vertical',
+                itemSize: '16',
                 feature: {
+                    restore: {title: 'Reset'},
+                    magicType: {
+                        title: {
+                            'bar': 'Switch To Histogram',
+                            'line': 'Switch To line'
+                        },
+                        type: ['bar', 'line']
+                    },
                     dataZoom: {
                         title: {
                             zoom: 'Area Zoom',
@@ -237,11 +282,6 @@
                         },
                         yAxisIndex: 'none'
                     },
-                    magicType: {
-                        title: {'bar': 'Switch To Histogram'},
-                        type: ['bar']
-                    },
-                    restore: {title: 'Reset'},
                     saveAsImage: {title: 'Save As Image'}
                 }
             },
@@ -252,11 +292,11 @@
             },
             yAxis: {
                 type: 'value',
-                splitNumber: 15
-
+                splitNumber: 10
             },
             series: []
         };
+
 
         $(document).ready(function () {
 
@@ -271,28 +311,31 @@
 
                     ////////////////////
 
+                    $.extend($.fn.dataTable.defaults, {
+                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
+                    });
+
                     if (resultDataTable !== null) {
                         resultDataTable.destroy();
                         $('#result-table').empty();
                     }
 
-                    $.extend($.fn.dataTable.defaults, {
-                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>'
-                    });
-
-                    reusltDataTable = $("#result-table").DataTable({
+                    resultDataTable = $('#result-table').DataTable({
                         retrieve: true,
                         searching: true,
                         'buttons': [
                             'copy', 'csv', 'excel', 'pdf'
                         ],
+                        iDisplayLength: 20,
+                        "order": [[0, "desc"]],
+                        lengthChange: true,
+                        scrollX: true,
                         data: result.tables_result.tables_data,
-                        columns: result.tables_result.tables_title,
-                        iDisplayLength: 100,
-                        "order": [[ 0, "desc" ]],
-                        lengthChange: false
+                        columns: result.tables_result.tables_title
+
 
                     });
+
                     ////////////////////
 
                     for (var c = 0; c < result.charts_result.charts_legend.length; c++) {
@@ -303,7 +346,6 @@
                             data: []
                         });
                     }
-
 
                     var data;
                     for (var d = 0; d < result.charts_result.charts_data.length; d++) {
@@ -317,9 +359,7 @@
 
                     myChart.setOption(option, true);
                 }
-            })
-            ;
-        })
-        ;
+            });
+        });
     </script>
 {% endblock %}

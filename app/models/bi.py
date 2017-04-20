@@ -1,4 +1,3 @@
-import sys
 from sqlalchemy import text
 from sqlalchemy.schema import UniqueConstraint
 
@@ -21,20 +20,31 @@ class BIStatistic(db.Model):
     __tablename__ = 'bi_statistic'
 
     id = db.Column(db.Integer, primary_key=True)
-    on_day = db.Column(NaiveDateTime, nullable=False, index=True)
+    on_day = db.Column(db.Date, nullable=False, index=True)
     game = db.Column(db.String(255), nullable=False, index=True)
     platform = db.Column(db.String(255), nullable=False, index=True)
 
-    new_reg = db.Column(db.Integer, default=0)
-    dau = db.Column(db.Integer, default=0)
-    wau = db.Column(db.Integer, default=0)
-    mau = db.Column(db.Integer, default=0)
-    new_reg_game_dau = db.Column(db.Integer, default=0)
+    new_reg = db.Column(db.Integer, nullable=False, default=0)
+    email_reg = db.Column(db.Integer, nullable=False, default=0)
+    email_validated = db.Column(db.Integer, nullable=False, default=0)
 
-    dollar_paid_user_count = db.Column(db.Integer, default=0)
+    dau = db.Column(db.Integer, nullable=False, default=0)
+    wau = db.Column(db.Integer, nullable=False, default=0)
+    mau = db.Column(db.Integer, nullable=False, default=0)
+    new_reg_game_dau = db.Column(db.Integer, nullable=False, default=0)
 
-    dollar_paid_amount = db.Column(db.Float, default=0)
-    dollar_paid_count = db.Column(db.Integer, default=0)
+    paid_user_count = db.Column(db.Integer, nullable=False, default=0)
+    paid_amount = db.Column(db.Float, nullable=False, default=0)
+    paid_count = db.Column(db.Integer, nullable=False, default=0)
+    revenue = db.Column(db.Float, default=0)
+
+    free_gold = db.Column(db.Integer, nullable=False, default=0)
+    free_silver = db.Column(db.Integer, nullable=False, default=0)
+
+    one_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    seven_day_retention = db.Column(db.Integer, nullable=False, default=0)
+    thirty_day_retention = db.Column(db.Integer, nullable=False, default=0)
+
 
     # count_of_masterpoint_exchanged_for_gold = db.Column(db.Integer, default=0)
     # amount_of_masterpoint_exchanged_for_gold = db.Column(db.Float, default=0)
@@ -196,7 +206,8 @@ class BIUser(db.Model):
     updated_at = db.Column(AwareDateTime, onupdate=current_time, index=True)
 
     def attribute_pairs(self):
-        return [[column.key.replace('_', ' ').title(), self.__dict__[column.key] or ''] for column in self.__table__.columns]
+        return [[column.key.replace('_', ' ').title(), self.__dict__[column.key] or ''] for column in
+                self.__table__.columns]
 
     def login_logs(self, limit=5):
         return WPTUserLoginLog.query.filter_by(user_id=self.user_id).order_by(text('id DESC')).limit(limit).all()
@@ -238,7 +249,7 @@ class BIUserCurrency(db.Model):
     user_id_updated = db.Column(db.Boolean, nullable=False, default=False, index=True)
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
-    __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
+    # __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
 
     def transaction_type_display(self):
         value = TRANSACTION_TYPES[self.transaction_type]
@@ -262,7 +273,7 @@ class BIUserBill(db.Model):
     currency_type = db.Column(db.String(255), nullable=False, index=True)
     currency_type_orig = db.Column(db.Integer, nullable=False, index=True)
 
-    currency_amount = db.Column(db.Float, nullable=False)
+    currency_amount = db.Column(db.Float, nullable=False, default=0)
 
     category = db.Column(db.String(255), nullable=False)
     category_orig = db.Column(db.Integer)
@@ -270,28 +281,28 @@ class BIUserBill(db.Model):
     product = db.Column(db.String(255), nullable=False)
     product_orig = db.Column(db.Integer, nullable=False)
 
-    goods = db.Column(db.String(255), nullable=False)
+    goods = db.Column(db.String(255))
     goods_orig = db.Column(db.Integer, nullable=False)
 
     quantity = db.Column(db.Integer, nullable=False)
 
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
-    __table_args__ = (UniqueConstraint('orig_db', 'orig_id', 'product_orig', name='ix_uniq_orig_db_and_orig_id_and_product_orig'),)
+    __table_args__ = (
+        UniqueConstraint('orig_db', 'orig_id', 'product_orig', name='ix_uniq_orig_db_and_orig_id_and_product_orig'),)
 
 
 class BIUserStatistic(db.Model):
     __tablename__ = 'bi_user_statistic'
 
     id = db.Column(db.BIGINT, primary_key=True)
-    user_id = db.Column(db.BIGINT, nullable=False, index=True)
+    user_id = db.Column(db.BIGINT, index=True)
 
-    on_day = db.Column(NaiveDateTime, nullable=False, index=True)
-    platform = db.Column(db.String(255), nullable=False, index=True)
+    on_day = db.Column(db.Date, index=True)
+    platform = db.Column(db.String(255), default='All Platform')
 
     # ring_player = db.Column(db.Integer, nullable=False)
     # ring_won_loss = db.Column(db.Integer, nullable=False)
-    #
     # rake = db.Column(db.String(255), nullable=False)
     #
     # sng_player = db.Column(db.Integer, nullable=False)
@@ -313,37 +324,45 @@ class BIUserStatistic(db.Model):
     # slots_wagered = db.Column(db.Integer, nullable=False)
     # slots_won_loss = db.Column(db.Integer, nullable=False)
 
-    purchase_gold_dollar = db.Column(db.Float, nullable=False)
-    purchase_gold_count = db.Column(db.Integer, nullable=False)
-    purchase_gold = db.Column(db.BIGINT, nullable=False)
 
-    purchase_silver_dollar = db.Column(db.Float, nullable=False)
-    purchase_silver_count = db.Column(db.Integer, nullable=False)
-    purchase_silver = db.Column(db.BIGINT, nullable=False)
+    purchase_gold_dollar = db.Column(db.Float, default=0)
+    purchase_gold_count = db.Column(db.Integer, default=0)
+    purchase_gold = db.Column(db.BIGINT, default=0)
 
-    purchase_avatar_gold = db.Column(db.BIGINT, nullable=False)
-    purchase_charms_gold = db.Column(db.BIGINT, nullable=False)
-    purchase_emoji_gold = db.Column(db.BIGINT, nullable=False)
-    purchase_table_gifts_gold = db.Column(db.BIGINT, nullable=False)
+    purchase_silver_dollar = db.Column(db.Float, default=0)
+    purchase_silver_count = db.Column(db.Integer, default=0)
+    purchase_silver = db.Column(db.BIGINT, default=0)
 
-    convert_silver_gold = db.Column(db.BIGINT, nullable=False)
-    convert_silver_count = db.Column(db.Integer, nullable=False)
-    convert_silver = db.Column(db.BIGINT, nullable=False)
+    purchase_avatar_gold = db.Column(db.BIGINT, default=0)
+    purchase_charms_gold = db.Column(db.BIGINT, default=0)
+    purchase_emoji_gold = db.Column(db.BIGINT, default=0)
 
-    lucky_spin_free_count = db.Column(db.Integer, nullable=False)
-    lucky_spin_buy_gold = db.Column(db.BIGINT, nullable=False)
-    lucky_spin_buy_count = db.Column(db.Integer, nullable=False)
-    lucky_spin_booster_gold = db.Column(db.BIGINT, nullable=False)
-    lucky_spin_booster_count = db.Column(db.Integer, nullable=False)
+    # purchase_table_gifts_gold = db.Column(db.BIGINT, nullable=False)
 
-    time_slot_daily_silver = db.Column(db.Integer, nullable=False)
-    time_slot_bonus_silver = db.Column(db.Integer, nullable=False)
-    time_slot_wagered = db.Column(db.Integer, nullable=False)
-    time_slot_won = db.Column(db.Integer, nullable=False)
 
-    reward_points_earned = db.Column(db.Integer, nullable=False)
-    reward_points_redeemed = db.Column(db.Integer, nullable=False)
-    reward_points_gold = db.Column(db.BIGINT, nullable=False)
+
+    convert_silver_gold = db.Column(db.BIGINT, default=0)
+    convert_silver_count = db.Column(db.Integer, default=0)
+    convert_silver = db.Column(db.BIGINT, default=0)
+
+
+
+    # lucky_spin_free_count = db.Column(db.Integer, default=0)
+    #
+    # lucky_spin_buy_gold = db.Column(db.BIGINT, default=0)
+    # lucky_spin_buy_count = db.Column(db.Integer, default=0)
+    #
+    # lucky_spin_booster_gold = db.Column(db.BIGINT, default=0)
+    # lucky_spin_booster_count = db.Column(db.Integer, default=0)
+
+    # time_slot_daily_silver = db.Column(db.Integer, nullable=False)
+    # time_slot_bonus_silver = db.Column(db.Integer, nullable=False)
+    # time_slot_wagered = db.Column(db.Integer, nullable=False)
+    # time_slot_won = db.Column(db.Integer, nullable=False)
+    #
+    # reward_points_earned = db.Column(db.Integer, nullable=False)
+    # reward_points_redeemed = db.Column(db.Integer, nullable=False)
+    # reward_points_gold = db.Column(db.BIGINT, nullable=False)
 
 
 class BIClubWPTUser(db.Model):

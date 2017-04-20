@@ -28,12 +28,12 @@ def visualization_summary_data():
         day = now.format('YYYY-MM-DD')
 
     new_reg = db.engine.execute(text("""
-                                              SELECT new_reg
-                                              FROM   bi_statistic
-                                              WHERE  platform = 'All Platform'
-                                              AND    game = 'All Game'
-                                              AND    on_day = :day
-                                              """), day=day).scalar()
+                                      SELECT new_reg
+                                      FROM   bi_statistic
+                                      WHERE  platform = 'All Platform'
+                                      AND    game = 'All Game'
+                                      AND    on_day = :day
+                                      """), day=day).scalar()
 
     revenue = db.engine.execute(text("""
                                      SELECT ROUND(SUM(currency_amount), 2)
@@ -51,12 +51,12 @@ def visualization_summary_data():
                                       """), day=day).scalar()
 
     new_reg_game_dau = db.engine.execute(text("""
-                                                       SELECT new_reg_game_dau
-                                                       FROM   bi_statistic
-                                                       WHERE  on_day = :day
-                                                       AND platform = 'All Platform'
-                                                       AND game = 'All Game'
-                                                       """), day=day).scalar()
+                                               SELECT new_reg_game_dau
+                                               FROM   bi_statistic
+                                               WHERE  on_day = :day
+                                               AND platform = 'All Platform'
+                                               AND game = 'All Game'
+                                               """), day=day).scalar()
 
     payload = {
         'new_reg': new_reg,
