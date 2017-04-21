@@ -218,6 +218,10 @@
 
         var dom = document.getElementById("charts");
         var myChart = echarts.init(dom, 'shine');
+        var grid_top_response = (screen.width < 550 ) ? "20%" : "11%";
+        var tool_top_response = (screen.width < 550 ) ? "16%" : "7%";
+        var tool_right_response = (screen.width < 550 ) ? "7%" : "4%";
+
 
         window.onresize = myChart.resize;
         var option = {
@@ -225,10 +229,7 @@
                 trigger: 'axis'
             },
             legend: {
-                width: 1400,
-                itemHeight:16,
-                itemWidth:16,
-                itemGap:15,
+
                 selected: {
                     'dau': 1,
                     'wau': 0,
@@ -254,7 +255,7 @@
                 data: []
             },
             grid: {
-                top: '11%',
+                top: grid_top_response,
                 bottom: '3%',
                 left: '1%',
                 right: '4%',
@@ -262,9 +263,8 @@
             },
             toolbox: {
                 show: true,
-                top: 110,
-                right: 15,
-                orient: 'vertical',
+                top: tool_top_response,
+                right: tool_right_response,
                 itemSize: '16',
                 feature: {
                     restore: {title: 'Reset'},
@@ -356,6 +356,14 @@
 
                     option.xAxis.data = result.charts_result.charts_labels;
                     option.legend.data = result.charts_result.charts_legend;
+
+                    if (screen.width > 550) {
+                        option.legend.width = 1400;
+                        option.legend.itemHeight = 16;
+                        option.legend.itemWidth = 16;
+                        option.legend.itemGap = 15;
+
+                    }
 
                     myChart.setOption(option, true);
                 }
