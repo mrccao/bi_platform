@@ -176,7 +176,7 @@ class AdminBIUserCurrencyModelView(AdminBaseModelView):
 
     column_default_sort = ('created_at', True)
     column_list = ['user_id', 'og_account', 'currency_type', 'transaction_type', 'transaction_amount', 'balance', 'created_at']
-    column_sortable_list = ['transaction_amount', 'balance', 'created_at']
+    column_sortable_list = ['created_at']
 
     column_filters = [
         FilterEqual(column=BIUserCurrency.user_id, name='User Id'),

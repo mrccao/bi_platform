@@ -1,5 +1,5 @@
 from sqlalchemy import text
-from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy.schema import UniqueConstraint, Index
 
 from app.constants import TRANSACTION_TYPES, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
 from app.extensions import db
@@ -13,7 +13,7 @@ class BIImportConfig(db.Model):
 
     var = db.Column(db.String(255), unique=True, primary_key=True)
     value = db.Column(db.String(255))
-    last_synced_at = db.Column(AwareDateTime, onupdate=current_time)
+    last_synced_at = db.Column(AwareDateTime)
 
 
 class BIStatistic(db.Model):
@@ -250,6 +250,9 @@ class BIUserCurrency(db.Model):
     created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
 
     # __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
+    __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),
+                      Index('og_account', 'user_id_updated', name='ix_og_account_and_user_id_updated'),)
+
 
     def transaction_type_display(self):
         value = TRANSACTION_TYPES[self.transaction_type]

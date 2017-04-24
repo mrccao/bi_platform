@@ -24,6 +24,7 @@ def process_user_gold_currency_newly_added_records():
                                            FROM   powergamecoin_detail
                                            WHERE  username IS NOT NULL
                                            ORDER  BY recdate ASC
+                                           LIMIT  5000000
                                            """))
         return connection.execute(text("""
                                        SELECT id,
@@ -37,6 +38,7 @@ def process_user_gold_currency_newly_added_records():
                                        FROM   powergamecoin_detail
                                        WHERE  recdate >= :recdate AND username IS NOT NULL
                                        ORDER  BY recdate ASC
+                                       LIMIT  5000000
                                        """), recdate=config_value)
 
     result_proxy = with_db_context(db, collection, 'orig_wpt_ods')
@@ -121,7 +123,7 @@ def process_user_silver_currency_newly_added_records():
                                            FROM   gamecoin_detail
                                            WHERE  username IS NOT NULL
                                            ORDER  BY recdate ASC
-                                           LIMIT  10000000
+                                           LIMIT  5000000
                                            """))
         return connection.execute(text("""
                                        SELECT id,
@@ -135,7 +137,7 @@ def process_user_silver_currency_newly_added_records():
                                        FROM   gamecoin_detail
                                        WHERE  recdate >= :recdate AND username IS NOT NULL
                                        ORDER  BY recdate ASC
-                                       LIMIT  10000000
+                                       LIMIT  5000000
                                        """), recdate=config_value)
 
     result_proxy = with_db_context(db, collection, 'orig_wpt_ods')
