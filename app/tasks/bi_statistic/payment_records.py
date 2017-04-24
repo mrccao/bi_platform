@@ -1,3 +1,6 @@
+from datetime import date
+
+import pandas as pd
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -8,75 +11,67 @@ from app.utils import generate_sql_date
 
 
 def process_bi_statistic_payment_records(target):
-    _, someday, _, timezone_offset = generate_sql_date(target)
+    today, someday, _, timezone_offset = generate_sql_date(target)
+    date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), today), reverse=True)
 
-    def collection_payment_records(connection, transaction):
+    def collection_payment_records(connection, transaction, day):
+
+        return connection.execute(text(""" 
+                                       SELECT Count(DISTINCT user_id) AS paid_user_count,
+                                              Count(*)                AS paid_count
+                                       FROM   bi_user_bill
+                                       WHERE  currency_type = 'Dollar'
+                                              AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :on_day 
+                                      """), on_day=day, timezone_offset=timezone_offset)
+
+    def get_payment_records():
+
+        result_proxy = []
 
         if target == 'lifetime':
 
-            return connection.execute(text(""" 
-                                           SELECT Date(Convert_tz(createtime, '+00:00', :timezone_offset)) AS on_day, 
-                                                  COUNT(DISTINCT u_id)                                     AS paid_user_count, 
-                                                  SUM(CASE 
-                                                        WHEN user_paylog_status_id = 3 THEN 1 
-                                                        ELSE 0 
-                                                      END)                                                 AS paid_count, 
-                                                  ROUND(SUM(CASE 
-                                                              WHEN user_paylog_status_id = 3 THEN order_price 
-                                                              ELSE 0 
-                                                            END) / 100, 2)                                 AS paid_amount 
-                                           FROM   user_paylog 
-                                           GROUP  BY on_day 
-                                           """), timezone_offset=timezone_offset)
+            for day in date_range_reversed:
+                day = day.strftime("%Y-%m-%d")
+                every_day_result = with_db_context(db, collection_payment_records, day=day)
+                every_day_result_rows = [{'_on_day': str(day),
+                                          'paid_user_count': row['paid_user_count'],
+                                          'paid_count': row['paid_count']} for row in every_day_result]
+
+                result_proxy.append(every_day_result_rows)
+
+            return result_proxy
 
         else:
 
-            return connection.execute(text(""" 
-                                           SELECT COUNT(DISTINCT u_id)                                     AS paid_user_count, 
-                                                  SUM(CASE 
-                                                        WHEN user_paylog_status_id = 3 THEN 1 
-                                                        ELSE 0 
-                                                      END)                                                 AS paid_count, 
-                                                  ROUND(SUM(CASE 
-                                                              WHEN user_paylog_status_id = 3 THEN order_price 
-                                                              ELSE 0 
-                                                            END) / 100, 2)                                 AS paid_amount 
-                                           FROM   user_paylog 
-                                           WHERE Date(Convert_tz(createtime, '+00:00', :timezone_offset)) = :on_day
-                                           """), on_day=someday, timezone_offset=timezone_offset)
+            someday_result = with_db_context(db, collection_payment_records, day=someday)
+            someday_result_rows = [{'_on_day': str(someday),
+                                    'paid_user_count': row['paid_user_count'],
+                                    'paid_count': row['paid_count']} for row in someday_result]
 
-    result_proxy = with_db_context(db, collection_payment_records, 'orig_wpt_payment')
+            result_proxy.append(someday_result_rows)
+            return result_proxy
 
-    if target == 'lifetime':
+    result_proxy_for_payments = get_payment_records()
 
-        rows = map(lambda row: {'_on_day': row['on_day'], 'paid_user_count': row['paid_user_count'],
-                                'paid_count': row['paid_count'] if row['paid_count'] else 0,
-                                'paid_amount': row['paid_amount'] if row['paid_amount'] else 0}, result_proxy)
+    for rows in result_proxy_for_payments:
 
-    else:
+        if rows:
+            def sync_collection_payments(connection, transaction):
 
-        rows = map(lambda row: {'_on_day': someday, 'paid_user_count': row['paid_user_count'],
-                                'paid_count': row['paid_count'] if row['paid_count'] else 0,
-                                'paid_amount': row['paid_amount'] if row['paid_amount'] else 0}, result_proxy)
+                where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                             BIStatistic.__table__.c.game == 'All Game',
+                             BIStatistic.__table__.c.platform == 'All Platform')
+                values = {'paid_user_count': bindparam('paid_user_count'),
+                          'paid_count': bindparam('paid_count')}
 
-    if rows:
-        def sync_collection_revenue(connection, transaction):
+                try:
+                    connection.execute(BIStatistic.__table__.update().where(where).values(values), list(rows))
+                except:
+                    print(target + ' payments transaction.rollback()')
+                    transaction.rollback()
+                    raise
+                else:
+                    print(target + ' payments transaction.commit()')
+                    transaction.commit()
 
-            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-                         BIStatistic.__table__.c.game == 'All Game',
-                         BIStatistic.__table__.c.platform == 'All Platform')
-            values = {'paid_user_count': bindparam('paid_user_count'),
-                      'paid_count': bindparam('paid_count'),
-                      'paid_amount': bindparam('paid_amount')}
-
-            try:
-                connection.execute(BIStatistic.__table__.update().where(where).values(values), list(rows))
-            except:
-                print(target + ' Revenue transaction.rollback()')
-                transaction.rollback()
-                raise
-            else:
-                print(target + 'Revenue transaction.commit()')
-                transaction.commit()
-
-        with_db_context(db, sync_collection_revenue)
+            with_db_context(db, sync_collection_payments)
