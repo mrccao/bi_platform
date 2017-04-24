@@ -251,7 +251,7 @@ class BIUserCurrency(db.Model):
 
     # __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),)
     __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),
-                      Index('og_account', 'user_id_updated', name='ix_og_account_and_user_id_updated'),)
+                      Index('ix_og_account_and_user_id_updated', 'og_account', 'user_id_updated'),)
 
 
     def transaction_type_display(self):
