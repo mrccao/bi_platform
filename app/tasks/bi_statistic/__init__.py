@@ -1,6 +1,7 @@
 from app.tasks import celery
 from .dau import process_bi_statistic_dau
 from .free_gold_silver import process_bi_statistic_free_transaction
+from .game_records import process_bi_statistic_game_records
 from .gold_silver_consumption import process_bi_statistic_gold_silver_consumption
 from .mau import process_bi_statistic_mau
 from .new_reg import process_bi_statistic_new_reg
@@ -9,12 +10,11 @@ from .payment_records import process_bi_statistic_payment_records
 from .retention import process_bi_statistic_retention
 from .revenue import process_bi_statistic_revenue
 from .wau import process_bi_statistic_wau
-from .game_records import  process_bi_statistic_game_records
 
 
 @celery.task
 def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1, gold_silver_consumption=0,
-                         free_gold_silver=1, payment_records=1,
+                         free_gold_silver=0, payment_records=1,
                          retention=1, revenue=1, game_records=1):
     if dau:
         process_bi_statistic_dau(target)
@@ -63,4 +63,3 @@ def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1, 
     if game_records:
         process_bi_statistic_game_records(target)
         print('******* ' + target.capitalize() + ' game_records Done *******')
-

@@ -28,6 +28,7 @@ class BIStatistic(db.Model):
     guest_reg = db.Column(db.Integer, nullable=False, default=0)
     facebook_reg = db.Column(db.Integer, nullable=False, default=0)
     facebook_game_reg = db.Column(db.Integer, nullable=False, default=0)
+    facebook_web_reg = db.Column(db.Integer, nullable=False, default=0)
     email_reg = db.Column(db.Integer, nullable=False, default=0)
     email_validated = db.Column(db.Integer, nullable=False, default=0)
 

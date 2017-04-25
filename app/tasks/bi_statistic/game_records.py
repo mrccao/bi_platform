@@ -161,27 +161,27 @@ def process_bi_statistic_game_records(target):
         result_proxy_for_winnings = []
 
         for game_type_id, game_type in [(1, 'sng'), (2, 'mtt'), (None, 'ring_game')]:
-            game_buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
-                                                            game_type_id=game_type_id,
-                                                            bind='orig_wpt_ods')
+            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
+                                                       game_type_id=game_type_id,
+                                                       bind='orig_wpt_ods')
 
-            game_buy_ins_and_rake_records_rows = [
+            buy_ins_and_rake_records_rows = [
                 {'_on_day': row['on_day'], 'rake': row['rake'], 'buy_ins': row['buy_ins']}
-                for row in game_buy_ins_and_rake_records]
+                for row in buy_ins_and_rake_records]
 
-            game_buy_ins_and_rake_records_rows_dict = dict([(game_type, game_buy_ins_and_rake_records_rows)])
+            buy_ins_and_rake_records_rows_dict = dict([(game_type, buy_ins_and_rake_records_rows)])
 
-            result_proxy.append(game_buy_ins_and_rake_records_rows_dict)
+            result_proxy.append(buy_ins_and_rake_records_rows_dict)
 
-            game_winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
-                                                    bind='orig_wpt_ods')
+            winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
+                                               bind='orig_wpt_ods')
 
-            game_winnings_records_rows = [{'_on_day': row['on_day'], 'wings': row['wings']} for row in
-                                          game_winnings_records]
+            winnings_records_rows = [{'_on_day': row['on_day'], 'wings': row['wings']} for row in
+                                     winnings_records]
 
-            game_winnings_records_rows_dict = dict([(game_type, game_winnings_records_rows)])
+            winnings_records_rows_dict = dict([(game_type, winnings_records_rows)])
 
-            result_proxy_for_winnings.append(game_winnings_records_rows_dict)
+            result_proxy_for_winnings.append(winnings_records_rows_dict)
 
 
     else:
@@ -190,28 +190,28 @@ def process_bi_statistic_game_records(target):
         result_proxy_for_winnings = []
 
         for game_type_id, game_type in [(1, 'sng'), (2, 'mtt'), (None, 'ring_game')]:
-            game_buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
-                                                            game_type_id=game_type_id,
-                                                            bind='orig_wpt_ods')
+            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
+                                                       game_type_id=game_type_id,
+                                                       bind='orig_wpt_ods')
 
-            game_buy_ins_and_rake_records_rows = [
+            buy_ins_and_rake_records_rows = [
                 {'_on_day': someday, 'rake': row['rake'], 'buy_ins': row['buy_ins']}
-                for row in game_buy_ins_and_rake_records]
+                for row in buy_ins_and_rake_records]
 
-            game_buy_ins_and_rake_records_rows_dict = dict([(game_type, game_buy_ins_and_rake_records_rows)])
+            buy_ins_and_rake_records_rows_dict = dict([(game_type, buy_ins_and_rake_records_rows)])
 
-            result_proxy.append(game_buy_ins_and_rake_records_rows_dict)
+            result_proxy.append(buy_ins_and_rake_records_rows_dict)
 
-            game_winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
-                                                    bind='orig_wpt_ods')
+            winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
+                                               bind='orig_wpt_ods')
 
-            game_winnings_records_rows = [{'_on_day': someday, 'wings': row['wings']}
+            winnings_records_rows = [{'_on_day': someday, 'wings': row['wings']}
 
-                                          for row in game_winnings_records]
+                                     for row in winnings_records]
 
-            game_winnings_records_rows_dict = dict([(game_type, game_winnings_records_rows)])
+            winnings_records_rows_dict = dict([(game_type, winnings_records_rows)])
 
-            result_proxy_for_winnings.append(game_winnings_records_rows_dict)
+            result_proxy_for_winnings.append(winnings_records_rows_dict)
 
     for game_buy_ins_and_rake_records_rows_dict in result_proxy:
 

@@ -317,7 +317,7 @@ def sync_bi_statistic_for_lifetime():
     payment_records = int(input('payment_records = '))
     retention = int(input('retention = '))
     revenue = int(input('revenue = '))
-    game_records = int(input('records = '))
+    game_records = int(input('game_records = '))
 
     if app.config['ENV'] == 'prod':
         process_bi_statistic.delay('lifetime', dau=dau, wau=wau, mau=mau, new_reg=new_reg, new_reg_dau=new_reg_dau,
