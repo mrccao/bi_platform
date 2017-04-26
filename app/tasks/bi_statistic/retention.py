@@ -13,7 +13,6 @@ from app.utils import generate_sql_date
 
 def process_bi_statistic_retention(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
-    date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
     def collection_retention(connection, transaction, day, timedelta):
 
@@ -21,7 +20,7 @@ def process_bi_statistic_retention(target):
                                         SELECT COUNT(DISTINCT user_id) AS sum
                                         FROM   bi_user_currency
                                         WHERE  transaction_type NOT IN :free_transaction_types
-                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) >=
+                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) =
                                                    DATE_ADD(:on_day, INTERVAL + :timedelta DAY)
                                                AND user_id IN (SELECT user_id
                                                                FROM   bi_user
@@ -36,6 +35,7 @@ def process_bi_statistic_retention(target):
         result_proxy = []
 
         if target == 'lifetime':
+            date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
 

@@ -120,6 +120,6 @@ def process_bi_statistic_dau(target):
                 raise
             else:
                 transaction.commit()
-                print(target + ' DAU  for every game transaction.commit()')
+                print(target + ' DAU for every game transaction.commit()')
 
         with_db_context(db, sync_collection_dau_every_game)

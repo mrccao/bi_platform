@@ -25,8 +25,23 @@ class BIStatistic(db.Model):
     platform = db.Column(db.String(255), nullable=False, index=True)
 
     new_reg = db.Column(db.Integer, nullable=False, default=0)
+    guest_reg = db.Column(db.Integer, nullable=False, default=0)
+    facebook_reg = db.Column(db.Integer, nullable=False, default=0)
+    facebook_game_reg = db.Column(db.Integer, nullable=False, default=0)
+    facebook_web_reg = db.Column(db.Integer, nullable=False, default=0)
     email_reg = db.Column(db.Integer, nullable=False, default=0)
     email_validated = db.Column(db.Integer, nullable=False, default=0)
+
+    mtt_buy_ins = db.Column(db.Integer, nullable=False, default=0)
+    ring_game_ins = db.Column(db.Integer, nullable=False, default=0)
+    sng_buy_ins = db.Column(db.Integer, nullable=False, default=0)
+
+    mtt_rake = db.Column(db.Integer, nullable=False, default=0)
+    sng_rake = db.Column(db.Integer, nullable=False, default=0)
+    ring_game_rake = db.Column(db.Integer, nullable=False, default=0)
+
+    mtt_winnings = db.Column(db.Integer, nullable=False, default=0)
+    sng_winnings = db.Column(db.Integer, nullable=False, default=0)
 
     dau = db.Column(db.Integer, nullable=False, default=0)
     wau = db.Column(db.Integer, nullable=False, default=0)

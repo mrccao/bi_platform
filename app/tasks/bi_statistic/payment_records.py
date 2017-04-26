@@ -12,7 +12,6 @@ from app.utils import generate_sql_date
 
 def process_bi_statistic_payment_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
-    date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), today), reverse=True)
 
     def collection_payment_records(connection, transaction, day):
 
@@ -29,6 +28,7 @@ def process_bi_statistic_payment_records(target):
         result_proxy = []
 
         if target == 'lifetime':
+            date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), today), reverse=True)
 
             for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")

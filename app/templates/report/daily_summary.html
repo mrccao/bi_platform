@@ -8,26 +8,26 @@
 
     <style>
 
-	#result-table_wrapper {
-		overflow: auto;
-	}
-	
-    #result-table_wrapper .table-button {
-        float: right;
-    }
-	
-    #result-table_wrapper .table-button .btn {
-        padding: 4px 12px;
-    }
-	
-    #result-table_wrapper .table-length {
-        float: left;
-    }
+        #result-table_wrapper {
+            overflow: auto;
+        }
 
-    #result-table_wrapper .table-filter {
-        float: right;
-		margin-right: 10px;
-    }
+        #result-table_wrapper .table-button {
+            float: right;
+        }
+
+        #result-table_wrapper .table-button .btn {
+            padding: 4px 12px;
+        }
+
+        #result-table_wrapper .table-length {
+            float: left;
+        }
+
+        #result-table_wrapper .table-filter {
+            float: right;
+            margin-right: 10px;
+        }
 
     </style>
 {% endblock %}
@@ -224,6 +224,10 @@
 
         var dom = document.getElementById("charts");
         var myChart = echarts.init(dom, 'shine');
+        var grid_top_response = (screen.width < 550 ) ? "33%" : "14%";
+        var tool_top_response = (screen.width < 550 ) ? "29%" : "9%";
+        var tool_right_response = (screen.width < 550 ) ? "2%" : "4%";
+
 
         window.onresize = myChart.resize;
         var option = {
@@ -231,36 +235,42 @@
                 trigger: 'axis'
             },
             legend: {
-                width: 1400,
-                itemHeight:16,
-                itemWidth:16,
-                itemGap:15,
+
                 selected: {
                     'dau': 1,
-                    'wau': 0,
+                    'wau': 1,
                     'mau': 1,
-                    'one_day_retention': 0,
-                    'seven_day_retention': 0,
-                    'thirty_day_retention': 0,
+                    'new_reg': 1,
+                    'facebook_game_reg': 0,
+                    'facebook_web_reg': 0,
+                    'facebook_reg': 0,
+                    'email_reg': 0,
+                    'email_validated': 0,
+                    'guest_reg': 0,
+                    'new_reg_game_dau': 0,
                     'paid_user_count': 0,
                     'paid_count': 0,
                     'revenue': 1,
-                    'new_reg': 1,
-                    'email_reg': 0,
-                    'email_validated': 0,
-                    'new_reg_game_dau': 0,
-                    'free_silver': 0,
-                    'free_gold': 0,
-                    'facebook_reg': 0,
-                    'reg_retention': 0,
+                    'one_day_retention(%)': 0,
+                    'seven_day_retention(%)': 0,
+                    'thirty_day_retention(%)': 0,
+                    'stickiness_weekly(%)': 0,
+                    'stickiness_monthly(%)': 0,
                     'ARPDAU': 0,
                     'ARPPU': 0,
-                    'ARPU': 0
+                    'thirty_day_retention': 0,
+                    'mtt_buy_ins': 0,
+                    'sng_buy_ins': 0,
+                    'mtt_rake': 0,
+                    'sng_rake': 0,
+                    'ring_game_rake': 0,
+                    'mtt_winnings': 0,
+                    'sng_winnings': 0
                 },
                 data: []
             },
             grid: {
-                top: '11%',
+                top: grid_top_response,
                 bottom: '3%',
                 left: '1%',
                 right: '4%',
@@ -268,10 +278,9 @@
             },
             toolbox: {
                 show: true,
-                top: 110,
-                right: 15,
-                orient: 'vertical',
-                itemSize: '16',
+                top: tool_top_response,
+                right: tool_right_response,
+                itemSize: '17',
                 feature: {
                     restore: {title: 'Reset'},
                     magicType: {
@@ -332,7 +341,7 @@
                         'buttons': [
                             'copy', 'csv', 'excel', 'pdf'
                         ],
-                        iDisplayLength: 100,
+                        iDisplayLength: 18,
                         "order": [[0, "desc"]],
                         lengthChange: false,
                         scrollX: true,
@@ -362,6 +371,14 @@
 
                     option.xAxis.data = result.charts_result.charts_labels;
                     option.legend.data = result.charts_result.charts_legend;
+
+                    if (screen.width > 550) {
+                        option.legend.width = 1400;
+                        option.legend.itemHeight = 16;
+                        option.legend.itemWidth = 16;
+                        option.legend.itemGap = 15;
+
+                    }
 
                     myChart.setOption(option, true);
                 }
