@@ -66,7 +66,7 @@ def process_bi_statistic_new_reg(target):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                   CASE
-                                                    WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
+                                                    WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'  
                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'

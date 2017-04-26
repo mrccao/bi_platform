@@ -1,10 +1,10 @@
 from datetime import datetime
+from operator import attrgetter
 
 from flask import Blueprint, render_template, jsonify
 from flask import current_app as app
 from flask_login import login_required
 from numpy import array
-from operator import attrgetter
 from sqlalchemy import and_
 
 from app.extensions import db
@@ -84,3 +84,9 @@ def daily_summary_data():
     tables_result = dict(tables_title=tables_title, tables_data=tables_data)
 
     return jsonify(charts_result=charts_result, tables_result=tables_result)
+
+
+@report.route("/report/reg_platform", methods=["GET"])
+@login_required
+def reg_platform():
+    return render_template('report/reg_platform_distributed.html')
