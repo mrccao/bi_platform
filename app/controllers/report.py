@@ -24,7 +24,7 @@ def daily_summary():
 @login_required
 def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
-    start_time = now.replace(days=-60).format('YYYY-MM-DD')
+    start_time = now.replace(days=-6).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
 
     get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'new_reg', 'facebook_game_reg', 'facebook_login_reg',
@@ -44,10 +44,6 @@ def daily_summary_data():
     dau = transpose_query_result[1]
     wau = transpose_query_result[2]
     mau = transpose_query_result[3]
-    # new_reg = transpose_query_result[4]
-    # facebook_game_reg = transpose_query_result[5]
-    # facebook_login_reg = transpose_query_result[6]
-    # guest_reg = transpose_query_result[7]
     new_reg_game_dau = transpose_query_result[8]
     paid_user_count = transpose_query_result[9]
     revenue = transpose_query_result[11]
@@ -70,8 +66,12 @@ def daily_summary_data():
     stickiness_weekly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(wau)))
     stickiness_monthly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(mau)))
 
-    ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
-    ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
+    try:
+        ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
+        ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
+    except:
+        ARPDAU = [0 for i in range(6)]
+        ARPPU =  [0 for i in range(6)]
 
     compound_metrics = [stickiness_weekly, stickiness_monthly, ARPDAU, ARPPU]
 
@@ -85,9 +85,10 @@ def daily_summary_data():
 
     charts_data = transpose_query_result
     charts_labels = [datetime.strftime(day, "%Y-%m-%d") for day in charts_data[0]]
+    charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
+
     charts_data = charts_data[1:]
 
-    charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
     charts_data.extend(compound_metrics)
 
     charts_result = dict(charts_labels=charts_labels, charts_data=charts_data, charts_legend=charts_legend)
