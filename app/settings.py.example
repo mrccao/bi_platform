@@ -1,6 +1,6 @@
-import tempfile
-
 from datetime import timedelta
+
+import tempfile
 from celery.schedules import crontab
 
 db_file = tempfile.NamedTemporaryFile()
@@ -31,10 +31,10 @@ class ProdConfig(Config):
     SQLALCHEMY_POOL_RECYCLE = 3000
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://x:x@127.0.0.1/bi_prod'
     SQLALCHEMY_BINDS = {
-        'orig_wpt':            'mysql+pymysql://x:x@10.2.1.75/wpt',
-        'orig_wpt_mall':       'mysql+pymysql://x:x@10.2.1.75/wptmall',
-        'orig_wpt_payment':    'mysql+pymysql://x:x@10.2.1.75/wptpayment',
-        'orig_wpt_ods':        'mysql+pymysql://x:x@192.168.1.233/wpt_ods',
+        'orig_wpt': 'mysql+pymysql://x:x@10.2.1.75/wpt',
+        'orig_wpt_mall': 'mysql+pymysql://x:x@10.2.1.75/wptmall',
+        'orig_wpt_payment': 'mysql+pymysql://x:x@10.2.1.75/wptpayment',
+        'orig_wpt_ods': 'mysql+pymysql://x:x@192.168.1.233/wpt_ods',
     }
 
     CELERY_BROKER_URL = 'amqp://localhost:5672'
@@ -61,8 +61,8 @@ class ProdConfig(Config):
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
-        }
-         'process_scheduled_bi_statistic_for_yesterday': {
+        },
+        'process_scheduled_bi_statistic_for_yesterday': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_yesterday',
             'schedule': crontab(hour=3, minute=0)
         },
@@ -85,7 +85,6 @@ class ProdConfig(Config):
 
 
 class DevConfig(Config):
-
     import warnings
 
     with warnings.catch_warnings():
@@ -107,12 +106,12 @@ class DevConfig(Config):
     REPORT_FILE_FOLDER = '/Users/Lei/Workspace/Projects/wpt-dwh-static'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_DATABASE_URI =  'mysql+pymysql://root:@127.0.0.1/bi_dev'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:@127.0.0.1/bi_dev'
     SQLALCHEMY_BINDS = {
-        'orig_wpt':            'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wpt',
-        'orig_wpt_mall':       'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wptmall',
-        'orig_wpt_payment':    'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wpt_payment',
-        'orig_wpt_ods':        'mysql+pymysql://localhost/orig_wpt_ods',
+        'orig_wpt': 'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wpt',
+        'orig_wpt_mall': 'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wptmall',
+        'orig_wpt_payment': 'mysql+pymysql://wpt_read:wxoselctWxjJnv0PhpQz@172.28.14.115/wpt_payment',
+        'orig_wpt_ods': 'mysql+pymysql://localhost/orig_wpt_ods',
     }
 
     CELERY_BROKER_URL = 'amqp://localhost:5672'
@@ -139,7 +138,7 @@ class DevConfig(Config):
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
-        }
+        },
         'process_scheduled_bi_statistic_for_yesterday': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_yesterday',
             'schedule': crontab(hour=3, minute=0)
@@ -207,13 +206,13 @@ class TestConfig(Config):
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
             'schedule': timedelta(seconds=6 * 60)
-        }
-       'process_scheduled_bi_statistic_for_yesterday': {
+        },
+        'process_scheduled_bi_statistic_for_yesterday': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_yesterday',
             'schedule': crontab(hour=3, minute=0)
         },
 
-       'process_scheduled_bi_statistic_for_today': {
+        'process_scheduled_bi_statistic_for_today': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_today',
             'schedule': timedelta(seconds=15 * 60)
         },

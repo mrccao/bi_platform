@@ -15,7 +15,7 @@ from .wau import process_bi_statistic_wau
 @celery.task
 def process_bi_statistic(target, dau=1, wau=1, mau=1, new_reg=1, new_reg_dau=1, gold_silver_consumption=0,
                          free_gold_silver=0, payment_records=1,
-                         retention=1, revenue=1, game_records=1):
+                         retention=1, revenue=1, game_records=0):
     if dau:
         process_bi_statistic_dau(target)
         print('******* ' + target.capitalize() + ' DAU Done *******')
