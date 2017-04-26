@@ -727,7 +727,7 @@ def process_bi_statistic_new_reg(target):
 
         with_db_context(db, sync_collection_email_validated)
 
-    def collection_guest_reg(connection, transaction):
+    def collection_guest_reg_all_platform(connection, transaction):
 
         if target == 'lifetime':
 
@@ -745,7 +745,7 @@ def process_bi_statistic_new_reg(target):
                                           WHERE  DATE(CONVERT_TZ(add_time, '+08:00', :timezone_offset)) = :on_day
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_guest_reg, bind='orig_wpt')
+    result_proxy = with_db_context(db, collection_guest_reg_all_platform, bind='orig_wpt')
 
     if target == 'lifetime':
 
@@ -757,7 +757,7 @@ def process_bi_statistic_new_reg(target):
 
     if rows:
 
-        def sync_collection_guest_reg(connection, transaction):
+        def sync_collection_guest_reg_all_platform(connection, transaction):
 
             where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
                          BIStatistic.__table__.c.platform == 'All Platform',
@@ -773,5 +773,62 @@ def process_bi_statistic_new_reg(target):
             else:
                 transaction.commit()
                 print(target + ' guest_reg for all platforms transaction.commit()')
+
+        with_db_context(db, sync_collection_guest_reg_all_platform)
+
+    def collection_guest_reg(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(add_time, '+08:00', :timezone_offset)) AS on_day,
+                                                   COUNT(DISTINCT u_id)                                   AS sum,
+                                            CASE 
+                                                  WHEN reg_device = 5 THEN  'iOS'
+                                                  WHEN reg_device = 6 THEN  'Android'
+                                            END                                                           AS platform
+                                            FROM   tb_app_guest
+                                            GROUP  BY on_day
+                                           """), timezone_offset=timezone_offset)
+        else:
+
+            return connection.execute(text("""
+                                          SELECT COUNT(DISTINCT u_id) AS sum,
+                                            CASE 
+                                                  WHEN reg_device = 5 THEN  'iOS'
+                                                  WHEN reg_device = 6 THEN  'Android'
+                                            END                       AS platform
+                                          FROM   tb_app_guest
+                                          WHERE  DATE(CONVERT_TZ(add_time, '+08:00', :timezone_offset)) = :on_day
+                                           """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_guest_reg, bind='orig_wpt')
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum'], 'platform': row['platform']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, 'sum': row['sum'], 'platform': row['platform']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_guest_reg(connection, transaction):
+
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'guest_reg': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' guest_reg  transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' guest_reg  transaction.commit()')
 
         with_db_context(db, sync_collection_guest_reg)
