@@ -26,8 +26,8 @@ def process_bi_statistic_game_records(target):
                                                     FROM   tj_super_game_scharges_record AS s
                                                       LEFT JOIN tj_matchinfo AS m
                                                         ON s.matchid = m.matchid
-                                                    WHERE  m.type = 3 /*ring game*/
-                                                           AND CONVERT_TZ(s.time_update, '+08:00', :timezone_offset) =
+                                                    WHERE  m.type = 3 
+                                                           AND DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) =
                                                                :on_day
                                                     GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)),
                                                       s.rolename
@@ -39,8 +39,8 @@ def process_bi_statistic_game_records(target):
                                                     FROM   tj_cgz_flow_usergameinfo AS f
                                                       LEFT JOIN tj_matchinfo AS m
                                                         ON f.matchid = m.matchid
-                                                    WHERE  m.type = 3 /*ring game*/
-                                                           AND CONVERT_TZ(f.time_update, '+08:00', :timezone_offset) =
+                                                    WHERE  m.type = 3
+                                                           AND DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) =
                                                                :on_day
                                                     GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)),
                                                       f.username) AS a
@@ -51,16 +51,16 @@ def process_bi_statistic_game_records(target):
                                            SELECT DATE(CONVERT_TZ(usersign.time, '+08:00', :timezone_offset)) AS on_day,
                                                    SUM(CASE
                                                        WHEN usersign.type = 1  THEN
-                                                         tj_flow_usersign.sign_totals
+                                                            usersign.sign_totals
                                                        WHEN usersign.type = 2  THEN
                                                          tj_flow_usersign.sign_totals * -1
                                                        ELSE 0
                                                        END)                                                    AS buy_ins,
                                                    SUM(CASE
                                                        WHEN usersign.type = 1  THEN
-                                                         tj_flow_usersign.tax_totals
+                                                            usersign.tax_totals
                                                        WHEN usersign.type = 2  THEN
-                                                         tj_flow_usersign.tax_totals * -1
+                                                            usersign.tax_totals * -1
                                                        ELSE 0
                                                        END)                                                    AS rake
                                            FROM   tj_flow_usersign   AS usersign 
@@ -73,49 +73,49 @@ def process_bi_statistic_game_records(target):
 
             if game_type == 'ring_game':
                 return connection.execute(text("""
-                                                SELECT SUM(a.rake) AS rake,
-                                                     0             AS  buy_ins
-                                                FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
-                                                  on_day,
-                                                               SUM(s.pay_num)                                              AS
-                                                  rake
-                                                        FROM   tj_super_game_scharges_record AS s
-                                                          LEFT JOIN tj_matchinfo AS m
-                                                            ON s.matchid = m.matchid
-                                                        WHERE  m.type = 3 /*ring game*/
-                                                               AND CONVERT_TZ(s.time_update, '+08:00', :timezone_offset) =
-                                                                   :on_day
-                                                        GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)),
-                                                          s.rolename
-                                                        UNION
-                                                        SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
-                                                          dates,
-                                                               SUM(f.scharges)                                             AS
-                                                          rake
-                                                        FROM   tj_cgz_flow_usergameinfo AS f
-                                                          LEFT JOIN tj_matchinfo AS m
-                                                            ON f.matchid = m.matchid
-                                                        WHERE  m.type = 3 /*ring game*/
-                                                               AND CONVERT_TZ(f.time_update, '+08:00', :timezone_offset) =
-                                                                   :on_day
-                                                        GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)),
-                                                          f.username) AS a
-                                                WHERE  a.on_day = :on_day;
+                                            SELECT SUM(a.rake) AS rake,
+                                                 0             AS  buy_ins
+                                            FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
+                                              on_day,
+                                                           SUM(s.pay_num)                                              AS
+                                              rake
+                                                    FROM   tj_super_game_scharges_record AS s
+                                                      LEFT JOIN tj_matchinfo AS m
+                                                        ON s.matchid = m.matchid
+                                                    WHERE  m.type = 3
+                                                           AND DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) =
+                                                               :on_day
+                                                    GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)),
+                                                      s.rolename
+                                                    UNION
+                                                    SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
+                                                      dates,
+                                                           SUM(f.scharges)                                             AS
+                                                      rake
+                                                    FROM   tj_cgz_flow_usergameinfo AS f
+                                                      LEFT JOIN tj_matchinfo AS m
+                                                        ON f.matchid = m.matchid
+                                                    WHERE  m.type = 3
+                                                           AND DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) =
+                                                               :on_day
+                                                    GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)),
+                                                      f.username) AS a
+                                            WHERE  a.on_day = :on_day;
                                            """), timezone_offset=timezone_offset, on_day=someday)
 
             return connection.execute(text("""
                                             SELECT SUM(CASE
                                                        WHEN usersign.type = 1  THEN
-                                                         tj_flow_usersign.sign_totals
+                                                            usersign.sign_totals
                                                        WHEN usersign.type = 2  THEN
-                                                         tj_flow_usersign.sign_totals * -1
+                                                            usersign.sign_totals * -1
                                                        ELSE 0
                                                        END) AS buy_ins,
                                                    SUM(CASE
                                                        WHEN usersign.type = 1  THEN
-                                                         tj_flow_usersign.tax_totals
+                                                            usersign.tax_totals
                                                        WHEN usersign.type = 2  THEN
-                                                         tj_flow_usersign.tax_totals * -1
+                                                            usersign.tax_totals * -1
                                                        ELSE 0
                                                        END) AS rake
                                             FROM   tj_flow_usersign     AS usersign 
@@ -130,30 +130,30 @@ def process_bi_statistic_game_records(target):
 
         if target == 'lifetime':
             return connection.execute(text("""
-                                                SELECT DATE(CONVERT_TZ(usersign.time, '+08:00', :timezone_offset)) AS on_day,
-                                                       SUM(CASE
-                                                           WHEN tj_userreward.rewardtype = 3 THEN tj_userreward.totals
-                                                           ELSE 0
-                                                           END)                                                    AS winnings
-                                                FROM   tj_userreward
-                                                  INNER JOIN matchinfo
-                                                    ON matchinfo.matchid = tj_userreward.matchid
-                                                WHERE  matchinfo.type = :game_type_id
-                                                GROUP  BY on_day;
-                                                  """), timezone_offset=timezone_offset)
+                                            SELECT DATE(CONVERT_TZ(userreward.time, '+08:00', :timezone_offset)) AS on_day,
+                                                   SUM(CASE
+                                                       WHEN userreward.rewardtype = 3 THEN userreward.totals
+                                                       ELSE 0
+                                                       END)                                                    AS winnings
+                                            FROM   tj_flow_userreward userreward 
+                                              INNER JOIN tj_matchinfo matchinfo 
+                                                ON matchinfo.matchid = userreward.matchid
+                                            WHERE  matchinfo.type = :game_type_id
+                                            GROUP  BY on_day;
+                                           """), timezone_offset=timezone_offset)
 
         else:
             return connection.execute(text("""
-                                                SELECT SUM(CASE
-                                                           WHEN tj_userreward.rewardtype = 3 THEN tj_userreward.totals
-                                                           ELSE 0
-                                                           END) AS winnings
-                                                FROM   tj_userreward
-                                                  INNER JOIN matchinfo
-                                                    ON matchinfo.matchid = tj_userreward.matchid
-                                                WHERE  matchinfo.type = :game_type_id
-                                                       AND DATE(CONVERT_TZ(usersign.time, '+08:00', :timezone_offset)) = :on_day ;
-                                               """), timezone_offset=timezone_offset, game_type_id=game_type_id)
+                                            SELECT SUM(CASE
+                                                       WHEN userreward.rewardtype = 3 THEN userreward.totals
+                                                       ELSE 0
+                                                       END) AS winnings
+                                            FROM   tj_flow_userreward userreward 
+                                              INNER JOIN tj_matchinfo matchinfo 
+                                                ON matchinfo.matchid = userreward.matchid
+                                            WHERE  matchinfo.type = :game_type_id
+                                                   AND DATE(CONVERT_TZ(userreward.time, '+08:00', :timezone_offset)) = :on_day ;
+                                          """), timezone_offset=timezone_offset, game_type_id=game_type_id)
 
     if target == 'lifetime':
 
