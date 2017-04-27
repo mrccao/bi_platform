@@ -258,6 +258,6 @@ def process_bi_statistic_game_records(target):
                         raise
                     else:
                         transaction.commit()
-                        print(target + ' winnings and rake transaction.commit()')
+                        print(target + ' winnings transaction.commit()')
 
                 with_db_context(db, sync_collection_game_winnings_records)
