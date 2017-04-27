@@ -14,46 +14,13 @@ def process_bi_statistic_game_records(target):
 
         if target == 'lifetime':
 
-            if game_type == 'ring_game':
-                return connection.execute(text("""
-                                              SELECT a.dates     AS on_day,
-                                                   SUM(a.rake)   AS rake,
-                                                   0             AS  buy_ins
-                                              FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
-                                                dates,
-                                                           SUM(s.pay_num)                                              AS
-                                                rake
-                                                    FROM   tj_super_game_scharges_record AS s
-                                                      LEFT JOIN tj_matchinfo AS m
-                                                        ON s.matchid = m.matchid
-                                                    WHERE  m.type = 3 
-                                                           AND DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) =
-                                                               :on_day
-                                                    GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)),
-                                                      s.rolename
-                                                    UNION
-                                                    SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
-                                                      dates,
-                                                           SUM(f.scharges)                                             AS
-                                                      rake
-                                                    FROM   tj_cgz_flow_usergameinfo AS f
-                                                      LEFT JOIN tj_matchinfo AS m
-                                                        ON f.matchid = m.matchid
-                                                    WHERE  m.type = 3
-                                                           AND DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) =
-                                                               :on_day
-                                                    GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)),
-                                                      f.username) AS a
-                                              GROUP  BY on_day;
-                                              """), timezone_offset=timezone_offset)
-
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(usersign.time, '+08:00', :timezone_offset)) AS on_day,
                                                    SUM(CASE
                                                        WHEN usersign.type = 1  THEN
                                                             usersign.sign_totals
                                                        WHEN usersign.type = 2  THEN
-                                                         tj_flow_usersign.sign_totals * -1
+                                                            usersign.sign_totals * -1
                                                        ELSE 0
                                                        END)                                                    AS buy_ins,
                                                    SUM(CASE
@@ -70,38 +37,6 @@ def process_bi_statistic_game_records(target):
                                            GROUP  BY on_day;
                                            """), timezone_offset=timezone_offset, game_type_id=game_type_id)
         else:
-
-            if game_type == 'ring_game':
-                return connection.execute(text("""
-                                            SELECT SUM(a.rake) AS rake,
-                                                 0             AS  buy_ins
-                                            FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
-                                              on_day,
-                                                           SUM(s.pay_num)                                              AS
-                                              rake
-                                                    FROM   tj_super_game_scharges_record AS s
-                                                      LEFT JOIN tj_matchinfo AS m
-                                                        ON s.matchid = m.matchid
-                                                    WHERE  m.type = 3
-                                                           AND DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) =
-                                                               :on_day
-                                                    GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)),
-                                                      s.rolename
-                                                    UNION
-                                                    SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
-                                                      dates,
-                                                           SUM(f.scharges)                                             AS
-                                                      rake
-                                                    FROM   tj_cgz_flow_usergameinfo AS f
-                                                      LEFT JOIN tj_matchinfo AS m
-                                                        ON f.matchid = m.matchid
-                                                    WHERE  m.type = 3
-                                                           AND DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) =
-                                                               :on_day
-                                                    GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)),
-                                                      f.username) AS a
-                                            WHERE  a.on_day = :on_day;
-                                           """), timezone_offset=timezone_offset, on_day=someday)
 
             return connection.execute(text("""
                                             SELECT SUM(CASE
@@ -140,7 +75,7 @@ def process_bi_statistic_game_records(target):
                                                 ON matchinfo.matchid = userreward.matchid
                                             WHERE  matchinfo.type = :game_type_id
                                             GROUP  BY on_day;
-                                           """), timezone_offset=timezone_offset)
+                                           """), timezone_offset=timezone_offset, game_type_id=game_type_id)
 
         else:
             return connection.execute(text("""
@@ -160,9 +95,8 @@ def process_bi_statistic_game_records(target):
         result_proxy = []
         result_proxy_for_winnings = []
 
-        for game_type_id, game_type in [(1, 'sng'), (2, 'mtt'), (None, 'ring_game')]:
-            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
-                                                       game_type_id=game_type_id,
+        for game_type_id, game_type in [(1, 'sng'), (2, 'mtt')]:
+            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake, game_type_id=game_type_id,
                                                        bind='orig_wpt_ods')
 
             buy_ins_and_rake_records_rows = [
@@ -176,7 +110,7 @@ def process_bi_statistic_game_records(target):
             winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
                                                bind='orig_wpt_ods')
 
-            winnings_records_rows = [{'_on_day': row['on_day'], 'wings': row['wings']} for row in
+            winnings_records_rows = [{'_on_day': row['on_day'], 'winnings': row['winnings']} for row in
                                      winnings_records]
 
             winnings_records_rows_dict = dict([(game_type, winnings_records_rows)])
@@ -189,14 +123,12 @@ def process_bi_statistic_game_records(target):
         result_proxy = []
         result_proxy_for_winnings = []
 
-        for game_type_id, game_type in [(1, 'sng'), (2, 'mtt'), (None, 'ring_game')]:
-            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake,
-                                                       game_type_id=game_type_id,
+        for game_type_id, game_type in [(1, 'sng'), (2, 'mtt')]:
+            buy_ins_and_rake_records = with_db_context(db, collection_buy_ins_and_rake, game_type_id=game_type_id,
                                                        bind='orig_wpt_ods')
 
-            buy_ins_and_rake_records_rows = [
-                {'_on_day': someday, 'rake': row['rake'], 'buy_ins': row['buy_ins']}
-                for row in buy_ins_and_rake_records]
+            buy_ins_and_rake_records_rows = [{'_on_day': someday, 'rake': row['rake'], 'buy_ins': row['buy_ins']} for
+                                             row in buy_ins_and_rake_records]
 
             buy_ins_and_rake_records_rows_dict = dict([(game_type, buy_ins_and_rake_records_rows)])
 
@@ -205,9 +137,7 @@ def process_bi_statistic_game_records(target):
             winnings_records = with_db_context(db, collection_winnings_records, game_type_id=game_type_id,
                                                bind='orig_wpt_ods')
 
-            winnings_records_rows = [{'_on_day': someday, 'wings': row['wings']}
-
-                                     for row in winnings_records]
+            winnings_records_rows = [{'_on_day': someday, 'winnings': row['winnings']} for row in winnings_records]
 
             winnings_records_rows_dict = dict([(game_type, winnings_records_rows)])
 
@@ -261,3 +191,89 @@ def process_bi_statistic_game_records(target):
                         print(target + ' winnings transaction.commit()')
 
                 with_db_context(db, sync_collection_game_winnings_records)
+
+    def collection_ring_game_rake(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                                SELECT a.dates     AS on_day,
+                                                       SUM(a.rake) AS rake
+                                                FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
+                                                               dates,
+                                                               SUM(s.pay_num)                                              AS
+                                                               rake
+                                                        FROM   tj_super_game_scharges_record AS s
+                                                               LEFT JOIN tj_matchinfo AS m
+                                                                      ON s.matchid = m.matchid
+                                                        WHERE  m.type = 3
+                                                        GROUP  BY DATE(CONVERT_TZ(s.time_update, '+08:00', '-04:00'))
+                                                        UNION
+                                                        SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
+                                                               dates,
+                                                               SUM(f.scharges)                                             AS
+                                                               rake
+                                                        FROM   tj_cgz_flow_usergameinfo AS f
+                                                               LEFT JOIN tj_matchinfo AS m
+                                                                      ON f.matchid = m.matchid
+                                                        WHERE  m.type = 3
+                                                        GROUP  BY DATE(CONVERT_TZ(f.time_update, '+08:00', '-04:00'))) AS a
+                                                GROUP  BY on_day
+                                              """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                                SELECT a.dates     AS on_day,
+                                                       SUM(a.rake) AS rake
+                                                FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
+                                                               dates,
+                                                               SUM(s.pay_num)                                              AS
+                                                               rake
+                                                        FROM   tj_super_game_scharges_record AS s
+                                                               LEFT JOIN tj_matchinfo AS m
+                                                                      ON s.matchid = m.matchid
+                                                        WHERE  m.type = 3
+                                                               AND DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) =
+                                                                   :on_day
+                                                        UNION
+                                                        SELECT DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) AS
+                                                               dates,
+                                                               SUM(f.scharges)                                             AS
+                                                               rake
+                                                        FROM   tj_cgz_flow_usergameinfo AS f
+                                                               LEFT JOIN tj_matchinfo AS m
+                                                                      ON f.matchid = m.matchid
+                                                        WHERE  m.type = 3
+                                                               AND DATE(CONVERT_TZ(f.time_update, '+08:00', :timezone_offset)) =
+                                                                   :on_day ) AS a
+                                              """), timezone_offset=timezone_offset, on_day=someday)
+
+    ring_game_rake_records = with_db_context(db, collection_ring_game_rake, bind='orig_wpt_ods')
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], 'rake': row['rake']} for row in ring_game_rake_records]
+    else:
+
+        rows = [{'_on_day': someday, 'rake': row['rake']} for row in ring_game_rake_records]
+
+    if rows:
+
+        def sync_collection_ring_game_rake(connection, transaction):
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.game == 'All Game',
+                         BIStatistic.__table__.c.platform == 'All Platform')
+            values = {'ring_game_rake': bindparam('rake')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' Ring_game rake transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' Ring_game rake transaction.commit()')
+
+        with_db_context(db, sync_collection_ring_game_rake)
