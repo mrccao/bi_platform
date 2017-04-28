@@ -29,7 +29,8 @@ def daily_summary_data():
 
     get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'new_reg', 'facebook_game_reg', 'facebook_login_reg',
                              'guest_reg', 'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
-                             'one_day_retention', 'seven_day_retention', 'thirty_day_retention')
+                             'one_day_retention', 'seven_day_retention', 'thirty_day_retention', 'free_gold',
+                             'free_silver', 'ring_game_rake', 'sng_winnings', 'mtt_winnings')
 
     metrics = get_metrics(BIStatistic)
     query = db.session.query(BIStatistic).with_entities(*metrics)
@@ -68,13 +69,13 @@ def daily_summary_data():
     ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
     ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
 
-    compound_metrics = [stickiness_weekly, stickiness_monthly, ARPDAU, ARPPU]
+    compound_metrics = [stickiness_weekly, stickiness_monthly, ARPPU]
 
     # process charts
 
     column_names = [column["name"] for column in query.column_descriptions]
     column_names[12:15] = ['one_day_retention(%)', 'seven_day_retention(%)', 'thirty_day_retention(%)']
-    column_names.extend(['stickiness_weekly(%)', 'stickiness_monthly(%)', 'ARPDAU', 'ARPPU'])
+    column_names.extend(['stickiness_weekly(%)', 'stickiness_monthly(%)', 'ARPPU'])
 
     charts_legend = column_names[1:]
 
