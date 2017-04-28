@@ -5,7 +5,7 @@ from flask import current_app as app
 from flask_login import login_required
 from numpy import array, isnan
 from operator import attrgetter
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 from app.extensions import db
 from app.models.bi import BIStatistic
@@ -65,8 +65,13 @@ def daily_summary_data():
     stickiness_weekly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(wau)))
     stickiness_monthly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(mau)))
 
-    ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
-    ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
+    try:
+        ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
+        ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
+
+    except:
+        ARPDAU = [0 for i in range(60)]
+        ARPPU = [0 for i in range(60)]
 
     compound_metrics = [stickiness_weekly, stickiness_monthly, ARPDAU, ARPPU]
 
@@ -102,3 +107,42 @@ def daily_summary_data():
     tables_result = dict(tables_title=tables_title, tables_data=tables_data)
 
     return jsonify(charts_result=charts_result, tables_result=tables_result)
+
+
+@report.route("/report/reg_platform", methods=["GET"])
+@login_required
+def reg_platform():
+    return render_template('report/reg_platform_distributed.html')
+
+
+@report.route("/report/reg_platform_data", methods=["GET"])
+@login_required
+def reg_platform_data():
+    now = current_time(app.config['APP_TIMEZONE'])
+    start_time = now.replace(days=-3).format('YYYY-MM-DD')
+    end_time = now.format('YYYY-MM-DD')
+
+    reg_records = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
+                                   BIStatistic.email_reg, BIStatistic.guest_reg,
+                                   BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
+        and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game'))
+
+    transpose_query_result = list(map(list, zip(*reg_records)))
+
+    platform = ["All Platform", "iOS", "Android", "Web", "Web Mobile", "Facebook Game"]
+
+    email_reg = transpose_query_result[1]
+    guest_reg = transpose_query_result[2]
+    facebook_game_reg = transpose_query_result[3]
+    facebook_login_reg = transpose_query_result[4]
+
+    all_reg_methods = [email_reg, guest_reg, facebook_game_reg, facebook_login_reg]
+
+    split_number = len(platform)
+
+    def split_query_result(split_number, reg_method):
+        return [reg_method[i:i + split_number] for i in range(0, len(reg_method), split_number)]
+
+    result = (split_query_result(split_number, reg_method) for reg_method in all_reg_methods)
+
+    return jsonify(result)

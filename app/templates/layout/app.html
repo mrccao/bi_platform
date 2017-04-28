@@ -81,6 +81,7 @@
                              </a>
                              <ul class="treeview-menu">
                                <li><a href="{{ url_for('report.daily_summary') }}"><i class="fa fa-circle-o"></i>Daily Summary</a></li>
+                               <li><a href="{{ url_for('report.reg_platform') }}"><i class="fa fa-circle-o"></i>Reg Platform Distribution</a></li>
                              </ul>
                            </li>
                            <li class="treeview{{ ' active' if request.path.startswith('/promotion') else ''}}">

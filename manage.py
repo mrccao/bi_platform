@@ -17,6 +17,7 @@ from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi
+from sqlalchemy import and_
 
 # default to dev config because no one should use this in
 # production anyway
@@ -36,7 +37,7 @@ def make_shell_context():
         in the context of the app
     """
 
-    return dict(app=app, db=db, AdminUser=AdminUser)
+    return dict(app=app, db=db, AdminUser=AdminUser, BIStatistic=BIStatistic, and_=and_)
 
 
 def init_bi_user_import_config():
