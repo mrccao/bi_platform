@@ -17,16 +17,16 @@ def process_bi_statistic_game_records(target):
             return connection.execute(text("""
                                            SELECT DATE(CONVERT_TZ(usersign.time, '+08:00', :timezone_offset)) AS on_day,
                                                    SUM(CASE
-                                                       WHEN usersign.type = 1  THEN
-                                                            usersign.sign_totals
                                                        WHEN usersign.type = 2  THEN
+                                                            usersign.sign_totals
+                                                       WHEN usersign.type = 1  THEN
                                                             usersign.sign_totals * -1
                                                        ELSE 0
                                                        END)                                                    AS buy_ins,
                                                    SUM(CASE
-                                                       WHEN usersign.type = 1  THEN
-                                                            usersign.tax_totals
                                                        WHEN usersign.type = 2  THEN
+                                                            usersign.tax_totals
+                                                       WHEN usersign.type = 1  THEN
                                                             usersign.tax_totals * -1
                                                        ELSE 0
                                                        END)                                                    AS rake
@@ -40,16 +40,16 @@ def process_bi_statistic_game_records(target):
 
             return connection.execute(text("""
                                             SELECT SUM(CASE
-                                                       WHEN usersign.type = 1  THEN
-                                                            usersign.sign_totals
                                                        WHEN usersign.type = 2  THEN
+                                                            usersign.sign_totals
+                                                       WHEN usersign.type = 1  THEN
                                                             usersign.sign_totals * -1
                                                        ELSE 0
                                                        END) AS buy_ins,
                                                    SUM(CASE
-                                                       WHEN usersign.type = 1  THEN
-                                                            usersign.tax_totals
                                                        WHEN usersign.type = 2  THEN
+                                                            usersign.tax_totals
+                                                       WHEN usersign.type = 1  THEN
                                                             usersign.tax_totals * -1
                                                        ELSE 0
                                                        END) AS rake
