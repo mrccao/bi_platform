@@ -5,37 +5,74 @@
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
-
-    <style>
-        #result-table_wrapper {
-            overflow: auto;
-        }
-
-        #result-table_wrapper .table-button {
-            float: right;
-        }
-
-        #result-table_wrapper .table-button .btn {
-            padding: 4px 12px;
-        }
-
-        #result-table_wrapper .table-filter {
-            float: left;
-        }
-
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block main_content %}
     <section class="content-header">
-        <h1>Daily Summary</h1>
+        <h1>User Source </h1>
     </section>
     <section class="content">
-        <div class="row">
+       <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-body">
-                        <div id="charts" style="height: 650px; width: 100%;"></div>
+                           <div class="row">
+            <div class="col-xs-12">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_1">
+                            <div class="row">
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Date range</label>
+                                        <div class="input-group">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="executive-date-range">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Platform</label>
+                                        <select class="form-control select2" style="width: 100%;" id="executive-platform">
+                                            <option selected="selected">All Platform</option>
+                                            <option>Web</option>
+                                            <option>iOS</option>
+                                            <option>Android</option>
+                                            <option>Facebook Game</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <div style="margin-top: 24px;">
+                                            <button type="button" class="btn btn-success" id="btn-executive-apply">Apply</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row" >
+                                <div class="col-md-12" style=" height: 20px;">
+                                    <div>
+                                        <canvas id="executive-chart" width="100%" height="42%"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                        <div id="charts_all_platform" style="height: 400px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -44,21 +81,10 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
+
+                    <div id="charts_every_platform" style="height: 740px; width: 100%;"></div>
                     <div class="box-body">
-                        <table id="result-table"
-                               class="display responsive no-wrap table table-bordered table-striped table-hover dataTable">
-                            <thead>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td colspan="999">
-                                    <div class="text-center">
-                                        There are no items in the result table.
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+
                     </div>
                 </div>
             </div>
@@ -89,6 +115,7 @@
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
     <script type="text/javascript"
             src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
@@ -223,62 +250,53 @@
         };
         echarts.registerTheme('shine', echartsTheme);
 
-        var dom = document.getElementById("charts");
-        var myChart = echarts.init(dom, 'shine');
-        var dataMap = {};
+        var dom = document.getElementById("charts_every_platform");
+        var dom1 = document.getElementById("charts_all_platform");
+        var myChart_every_platform = echarts.init(dom, 'shine');
+        var myChart_all_platform = echarts.init(dom1, 'shine');
 
-        {#        function dataFormatter(obj) {#}
-        {#            #}
-        {#            var pList = ['ios','Android','Facebook Game', 'Web'];#}
-        {#            var temp;#}
-        {#            for (var year = 2002; year <= 2003; year++) {#}
-        {#                var sum = 0;#}
-        {#                temp = obj[year];#}
-        {#                for (var i = 0, l = temp.length; i < l; i++) {#}
-        {#                    sum += temp[i];#}
-        {#                    obj[year][i] = {#}
-        {#                        name: pList[i],#}
-        {#                        value: temp[i]#}
-        {#                    }#}
-        {#                }#}
-        {#                obj[year + 'sum'] = sum;#}
-        {#            }#}
-        {#            return obj;#}
-        {#        }#}
-        {##}
-        {##}
-        {#        dataMap.email_reg = dataFormatter({#}
-        {#            //每一天 4个平台（ios Android Facebook_game web）使用email_reg的人数#}
-        {#            2003: [84.11, 1189.91, 0, 215.19],#}
-        {#            2002: [82.44, 284.21, 0, 197.8]#}
-        {#        });#}
-        {##}
-        {#        dataMap.guest_reg = dataFormatter({#}
-        {#            2003: [1487.15, 1223, 0, 0],#}
-        {#            2002: [1249.99, 4414, 0, 0]#}
-        {#        });#}
-        {##}
-        {#        dataMap.facebook_login_reg = dataFormatter({#}
-        {#            2003: [3435.95, 1150.81, 0, 1176.65],#}
-        {#            2002: [2982.57, 997.47, 0, 992.69]#}
-        {#        });#}
-        {##}
-        {#        dataMap.facebook_game_reg = dataFormatter({#}
-        {#            2003: [0,0,9122,0],#}
-        {#            2002: [0,0,9616,0]#}
-        {#        });#}
+        option_all_platform = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
 
-        option = {
+                data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
+            },
+            toolbox: {
+                    show: true,
+                    feature: {
+                        saveAsImage: {show: true}
+                    }
+                },
+
+            grid: {
+                top: '15%',
+                bottom: '3%',
+                left: '1%',
+                right: '4%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: []
+            },
+            yAxis: {
+                type: 'value',
+                max: 1000
+            },
+            series: []
+        };
+
+
+        option_every_platform = {
             baseOption: {
                 timeline: {
                     axisType: 'category',
                     autoPlay: true,
                     realtime: true,
                     playInterval: 2000,
-                    data: [
-                        '2017-01-01',
-                        '2017-01-02',
-                    ],
                     label: {
                         formatter: function (s) {
                             return s
@@ -286,32 +304,37 @@
                     },
                     loop: true
                 },
+                tooltip: {
+                    formatter: "{a}{b}{c}{d}"
+                },
                 legend: {
                     top: '3%',
                     left: '45%',
                     data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
                 },
                 calculable: true,
+                toolbox: {
+                    show: true,
+                    feature: {
+                        saveAsImage: {show: true}
+                    }
+                },
+
                 grid: {
-                    top: 80,
+                    top: 99,
                     bottom: 100
                 },
                 xAxis: [
                     {
                         'type': 'category',
                         'axisLabel': {'interval': 0},
-                        'data': [
-                            'iOS',
-                            'Android',
-                            'Facebook Game',
-                            'Web'
-                        ]
+                        'data': ["iOS", "Android", "Web", "Web Mobile", "Facebook Game"]
                     }
                 ],
                 yAxis: [
                     {
                         type: 'value',
-                        max: 30000
+                        max: 1500
                     }
                 ],
                 series: [
@@ -320,21 +343,57 @@
                     {name: 'facebook_login_reg', type: 'bar'},
                     {name: 'facebook_game_reg', type: 'bar'},
                     {
-                        {#                        name: '平台占比‘,#}
+
                         type: 'pie',
-                        center: ['75%', '35%'],
-                        radius: '25%'
+                        center: ['73%', '25%'],
+                        radius: '18%'
+
+                    },
+
+                    {
+                        type: 'pie',
+                        center: ['73%', '53%'],
+                        radius: '18%'
                     }
+
                 ]
             }
+
 
         };
 
 
-
-        window.onresize = myChart.resize;
+        window.onresize = myChart_every_platform.resize;
+        window.onresize = myChart_all_platform.resize;
 
         $(function () {
+
+
+            $(".select2").select2();
+
+            $('#executive-date-range').daterangepicker({
+                opens: 'right',
+                showDropdowns: true,
+                autoApply: true,
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: '  -  '
+                },
+                ranges: {
+                    // 'Today': [moment(), moment()],
+                    // 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Week': [moment().startOf('week'), moment().endOf('week')],
+                    'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                startDate: moment().subtract(60, 'days'),
+                endDate: moment(),
+                minDate: moment().subtract(6, 'month'),
+                maxDate: moment()
+            });
 
             var resultDataTable = null;
 
@@ -345,76 +404,118 @@
 
                 success: function (result) {
 
-                    ////////////////////
 
-                    $.extend($.fn.dataTable.defaults, {
-                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
-                    });
+                    var options = [];
 
-                    if (resultDataTable !== null) {
-                        resultDataTable.destroy();
-                        $('#result-table').empty();
-                    }
+                    var email_reg_all_platform_all_days = [];
+                    var guest_reg_all_platform_all_days = [];
+                    var facebook_login_reg_all_platform_all_days = [];
+                    var facebook_game_reg_all_platform_all_days = [];
 
-                    resultDataTable = $('#result-table').DataTable({
-                        retrieve: true,
-                        searching: true,
-                        'buttons': [
-                            'copy', 'csv', 'excel', 'pdf'
-                        ],
-                        iDisplayLength: 20,
-                        "order": [[0, "desc"]],
-                        lengthChange: true,
-                        scrollX: true,
-                        data: result.tables_result.tables_data,
-                        columns: result.tables_result.tables_title
+                    for (var i in  result.day_range) {
+
+                        var day = result.day_range[i];
+
+                        var email_reg = result.email_reg[day].slice(0, 5);
+                        var guest_reg = result.guest_reg[day].slice(0, 5);
+                        var facebook_login_reg = result.facebook_login_reg[day].slice(0, 5);
+                        var facebook_game_reg = result.facebook_game_reg[day].slice(0, 5);
+
+                        var users_count_every_platform = {};
+                        users_count_every_platform['iOS'] = email_reg[0] + guest_reg[0] + facebook_login_reg[0] + facebook_game_reg[0];
+                        users_count_every_platform['Android'] = email_reg[1] + guest_reg[1] + facebook_login_reg[1] + facebook_game_reg[1];
+                        users_count_every_platform['Web'] = email_reg[2] + guest_reg[2] + facebook_login_reg[2] + facebook_game_reg[2];
+                        users_count_every_platform['Facebook Game'] = email_reg[4] + guest_reg[4] + facebook_login_reg[4] + facebook_game_reg[4];
+
+                        email_reg_all_platform_all_days.push(result.email_reg[day][5]);
+                        guest_reg_all_platform_all_days.push(result.guest_reg[day][5]);
+                        facebook_login_reg_all_platform_all_days.push(result.facebook_login_reg[day][5]);
+                        facebook_game_reg_all_platform_all_days.push(result.facebook_game_reg[day][5]);
 
 
-                    });
-
-                    options = [];
-
-                    var day =result.day;
-
-                    for (var i; i <= day.length; i++) {
-
-                        list.push(
+                        options.push(
                             {
-                                title: {text: day + 'user reg distribution'},
+                                title: {
+                                    text: day,
+                                    left: 30,
+                                    top: 20
+                                },
                                 series: [
-                                    {data: dataMap.email_reg[day]},
-                                    {data: dataMap.guest_reg[day]},
-                                    {data: dataMap.facebook_login_reg[day]},
-                                    {data: dataMap.facebook_game_reg[day]},
+                                    {data: result.email_reg[day].slice(0, 5)},
+                                    {data: result.guest_reg[day].slice(0, 5)},
+                                    {data: result.facebook_login_reg[day].slice(0, 5)},
+                                    {data: result.facebook_game_reg[day].slice(0, 5)},
                                     {
-                                        data: [
-                                            {name: 'email_reg', value: dataMap.email_reg[day + 'all_platform']},
-                                            {name: 'guest_reg', value: dataMap.guest_reg['2002sum']},
-                                            {
-                                                name: 'facebook_login_reg',
-                                                value: dataMap.facebook_login_reg[day + 'all_platform']
-                                            },
-                                            {
-                                                name: 'facebook_game_reg',
-                                                value: dataMap.facebook_game_reg['all_platform']
-                                            }
+                                        data: [{name: 'email_reg', value: result.email_reg[day][5]},
+                                            {name: 'guest_reg', value: result.guest_reg[day][5]},
+                                            {name: 'facebook_login_reg', value: result.facebook_login_reg[day][5]},
+                                            {name: 'facebook_game_reg', value: result.facebook_game_reg[day][5]}
+                                        ]
+                                    },
+                                    {
+                                        data: [{
+                                            name: 'iOS', value: users_count_every_platform['iOS']
+                                        },
+                                            {name: 'Android', value: users_count_every_platform['Android']},
+                                            {name: 'Web', value: users_count_every_platform['Web']},
+                                            {name: 'Facebook Game', value: users_count_every_platform['Facebook Game']},
                                         ]
                                     }
+
                                 ]
                             }
-                        )
+                        );
+
                     }
+                    option_all_platform.series = [{
 
-                    option.options = options;
+                        name: 'email_reg',
+                        type: 'line',
+                        smooth: true,
+                        data: email_reg_all_platform_all_days
+
+
+                    },
+                        {
+                            name: 'guest_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: guest_reg_all_platform_all_days
+
+
+                        }, {
+                            name: 'facebook_login_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: facebook_login_reg
+
+
+                        }, {
+                            name: 'facebook_game_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: facebook_game_reg
+
+
+                        }
+
+
+                    ]
+                    ;
+
+
+                    option_all_platform.xAxis.data = result.day_range;
+
+
+                    option_every_platform.baseOption.timeline.data = result.day_range;
+                    option_every_platform.options = options;
                     ////////////////////
-
-                    {#                    option.xAxis.data = result.charts_result.charts_labels;#}
-                    {#                    option.legend.data = result.charts_result.charts_legend;#}
-
-
-                    myChart.setOption(option, true);
+                    myChart_every_platform.setOption(option_every_platform, true);
+                    myChart_all_platform.setOption(option_all_platform, true);
                 }
-            });
-        });
+            })
+            ;
+        })
+        ;
     </script>
 {% endblock %}

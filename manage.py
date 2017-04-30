@@ -1,7 +1,11 @@
 import os
+from random import randrange
+
+import pandas as pd
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
+from sqlalchemy import and_
 
 from app import create_app
 from app.extensions import db
@@ -17,7 +21,6 @@ from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi
-from sqlalchemy import and_
 
 # default to dev config because no one should use this in
 # production anyway
@@ -227,11 +230,18 @@ def reset_bi_statistic():
     BIStatistic.__table__.create(db.engine, checkfirst=True)
 
     from datetime import date
-    import pandas as pd
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform))
+                email_reg = randrange(200)
+                guest_reg = randrange(300)
+                facebook_game_reg = randrange(400)
+                facebook_login_reg = randrange(500)
+                db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
+                                           email_reg=email_reg, guest_reg=guest_reg,
+                                           facebook_game_reg=facebook_game_reg,
+                                           facebook_login_reg=facebook_login_reg
+                                           ))
     db.session.commit()
 
 

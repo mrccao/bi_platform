@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
 from flask import current_app as app
 from flask_login import login_required
 from numpy import array, isnan
-from operator import attrgetter
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, text
+from sqlalchemy import select
+from sqlalchemy.sql import table
 
 from app.extensions import db
 from app.models.bi import BIStatistic
@@ -26,30 +27,72 @@ def daily_summary_data():
     now = current_time(app.config['APP_TIMEZONE'])
     start_time = now.replace(days=-60).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
+    start_time = request.args.get('start_time', start_time)
+    end_time = request.args.get('end_time', end_time)
+    week = request.args.get("week")
+    months = request.args.get("months")
 
-    get_metrics = attrgetter('on_day', 'dau', 'wau', 'mau', 'new_reg', 'facebook_game_reg', 'facebook_login_reg',
-                             'guest_reg', 'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
-                             'one_day_retention', 'seven_day_retention', 'thirty_day_retention')
+    game = request.args.get("game", "All Game")
+    platform = request.args.get("platform", "All Platform")
 
-    metrics = get_metrics(BIStatistic)
-    query = db.session.query(BIStatistic).with_entities(*metrics)
+    metrics = [
+        text('sum(wau)/:days'),
+        text('sum(mau)/:days'),
+        text('sum(new_reg)/:days'),
+        text('sum(facebook_game_reg)/:days'),
+        text('sum(facebook_login_reg)/:days'),
+        text('sum(guest_reg)/:days'),
+        text('sum(new_reg_game_dau)/:days'),
+        text('sum(paid_user_count)/:days'),
+        text('sum(paid_count)/:days'),
+        text('sum(revenue)/:days'),
+        text('sum(one_day_retention)/:days'),
+        text('sum(seven_day_retention)/:days'),
+        text('sum(thirty_day_retention)/:days')]
 
-    query_result = query.filter(and_(BIStatistic.on_day >= start_time,
-                                     BIStatistic.on_day < end_time,
-                                     BIStatistic.game == 'All Game',
-                                     BIStatistic.platform == 'All Platform'))
+    # if week:
+    target = text("date_format(on_day, '%Y-%u') as week")
+    # target = literal_column(on_day, )
+    metrics.insert(0, target)
 
-    transpose_query_result = list(map(list, zip(*query_result)))
+    s = select(metrics).where(
+        and_(text("game = :game"),
+             text("platform = :platform "), )). \
+        select_from(table("bi_statistic")). \
+        group_by(text("week")). \
+        having(and_(
+        text("week>=:start_time"),
+        text("week<=:end_time")))
 
-    dau = transpose_query_result[1]
-    wau = transpose_query_result[2]
-    mau = transpose_query_result[3]
-    new_reg_game_dau = transpose_query_result[8]
-    paid_user_count = transpose_query_result[9]
-    revenue = transpose_query_result[11]
-    one_day_retention_count = transpose_query_result[12]
-    seven_day_retention_count = transpose_query_result[13]
-    thirty_day_retention_count = transpose_query_result[14]
+    result = db.engine.execute(s, start_time=start_time, end_time=end_time, game=game, days=7,
+                               platform=platform).fetchall()
+
+    if months:
+        target = text("date_format(on_day,'%Y-%m')").label("months")
+        metrics.insert(0, target)
+
+        s = select(metrics).where(
+            and_(text("game = :game"),
+                 text("platform = :platform "), )). \
+            select_from(table("bi_statistic")). \
+            group_by(text("months")). \
+            having(and_(
+            text("months>=:start_time"),
+            text("months<=:end_time")))
+
+        result = db.engine.execute(s, start_time=start_time, end_time=end_time, game=game, days=7,
+                                   platform=platform).fetchall()
+
+    #
+    #     dau = transpose_query_result[1]
+    #     wau = transpose_query_result[2]
+    #     mau = transpose_query_result[3]
+    #     new_reg_game_dau = transpose_query_result[8]
+    #     paid_user_count = transpose_query_result[9]
+    #     revenue = transpose_query_result[11]
+    #     one_day_retention_count = transpose_query_result[12]
+    #     seven_day_retention_count = transpose_query_result[13]
+    #     thirty_day_retention_count = transpose_query_result[14]
 
     # calculate  Compound metrics
 
@@ -119,7 +162,7 @@ def reg_platform():
 @login_required
 def reg_platform_data():
     now = current_time(app.config['APP_TIMEZONE'])
-    start_time = now.replace(days=-3).format('YYYY-MM-DD')
+    start_time = now.replace(days=-30).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
 
     reg_records = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
@@ -129,20 +172,21 @@ def reg_platform_data():
 
     transpose_query_result = list(map(list, zip(*reg_records)))
 
-    platform = ["All Platform", "iOS", "Android", "Web", "Web Mobile", "Facebook Game"]
+    platform = ["iOS", "Android", "Web", "Web Mobile", "Facebook Game", "All Platform"]
+    reg_methods = ['email_reg', 'guest_reg', 'facebook_game_reg', 'facebook_login_reg']
 
-    email_reg = transpose_query_result[1]
-    guest_reg = transpose_query_result[2]
-    facebook_game_reg = transpose_query_result[3]
-    facebook_login_reg = transpose_query_result[4]
+    day_range_duplicated = transpose_query_result[0]
+    all_reg_methods = transpose_query_result[1:5]
+    day_range = sorted(set(day_range_duplicated), key=day_range_duplicated.index)
 
-    all_reg_methods = [email_reg, guest_reg, facebook_game_reg, facebook_login_reg]
+    def reg_method_count_every_platform_every_day(reg_method):
+        def split_query_result(reg_method):
+            return [reg_method[i:i + len(platform)] for i in range(0, len(reg_method), len(platform))]
 
-    split_number = len(platform)
+        return dict(zip(day_range, split_query_result(reg_method)))
 
-    def split_query_result(split_number, reg_method):
-        return [reg_method[i:i + split_number] for i in range(0, len(reg_method), split_number)]
-
-    result = (split_query_result(split_number, reg_method) for reg_method in all_reg_methods)
+    every_reg_method_result = map(reg_method_count_every_platform_every_day, all_reg_methods)
+    result = dict(zip(reg_methods, every_reg_method_result))
+    result['day_range'] = day_range
 
     return jsonify(result)
