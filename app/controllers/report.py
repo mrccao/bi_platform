@@ -1,8 +1,7 @@
 from decimal import Decimal
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, session
 from flask import current_app as app
-from flask_login import login_required
 from numpy import array
 from sqlalchemy import and_, func, text
 
@@ -15,13 +14,13 @@ report = Blueprint('report', __name__)
 
 
 @report.route("/report/metrics_summary", methods=["GET"])
-@login_required
+# @login_required
 def metrics_summary():
     return render_template('report/metrics_summary.html')
 
 
 @report.route("/report/metrics_summary_data", methods=["GET"])
-@login_required
+# @login_required
 def metrics_summary_data():
     # get custom date range
     days_ago = request.args.get('days_ago')
@@ -204,13 +203,13 @@ def metrics_summary_data():
 
 
 @report.route("/report/reg_platform", methods=["GET"])
-@login_required
+# @login_required
 def reg_platform():
     return render_template('report/reg_platform_distributed.html')
 
 
 @report.route("/report/reg_platform_data", methods=["GET"])
-@login_required
+# @login_required
 def reg_platform_data():
     now = current_time(app.config['APP_TIMEZONE'])
     start_time = now.replace(days=-30).format('YYYY-MM-DD')
@@ -245,20 +244,38 @@ def reg_platform_data():
 
 
 @report.route("/report/user_reg_data", methods=["GET"])
-@login_required
+# @login_required
 def user_reg_data():
-    now = current_time(app.config['APP_TIMEZONE'])
-    start_time = now.replace(days=-30).format('YYYY-MM-DD')
-    end_time = now.format('YYYY-MM-DD')
-    platform = request.args.get("platform")
+    # start_time = request.args.get("start_day")
+    # end_time = request.args.get("end_day")
+    # last_time = request.args.get("last_time")
+    # platform = request.args.get("platform")
 
-    line_result = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
-                                   BIStatistic.email_reg, BIStatistic.guest_reg,
-                                   BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
+    start_time = '2017-03-03'
+    end_time = '2017-04-01'
+    last_time = 'True'
+    platform = 'iOS'
+
+    previous_day_range = session.get("previous_day_range")
+    previous_data = session.get("previous_data")
+
+    result = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
+                              BIStatistic.email_reg, BIStatistic.guest_reg,
+                              BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
         and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game',
              BIStatistic.platform != 'Web Mobile', BIStatistic.platform == platform))
 
-    transpose_query_result = list(map(list, zip(*line_result)))
-    line_data = transpose_query_result[1:]
+    transpose_query_result = list(map(list, zip(*result)))
+    data = transpose_query_result[1:]
+    day_range = transpose_query_result[0]
 
-    return jsonify(day_range=transpose_query_result[0], line_result=line_data)
+    if last_time:
+        if previous_day_range and previous_data is not None:
+
+            return jsonify(day_range=day_range, data=data, previous_day_range=previous_day_range,
+                           previous_data=previous_data)
+
+    session["previous_day_range"] = [day_range]
+    session["previous_data"] = [data]
+
+    return jsonify(day_range=day_range, result=data)
