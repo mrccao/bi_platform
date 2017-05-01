@@ -25,9 +25,9 @@ def metrics_summary():
 def metrics_summary_data():
     # get custom date range
     days_ago = request.args.get('days_ago')
-    game = request.args.get("game", "Game")
-    platform = request.args.get("platform", "All Platform")
-    group_type = request.args.get("group", "Daily")
+    game = request.args.get("game")
+    platform = request.args.get("platform")
+    group_type = request.args.get("group")
     # get default date range
     start_time, end_time = request.args.get('date_range').split('  -  ')
 
@@ -216,14 +216,15 @@ def reg_platform_data():
     start_time = now.replace(days=-30).format('YYYY-MM-DD')
     end_time = now.format('YYYY-MM-DD')
 
-    reg_records = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
-                                   BIStatistic.email_reg, BIStatistic.guest_reg,
-                                   BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
-        and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game'))
+    pie_result = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
+                                  BIStatistic.email_reg, BIStatistic.guest_reg,
+                                  BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
+        and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game',
+             BIStatistic.platform != 'Web Mobile'))
 
-    transpose_query_result = list(map(list, zip(*reg_records)))
+    transpose_query_result = list(map(list, zip(*pie_result)))
 
-    platform = ["iOS", "Android", "Web", "Web Mobile", "Facebook Game", "All Platform"]
+    platform = ["iOS", "Android", "Web", "Facebook Game", "All Platform"]
     reg_methods = ['email_reg', 'guest_reg', 'facebook_game_reg', 'facebook_login_reg']
 
     day_range_duplicated = transpose_query_result[0]
@@ -241,3 +242,23 @@ def reg_platform_data():
     result['day_range'] = day_range
 
     return jsonify(result)
+
+
+@report.route("/report/user_reg_data", methods=["GET"])
+@login_required
+def user_reg_data():
+    now = current_time(app.config['APP_TIMEZONE'])
+    start_time = now.replace(days=-30).format('YYYY-MM-DD')
+    end_time = now.format('YYYY-MM-DD')
+    platform = request.args.get("platform")
+
+    line_result = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
+                                   BIStatistic.email_reg, BIStatistic.guest_reg,
+                                   BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
+        and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game',
+             BIStatistic.platform != 'Web Mobile', BIStatistic.platform == platform))
+
+    transpose_query_result = list(map(list, zip(*line_result)))
+    line_data = transpose_query_result[1:]
+
+    return jsonify(day_range=transpose_query_result[0], line_result=line_data)

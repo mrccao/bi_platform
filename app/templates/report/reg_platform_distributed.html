@@ -5,7 +5,8 @@
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
+          rel="stylesheet">
 {% endblock %}
 
 {% block main_content %}
@@ -13,66 +14,98 @@
         <h1>User Source </h1>
     </section>
     <section class="content">
-       <div class="row">
+        <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-body">
-                           <div class="row">
-            <div class="col-xs-12">
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="tab_1">
-                            <div class="row">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="tab_1">
+                                        <div class="row">
 
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Date range</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon">
-                                                <i class="fa fa-calendar"></i>
+                                            <div class="col-md-8   col-xs-1">
+
                                             </div>
-                                            <input type="text" class="form-control pull-right" id="executive-date-range">
+
+                                            <div class="col-md-4">
+                                                <div id="iOS" class="col-md-3">
+
+
+                                                    <svg t="1493622397938" class="icon" style=""
+                                                         viewBox="0 0 1024 1024"
+                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10690"
+                                                         width="30" height="40">
+                                                        <defs>
+                                                            <style type="text/css"></style>
+                                                        </defs>
+                                                        <path d="M517.392097 360.456569 428.783963 331.810276C428.783963 331.810276 296.493731 280.356061 197.448509 389.075727 96.176766 500.18901 103.92032 637.19364 148.226529 761.237601 192.528454 885.310126 276.884917 1021.919152 369.716158 1023.681517 441.443288 1025.042566 447.060292 984.825216 546.909575 985.522165 546.909575 985.522165 582.770998 990.275124 635.517709 1009.355515 688.265848 1028.467325 733.036214 1031.753551 788.109419 975.949121 866.85459 896.21137 906.240744 775.59788 906.240744 775.59788 906.240744 775.59788 774.748861 727.168536 778.273592 584.713997 781.766903 442.259459 881.610473 408.156117 881.610473 408.156117 881.610473 408.156117 806.391461 280.027582 635.517709 322.270081L517.392097 360.456569ZM512.372069 235.352904C512.372069 235.352904 493.325954 29.14901 748.556169 0 748.556169 0 765.013006 218.900351 512.372069 235.352904L512.372069 235.352904Z"
+                                                              p-id="10691" fill="#bfbfbf"></path>
+                                                    </svg>
+
+                                                </div>
+
+
+                                                <div id="Android" class="col-md-3">
+                                                    <svg t="1493622033922" class="icon" style=""
+                                                         viewBox="0 0 1024 1024"
+                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8580"
+                                                         width="30" height="40">
+                                                        <defs>
+                                                            <style type="text/css"></style>
+                                                        </defs>
+                                                        <path d="M862.778202 640.174593c-17.774874 0-32.175395-13.876101-32.175395-30.980825L830.602807 414.807258c0-17.134486 14.399495-30.981851 32.175395-30.981851 17.773847 0 32.203104 13.847365 32.203104 30.981851l0 194.385484C894.981306 626.298492 880.553076 640.174593 862.778202 640.174593zM380.771249 151.679606 380.771249 151.679606l-56.204315-70.516577c-3.83925-4.829593-2.675467-11.578298 2.619023-15.097354 5.293464-3.520082 12.682557-2.443532 16.523859 2.385035l58.093665 72.901612c33.367912-14.662218 70.603809-22.865138 109.905574-22.865138 39.302791 0 76.509952 8.203946 109.875812 22.865138l58.094691-72.901612c3.83925-4.829593 11.258104-5.905117 16.552594-2.385035 5.265755 3.520082 6.429537 10.268787 2.589261 15.097354l-56.204315 70.516577c64.726402 35.578483 111.504491 96.640099 124.53803 168.465162L256.233218 320.144767C269.295493 248.319705 316.042794 187.258088 380.771249 151.679606zM622.341222 254.749242 622.341222 254.749242c17.716377 0 32.058401-13.439939 32.058401-29.992534 0-16.552594-14.34305-29.963798-32.058401-29.963798-17.65788 0-32.028639 13.411204-32.028639 29.963798C590.312583 241.309303 604.683343 254.749242 622.341222 254.749242zM401.01839 254.749242 401.01839 254.749242c17.716377 0 32.028639-13.439939 32.028639-29.992534 0-16.552594-14.312263-29.963798-32.028639-29.963798-17.687641 0-32.029665 13.411204-32.029665 29.963798C368.988724 241.309303 383.330748 254.749242 401.01839 254.749242zM161.221798 640.174593 161.221798 640.174593c-17.803609 0-32.20413-13.876101-32.20413-30.980825L129.017668 414.807258c0-17.134486 14.400521-30.981851 32.20413-30.981851 17.773847 0 32.175395 13.847365 32.175395 30.981851l0 194.385484C193.397193 626.298492 178.995645 640.174593 161.221798 640.174593zM766.691258 718.719625 766.691258 718.719625c0 31.011613-25.658625 56.117082-57.3096 56.117082l-40.116617 0 0 131.868626c0 29.440404-24.349114 53.294859-54.42888 53.294859-30.079766 0-54.42888-23.854455-54.42888-53.294859L560.407282 774.836707l-97.425191 0 0 131.868626c0 29.440404-24.378875 53.294859-54.429906 53.294859-30.050004 0-54.42888-23.854455-54.42888-53.294859L354.123306 774.836707l-40.116617 0c-31.621213 0-57.308573-25.10547-57.308573-56.117082L256.698115 384.348801l509.992117 0L766.690232 718.719625z"
+                                                              p-id="8581" fill="#a6d534"></path>
+                                                    </svg>
+
+
+                                                </div>
+
+                                                <div id="Web" class="col-md-3">
+                                                    <svg t="1493622643016" class="icon" style=""
+                                                         viewBox="0 0 1024 1024"
+                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2926"
+                                                         width="30" height="40">
+                                                        <defs>
+                                                            <style type="text/css"></style>
+                                                        </defs>
+                                                        <path d="M265.664 357.930667l492.629333 0 0 294.378667-492.629333 0 0-294.378667z"
+                                                              p-id="2927" fill="#0b7fb0"></path>
+                                                        <path d="M511.978667 49.962667c-255.168 0-462.037333 206.848-462.037333 462.037333s206.848 462.037333 462.037333 462.037333 462.037333-206.848 462.037333-462.037333-206.848-462.037333-462.037333-462.037333zM238.357333 342.506667c0-11.157333 9.045333-20.181333 20.181333-20.181333l506.837333 0c11.157333 0 20.181333 9.045333 20.181333 20.181333l0 342.741333-547.221333 0 0-342.741333zM776.341333 701.674667l-528.725333 0c-45.397333-0.896-71.232-16.021333-71.232-16.021333l282.218667 0 4.458667 4.458667 97.834667 0 4.458667-4.458667 282.218667 0c0 0-25.813333 15.125333-71.210667 16.021333z"
+                                                              p-id="2928" fill="#0b7fb0"></path>
+                                                    </svg>
+                                                </div>
+
+                                                <div id="Facebook_Game" class="col-md-3">
+                                                    <svg t="1493622238067" class="icon" style=""
+                                                         viewBox="0 0 1024 1024"
+                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9927"
+                                                         width="24" height="40">
+                                                        <defs>
+                                                            <style type="text/css"></style>
+                                                        </defs>
+                                                        <path d="M965.7344 2.7648c14.848 0 28.2624 5.5296 40.2432 16.6912C1017.9584 30.5152 1024 43.52 1024 58.2656l0 910.2336c0 14.848-6.0416 27.7504-18.0224 38.8096C993.8944 1018.4704 980.48 1024 965.7344 1024L704.9216 1024 704.9216 629.9648l133.2224 0 19.456-155.4432-152.576 0L705.024 373.0432c0-50.688 25.9072-76.0832 77.7216-76.0832l80.4864 0L863.232 163.5328c-27.7504-5.4272-67.4816-8.192-119.296-8.192-59.1872 0-106.8032 18.0224-142.9504 54.0672C564.736 245.5552 546.7136 296.0384 546.7136 360.7552l0 113.7664L413.4912 474.5216l0 155.4432 133.2224 0L546.7136 1024 55.5008 1024c-14.848 0-27.7504-5.5296-38.8096-16.6912C5.5296 996.2496 0 983.3472 0 968.4992L0 58.2656C0 43.52 5.5296 30.5152 16.6912 19.456c11.0592-11.0592 24.064-16.6912 38.8096-16.6912L965.7344 2.7648z"
+                                                              p-id="9928" fill="#404b9b"></path>
+                                                    </svg>
+
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Platform</label>
-                                        <select class="form-control select2" style="width: 100%;" id="executive-platform">
-                                            <option selected="selected">All Platform</option>
-                                            <option>Web</option>
-                                            <option>iOS</option>
-                                            <option>Android</option>
-                                            <option>Facebook Game</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <div style="margin-top: 24px;">
-                                            <button type="button" class="btn btn-success" id="btn-executive-apply">Apply</button>
+                                        <div class="row">
+                                            <div class="col-md-12" style=" height: 20px;">
+                                                <div>
+                                                    <canvas id="executive-chart" width="100%" height="42%"></canvas>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                            </div>
-
-                            <div class="row" >
-                                <div class="col-md-12" style=" height: 20px;">
-                                    <div>
-                                        <canvas id="executive-chart" width="100%" height="42%"></canvas>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-                        </div>
-                    </div>
-                </div>
 
-                        <div id="charts_all_platform" style="height: 400px; width: 100%;"></div>
+                        <div id="line_every_platform" style="height: 400px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -115,16 +148,12 @@
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
     <script type="text/javascript"
             src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
             '#c12e34', '#e6b600', '#0098d9', '#2b821d',
             '#005eaa', '#339ca8', '#cda819', '#32a487',
             '#E01F54', '#001852', '#f5e8c8', '#b8d2c7', '#c6b38e',
-            '#a4d8c2', '#f3d999', '#d3758f', '#dcc392', '#2e4783',
-            '#82b6e9', '#ff6347', '#a092f1', '#0a915d', '#eaf889',
-            '#6699FF', '#ff6666', '#3cb371', '#d5b158', '#38b6b6'
         ];
 
         var echartsTheme = {
@@ -248,14 +277,15 @@
                 }
             }
         };
+
         echarts.registerTheme('shine', echartsTheme);
 
         var dom = document.getElementById("charts_every_platform");
-        var dom1 = document.getElementById("charts_all_platform");
-        var myChart_every_platform = echarts.init(dom, 'shine');
-        var myChart_all_platform = echarts.init(dom1, 'shine');
+        var dom1 = document.getElementById("line_every_platform");
+        var myChart_every_platform_pie = echarts.init(dom, 'shine');
+        var myChart_every_platform_line = echarts.init(dom1, 'shine');
 
-        option_all_platform = {
+        option_every_platform_line = {
             tooltip: {
                 trigger: 'axis'
             },
@@ -264,11 +294,11 @@
                 data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
             },
             toolbox: {
-                    show: true,
-                    feature: {
-                        saveAsImage: {show: true}
-                    }
-                },
+                show: true,
+                feature: {
+                    saveAsImage: {show: true}
+                }
+            },
 
             grid: {
                 top: '15%',
@@ -290,7 +320,7 @@
         };
 
 
-        option_every_platform = {
+        option_every_platform_pie = {
             baseOption: {
                 timeline: {
                     axisType: 'category',
@@ -304,9 +334,9 @@
                     },
                     loop: true
                 },
-                tooltip: {
-                    formatter: "{a}{b}{c}{d}"
-                },
+                {#                tooltip: {#}
+                {#                    formatter: "{a}{b}{c}{d}"#}
+                {#                },#}
                 legend: {
                     top: '3%',
                     left: '45%',
@@ -328,7 +358,7 @@
                     {
                         'type': 'category',
                         'axisLabel': {'interval': 0},
-                        'data': ["iOS", "Android", "Web", "Web Mobile", "Facebook Game"]
+                        'data': ["iOS", "Android", "Web", "Facebook Game"]
                     }
                 ],
                 yAxis: [
@@ -362,40 +392,14 @@
 
         };
 
+        {#        var platform = $#}
 
-        window.onresize = myChart_every_platform.resize;
-        window.onresize = myChart_all_platform.resize;
+        window.onresize = myChart_every_platform_pie.resize;
+        window.onresize = myChart_every_platform_line.resize;
+
 
         $(function () {
 
-
-            $(".select2").select2();
-
-            $('#executive-date-range').daterangepicker({
-                opens: 'right',
-                showDropdowns: true,
-                autoApply: true,
-                locale: {
-                    format: 'YYYY-MM-DD',
-                    separator: '  -  '
-                },
-                ranges: {
-                    // 'Today': [moment(), moment()],
-                    // 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Week': [moment().startOf('week'), moment().endOf('week')],
-                    'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                },
-                startDate: moment().subtract(60, 'days'),
-                endDate: moment(),
-                minDate: moment().subtract(6, 'month'),
-                maxDate: moment()
-            });
-
-            var resultDataTable = null;
 
             $.ajax({
                 type: 'GET',
@@ -407,30 +411,21 @@
 
                     var options = [];
 
-                    var email_reg_all_platform_all_days = [];
-                    var guest_reg_all_platform_all_days = [];
-                    var facebook_login_reg_all_platform_all_days = [];
-                    var facebook_game_reg_all_platform_all_days = [];
 
                     for (var i in  result.day_range) {
 
                         var day = result.day_range[i];
 
-                        var email_reg = result.email_reg[day].slice(0, 5);
-                        var guest_reg = result.guest_reg[day].slice(0, 5);
-                        var facebook_login_reg = result.facebook_login_reg[day].slice(0, 5);
-                        var facebook_game_reg = result.facebook_game_reg[day].slice(0, 5);
+                        var email_reg = result.email_reg[day].slice(0, 4);
+                        var guest_reg = result.guest_reg[day].slice(0, 4);
+                        var facebook_login_reg = result.facebook_login_reg[day].slice(0, 4);
+                        var facebook_game_reg = result.facebook_game_reg[day].slice(0, 4);
 
                         var users_count_every_platform = {};
                         users_count_every_platform['iOS'] = email_reg[0] + guest_reg[0] + facebook_login_reg[0] + facebook_game_reg[0];
                         users_count_every_platform['Android'] = email_reg[1] + guest_reg[1] + facebook_login_reg[1] + facebook_game_reg[1];
                         users_count_every_platform['Web'] = email_reg[2] + guest_reg[2] + facebook_login_reg[2] + facebook_game_reg[2];
                         users_count_every_platform['Facebook Game'] = email_reg[4] + guest_reg[4] + facebook_login_reg[4] + facebook_game_reg[4];
-
-                        email_reg_all_platform_all_days.push(result.email_reg[day][5]);
-                        guest_reg_all_platform_all_days.push(result.guest_reg[day][5]);
-                        facebook_login_reg_all_platform_all_days.push(result.facebook_login_reg[day][5]);
-                        facebook_game_reg_all_platform_all_days.push(result.facebook_game_reg[day][5]);
 
 
                         options.push(
@@ -441,15 +436,15 @@
                                     top: 20
                                 },
                                 series: [
-                                    {data: result.email_reg[day].slice(0, 5)},
-                                    {data: result.guest_reg[day].slice(0, 5)},
-                                    {data: result.facebook_login_reg[day].slice(0, 5)},
-                                    {data: result.facebook_game_reg[day].slice(0, 5)},
+                                    {data: result.email_reg[day].slice(0, 4)},
+                                    {data: result.guest_reg[day].slice(0, 4)},
+                                    {data: result.facebook_login_reg[day].slice(0, 4)},
+                                    {data: result.facebook_game_reg[day].slice(0, 4)},
                                     {
-                                        data: [{name: 'email_reg', value: result.email_reg[day][5]},
-                                            {name: 'guest_reg', value: result.guest_reg[day][5]},
-                                            {name: 'facebook_login_reg', value: result.facebook_login_reg[day][5]},
-                                            {name: 'facebook_game_reg', value: result.facebook_game_reg[day][5]}
+                                        data: [{name: 'email_reg', value: result.email_reg[day][4]},
+                                            {name: 'guest_reg', value: result.guest_reg[day][4]},
+                                            {name: 'facebook_login_reg', value: result.facebook_login_reg[day][4]},
+                                            {name: 'facebook_game_reg', value: result.facebook_game_reg[day][4]}
                                         ]
                                     },
                                     {
@@ -462,60 +457,121 @@
                                         ]
                                     }
 
+
                                 ]
                             }
                         );
 
                     }
-                    option_all_platform.series = [{
 
-                        name: 'email_reg',
-                        type: 'line',
-                        smooth: true,
-                        data: email_reg_all_platform_all_days
 
+                    option_every_platform_pie.baseOption.timeline.data = result.day_range;
+                    option_every_platform_pie.options = options;
+                    ////////////////////
+                    myChart_every_platform_pie.setOption(option_every_platform_pie, true);
+
+
+                }
+            });
+
+
+            function getExecutiveData(platform) {
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/report/user_reg_data',
+                    dataType: "json",
+                    data: {
+                        platform: platform
 
                     },
-                        {
-                            name: 'guest_reg',
+
+                    success: function (result) {
+
+
+                        option_every_platform_line.series = [{
+
+                            name: 'email_reg',
                             type: 'line',
                             smooth: true,
-                            data: guest_reg_all_platform_all_days
+                            data: result.line_result[0]
 
 
-                        }, {
-                            name: 'facebook_login_reg',
-                            type: 'line',
-                            smooth: true,
-                            data: facebook_login_reg
+                        },
+                            {
+                                name: 'guest_reg',
+                                type: 'line',
+                                smooth: true,
+
+                                data: result.line_result[1]
 
 
-                        }, {
-                            name: 'facebook_game_reg',
-                            type: 'line',
-                            smooth: true,
-                            data: facebook_game_reg
+                            }, {
+                                name: 'facebook_login_reg',
+                                type: 'line',
+                                smooth: true,
+                                data: result.line_result[2]
 
 
-                        }
+                            }, {
+                                name: 'facebook_game_reg',
+                                type: 'line',
+                                smooth: true,
+                                data: result.line_result[3]
 
 
-                    ]
-                    ;
+                            }
+
+                        ];
+
+                        option_every_platform_line.xAxis.data = result.day_range;
+                        myChart_every_platform_line.setOption(option_every_platform_line, true);
+
+                    }
+                })
+            }
 
 
-                    option_all_platform.xAxis.data = result.day_range;
+            $('#iOS').dblclick(function () {
+                getExecutiveData('iOS');
+
+                $('#Android').attr("color", "red");
+                {#                $('#Web').attr("hidden", "hidden");#}
+                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
+            });
+
+            $('#Android').dblclick(function () {
+                getExecutiveData('Android');
 
 
-                    option_every_platform.baseOption.timeline.data = result.day_range;
-                    option_every_platform.options = options;
-                    ////////////////////
-                    myChart_every_platform.setOption(option_every_platform, true);
-                    myChart_all_platform.setOption(option_all_platform, true);
-                }
-            })
-            ;
-        })
-        ;
+                {#                $('#iOS').attr("hidden", "hidden");#}
+                {#                $('#Web').attr("hidden", "hidden");#}
+                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
+            });
+
+            $('#Web').dblclick(function () {
+                getExecutiveData('Web');
+
+                $('#Android').css("background","red");
+
+                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
+                {#                $('#Android').attr("hidden", "hidden");#}
+                {#                $('#iOS').attr("hidden", "hidden");#}
+            });
+
+
+            $('#Facebook_Game').dblclick(function () {
+                getExecutiveData('Facebook Game');
+
+
+                {#                $('#iOS').attr("hidden", "hidden");#}
+                {#                $('#Android').attr("hidden", "hidden");#}
+                {#                $('#Web').attr("hidden", "hidden");#}
+            });
+
+
+        });
+
+
     </script>
 {% endblock %}
