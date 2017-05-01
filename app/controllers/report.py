@@ -1,154 +1,205 @@
-from datetime import datetime
+from decimal import Decimal
 
 from flask import Blueprint, render_template, jsonify, request
 from flask import current_app as app
 from flask_login import login_required
-from numpy import array, isnan
+from numpy import array
 from sqlalchemy import and_, func, text
-from sqlalchemy import select
-from sqlalchemy.sql import table
 
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.utils import current_time
+from app.utils import generate_date_range_group_by_daily_or_weekly_or_monthly
 
 report = Blueprint('report', __name__)
 
 
-@report.route("/report/daily_summary", methods=["GET"])
+@report.route("/report/metrics_summary", methods=["GET"])
 @login_required
-def daily_summary():
-    return render_template('report/daily_summary.html')
+def metrics_summary():
+    return render_template('report/metrics_summary.html')
 
 
-@report.route("/report/daily_summary_data", methods=["GET"])
+@report.route("/report/metrics_summary_data", methods=["GET"])
 @login_required
-def daily_summary_data():
-    now = current_time(app.config['APP_TIMEZONE'])
-    start_time = now.replace(days=-60).format('YYYY-MM-DD')
-    end_time = now.format('YYYY-MM-DD')
-    start_time = request.args.get('start_time', start_time)
-    end_time = request.args.get('end_time', end_time)
-    week = request.args.get("week")
-    months = request.args.get("months")
-
-    game = request.args.get("game", "All Game")
+def metrics_summary_data():
+    # get custom date range
+    days_ago = request.args.get('days_ago')
+    game = request.args.get("game", "Game")
     platform = request.args.get("platform", "All Platform")
+    group_type = request.args.get("group", "Daily")
+    # get default date range
+    start_time, end_time = request.args.get('date_range').split('  -  ')
 
-    metrics = [
-        text('sum(wau)/:days'),
-        text('sum(mau)/:days'),
-        text('sum(new_reg)/:days'),
-        text('sum(facebook_game_reg)/:days'),
-        text('sum(facebook_login_reg)/:days'),
-        text('sum(guest_reg)/:days'),
-        text('sum(new_reg_game_dau)/:days'),
-        text('sum(paid_user_count)/:days'),
-        text('sum(paid_count)/:days'),
-        text('sum(revenue)/:days'),
-        text('sum(one_day_retention)/:days'),
-        text('sum(seven_day_retention)/:days'),
-        text('sum(thirty_day_retention)/:days')]
+    if days_ago:
+        now = current_time(app.config['APP_TIMEZONE'])
+        start_time = now.replace(days=-int(days_ago)).format('YYYY-MM-DD')
+        end_time = now.replace(days=-1).format('YYYY-MM-DD')
+        start_time, end_time = generate_date_range_group_by_daily_or_weekly_or_monthly(start_time, end_time, group_type)
 
-    # if week:
-    target = text("date_format(on_day, '%Y-%u') as week")
-    # target = literal_column(on_day, )
-    metrics.insert(0, target)
+    start_time, end_time = generate_date_range_group_by_daily_or_weekly_or_monthly(start_time, end_time, group_type)
 
-    s = select(metrics).where(
-        and_(text("game = :game"),
-             text("platform = :platform "), )). \
-        select_from(table("bi_statistic")). \
-        group_by(text("week")). \
-        having(and_(
-        text("week>=:start_time"),
-        text("week<=:end_time")))
+    if group_type == 'Weekly':
+        query_result = db.engine.execute(text("""
+                                      SELECT DATE_FORMAT(on_day,'%Y-%u') AS  week,
+                                             SUM(dau)/7,
+                                             SUM(wau)/7,
+                                             SUM(mau)/7,
+                                             SUM(facebook_game_reg)/7,
+                                             SUM(facebook_login_reg)/7,
+                                             SUM(guest_reg)/7,
+                                             SUM(email_reg)/7,
+                                             SUM(new_reg_game_dau)/7,
+                                             SUM(paid_user_count)/7,
+                                             SUM(paid_count)/7,
+                                             SUM(revenue)/7,
+                                             SUM(email_validated)/7,
+                                             SUM(mtt_buy_ins)/7,
+                                             SUM(sng_buy_ins)/7,
+                                             SUM(mtt_rake)/7,
+                                             SUM(sng_rake)/7,
+                                             SUM(ring_game_rake)/7,
+                                             SUM(mtt_winnings)/7,
+                                             SUM(sng_winnings)/7
+                                      FROM   bi_statistic
+                                      WHERE  platform = :platform
+                                             AND game = :game
+                                      GROUP  BY  week
+                                      HAVING week BETWEEN :start_time AND :end_time
+                                      """), platform=platform, game=game, start_time=start_time, end_time=end_time)
 
-    result = db.engine.execute(s, start_time=start_time, end_time=end_time, game=game, days=7,
-                               platform=platform).fetchall()
+    elif group_type == 'Monthly':
+        query_result = db.engine.execute(text("""
+                                      SELECT DATE_FORMAT(on_day,'%Y-%m') AS  month,
+                                             SUM(dau)/30,
+                                             SUM(wau)/30,
+                                             SUM(mau)/30,
+                                             SUM(facebook_game_reg)/30,
+                                             SUM(facebook_login_reg)/30,
+                                             SUM(guest_reg)/30,
+                                             SUM(email_reg)/30,
+                                             SUM(new_reg_game_dau)/30,
+                                             SUM(paid_user_count)/30,
+                                             SUM(paid_count)/30,
+                                             SUM(revenue)/30,
+                                             SUM(email_validated)/30,
+                                             SUM(mtt_buy_ins)/30,
+                                             SUM(sng_buy_ins)/30,
+                                             SUM(mtt_rake)/30,
+                                             SUM(sng_rake)/30,
+                                             SUM(ring_game_rake)/30,
+                                             SUM(mtt_winnings)/30,
+                                             SUM(sng_winnings)/30
+                                      FROM   bi_statistic
+                                      WHERE  platform = :platform
+                                             AND game = :game
+                                      GROUP  BY month 
+                                      HAVING month BETWEEN :start_time AND :end_time
+                                      """), platform=platform, game=game, start_time=start_time, end_time=end_time)
 
-    if months:
-        target = text("date_format(on_day,'%Y-%m')").label("months")
-        metrics.insert(0, target)
+    else:
+        query_result = db.engine.execute(text("""
+                                      SELECT DATE_FORMAT(on_day,'%Y-%m-%d') AS  on_day,
+                                             dau,
+                                             wau,
+                                             mau,
+                                             facebook_game_reg,
+                                             facebook_login_reg,
+                                             guest_reg,
+                                             email_reg,
+                                             new_reg_game_dau,
+                                             paid_user_count,
+                                             paid_count,
+                                             revenue,
+                                             one_day_retention,
+                                             seven_day_retention,
+                                             thirty_day_retention ,
+                                             email_validated,
+                                             mtt_buy_ins,
+                                             sng_buy_ins,
+                                             mtt_rake,
+                                             sng_rake,
+                                             ring_game_rake,
+                                             mtt_winnings,
+                                             sng_winnings
+                                      FROM   bi_statistic
+                                      WHERE  platform = :platform
+                                             AND game = :game
+                                             AND on_day BETWEEN :start_time AND :end_time
+                                      """), platform=platform, game=game, start_time=start_time, end_time=end_time)
 
-        s = select(metrics).where(
-            and_(text("game = :game"),
-                 text("platform = :platform "), )). \
-            select_from(table("bi_statistic")). \
-            group_by(text("months")). \
-            having(and_(
-            text("months>=:start_time"),
-            text("months<=:end_time")))
+    query_result = list(query_result)
+    transpose_query_result = list(map(list, zip(*query_result)))
+    charts_data = transpose_query_result
 
-        result = db.engine.execute(s, start_time=start_time, end_time=end_time, game=game, days=7,
-                                   platform=platform).fetchall()
+    if group_type == 'Daily':
 
-    #
-    #     dau = transpose_query_result[1]
-    #     wau = transpose_query_result[2]
-    #     mau = transpose_query_result[3]
-    #     new_reg_game_dau = transpose_query_result[8]
-    #     paid_user_count = transpose_query_result[9]
-    #     revenue = transpose_query_result[11]
-    #     one_day_retention_count = transpose_query_result[12]
-    #     seven_day_retention_count = transpose_query_result[13]
-    #     thirty_day_retention_count = transpose_query_result[14]
+        column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
+                        'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue', 'one_day_retention(%)',
+                        'seven_day_retention(%)', 'thirty_day_retention(%)', 'email_validated', 'mtt_buy_ins',
+                        'sng_buy_ins', 'mtt_rake', 'sng_rake', 'ring_game_rake', 'mtt_winnings', 'sng_winnings',
+                        'stickiness_weekly', 'stickiness_monthly', 'ARPDAU', 'ARPPU']
+
+        new_reg_game_dau = transpose_query_result[8]
+        one_day_retention_count = transpose_query_result[12]
+        seven_day_retention_count = transpose_query_result[13]
+        thirty_day_retention_count = transpose_query_result[14]
+
+        try:
+            one_day_retention = [int(round(i, 2) * 100) for i in
+                                 array(one_day_retention_count) / array(new_reg_game_dau)]
+            seven_day_retention = [int(round(i, 2) * 100) for i in
+                                   array(seven_day_retention_count) / array(new_reg_game_dau)]
+            thirty_day_retention = [int(round(i, 2) * 100) for i in
+                                    array(thirty_day_retention_count) / array(new_reg_game_dau)]
+
+        except Exception:
+
+            one_day_retention = [0 for i in range(len(one_day_retention_count))]
+            seven_day_retention = [0 for i in range(len(seven_day_retention_count))]
+            thirty_day_retention = [0 for i in range(len(thirty_day_retention_count))]
+
+        charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
+
+    else:
+        column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
+                        'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
+                        'email_validated', 'mtt_buy_ins', 'sng_buy_ins', 'mtt_rake', 'sng_rake',
+                        'ring_game_rake', 'mtt_winnings', 'sng_winnings', 'stickiness_weekly', 'stickiness_monthly',
+                        'ARPDAU', 'ARPPU']
+
+    dau = transpose_query_result[1]
+    wau = transpose_query_result[2]
+    mau = transpose_query_result[3]
+    paid_user_count = transpose_query_result[9]
+    revenue = [Decimal(row) for row in transpose_query_result[11]]
 
     # calculate  Compound metrics
 
-
-    # email_reg = array(new_reg) - array(facebook_game_reg)- array(facebook_login_reg) -array(guest_reg)
-    one_day_retention = list(map(lambda i: 0 if isnan(i)  else int(round(i, 2) * 100),
-                                 array(one_day_retention_count) / array(new_reg_game_dau)))
-    seven_day_retention = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100),
-                                   array(seven_day_retention_count) / array(new_reg_game_dau)))
-    thirty_day_retention = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100),
-                                    array(thirty_day_retention_count) / array(new_reg_game_dau)))
-
-    stickiness_weekly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(wau)))
-    stickiness_monthly = list(map(lambda i: 0 if isnan(i) else int(round(i, 2) * 100), array(dau) / array(mau)))
-
     try:
-        ARPDAU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(dau)))
-        ARPPU = list(map(lambda i: 0 if isnan(i) else int(round(i, 2)), array(revenue) / array(paid_user_count)))
-
-    except:
-        ARPDAU = [0 for i in range(60)]
-        ARPPU = [0 for i in range(60)]
+        stickiness_weekly = array(dau) / array(wau)
+        stickiness_monthly = array(dau) / array(mau)
+        ARPDAU = [int(round(i, 2)) for i in array(revenue) / array(dau)]
+        ARPPU = [int(round(i, 2)) for i in array(revenue) / array(paid_user_count)]
+    except Exception:
+        stickiness_weekly = [0 for i in range(len(dau))]
+        stickiness_monthly = [0 for i in range(len(mau))]
+        ARPDAU = [0 for i in range(len(dau))]
+        ARPPU = [0 for i in range(len(dau))]
 
     compound_metrics = [stickiness_weekly, stickiness_monthly, ARPDAU, ARPPU]
-
     # process charts
-
-    column_names = [column["name"] for column in query.column_descriptions]
-    column_names[12:15] = ['one_day_retention(%)', 'seven_day_retention(%)', 'thirty_day_retention(%)']
-    column_names.extend(['stickiness_weekly(%)', 'stickiness_monthly(%)', 'ARPDAU', 'ARPPU'])
-
-    charts_legend = column_names[1:]
-
-    charts_data = transpose_query_result
-    charts_labels = [datetime.strftime(day, "%Y-%m-%d") for day in charts_data[0]]
-    charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
-    charts_data = charts_data[1:]
     charts_data.extend(compound_metrics)
-
-    charts_result = dict(charts_labels=charts_labels, charts_data=charts_data, charts_legend=charts_legend)
+    charts_labels = charts_data[0]
+    charts_data = charts_data[1:]
+    charts_result = dict(charts_labels=charts_labels, charts_data=charts_data, charts_legend=column_names)
 
     # process tables
 
     tables_title = [{'title': column_name} for column_name in column_names]
-
-    tables_data = [row for row in query_result]
-    transpose_tables_data = list(map(list, zip(*tables_data)))
-    transpose_tables_data[0] = charts_labels
-
-    transpose_tables_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
-    transpose_tables_data.extend(compound_metrics)
-
-    tables_data = list(map(list, zip(*transpose_tables_data)))
-
+    transpose_query_result[0] = charts_labels
+    tables_data = list(map(list, zip(*transpose_query_result)))
     tables_result = dict(tables_title=tables_title, tables_data=tables_data)
-
     return jsonify(charts_result=charts_result, tables_result=tables_result)
 
 

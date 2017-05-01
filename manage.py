@@ -233,14 +233,49 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                email_reg = randrange(200)
-                guest_reg = randrange(300)
-                facebook_game_reg = randrange(400)
-                facebook_login_reg = randrange(500)
+                email_reg = randrange(2,200)
+                guest_reg = randrange(6,300)
+                facebook_game_reg = randrange(8,400)
+                facebook_login_reg = randrange(9,500)
+                dau = randrange(2, 100)
+                wau = randrange(3, 200)
+                mau = randrange(5, 300)
+                facebook_game_reg = randrange(5, 400)
+                facebook_login_reg = randrange(8, 500)
+                guest_reg = randrange(9, 600)
+                email_reg = randrange(9, 700)
+                new_reg_game_dau = randrange(9, 800)
+                paid_user_count = randrange(9, 900)
+                paid_count = randrange(9, 100)
+                revenue = randrange(9, 200)
+                one_day_retention = randrange(9, 300)
+                seven_day_retention = randrange(9, 300)
+                thirty_day_retention = randrange(9, 400)
+                email_validated = randrange(9, 500)
+                mtt_buy_ins = randrange(9, 600)
+                sng_buy_ins = randrange(9, 700)
+                mtt_rake = randrange(9, 800)
+                sng_rake = randrange(9, 900)
+                ring_game_rake = randrange(9, 900)
+                mtt_winnings = randrange(9, 100)
+                sng_winnings = randrange(9, 200)
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
+                                           dau=dau,wau=wau,mau=mau,
                                            email_reg=email_reg, guest_reg=guest_reg,
                                            facebook_game_reg=facebook_game_reg,
-                                           facebook_login_reg=facebook_login_reg
+                                           facebook_login_reg=facebook_login_reg,
+                                           new_reg_game_dau=new_reg_game_dau,
+                                           paid_user_count=paid_user_count,
+                                           paid_count=paid_count,
+                                           revenue=revenue,
+                                           one_day_retention=one_day_retention,
+                                           seven_day_retention=seven_day_retention,
+                                           thirty_day_retention=thirty_day_retention,
+                                           mtt_buy_ins=mtt_buy_ins,
+                                           mtt_rake=mtt_rake,
+                                           mtt_winnings=mtt_winnings,
+                                           ring_game_rake=ring_game_rake,
+                                           sng_winnings=sng_winnings
                                            ))
     db.session.commit()
 

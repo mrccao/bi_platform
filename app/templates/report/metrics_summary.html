@@ -1,12 +1,13 @@
 {% extends "layout/app.html" %}
 
-{% block page_title %}Daily Summary{% endblock %}
+{% block page_title %}Metrics Summary{% endblock %}
 
 {% block head_tail %}
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.13/css/dataTables.bootstrap.min.css">
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
+          rel="stylesheet">
 
     <style>
 
@@ -36,80 +37,79 @@
 
 {% block main_content %}
     <section class="content-header">
-        <h1>Daily Summary</h1>
+        <h1>Metrics Summary</h1>
     </section>
     <section class="content">
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-body">
-                                                    <div class="row">
+                        <div class="row" style="margin-top: 10px">
 
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Date range</label>
-                                        <div class="input-group">
-                                            <div class="input-group-addon">
-                                                <i class="fa fa-calendar"></i>
-                                            </div>
-                                            <input type="text" class="form-control pull-right" id="executive-date-range">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Date range</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
                                         </div>
+                                        <input type="text" class="form-control pull-right" id="executive-date-range">
                                     </div>
                                 </div>
-
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Game</label>
-                                        <select class="form-control select2" style="width: 100%;" id="executive-game">
-                                            <option selected="selected">All Game</option>
-                                            <option>TexasPoker</option>
-                                            <option>TimeSlots</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Platform</label>
-                                        <select class="form-control select2" style="width: 100%;" id="executive-platform">
-                                            <option selected="selected">All Platform</option>
-                                            <option>Web</option>
-                                            <option>iOS</option>
-                                            <option>Android</option>
-                                            <option>Facebook Game</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>Report type</label>
-                                        <select class="form-control select2" style="width: 100%;" id="executive-report-type">
-                                            <option selected="selected">New Registration</option>
-                                            <option>Game DAU</option>
-                                            <option>New Reg Game DAU</option>
-                                            <option>WAU</option>
-                                            <option>MAU</option>
-                                            <option>Revenue</option>
-                                            <!--<option>avg Revenue Per DAU</option>
-                                            <option>avg Revenue Per User</option>
-                                            <option>avg Revenue Per Paid User</option>-->
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <div style="margin-top: 24px;">
-                                            <button type="button" class="btn btn-success" id="btn-executive-apply">Apply</button>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
 
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Game</label>
+                                    <select class="form-control select2" style="width: 100%;" id="executive-game">
+                                        <option selected="selected">All Game</option>
+                                        <option>TexasPoker</option>
+                                        <option>TimeSlots</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                        <div id="charts" style="height: 750px; width: 100%;"></div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Platform</label>
+                                    <select class="form-control select2" style="width: 100%;" id="executive-platform">
+                                        <option selected="selected">All Platform</option>
+                                        <option>Web</option>
+                                        <option>iOS</option>
+                                        <option>Android</option>
+                                        <option>Facebook Game</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Grouping</label>
+                                    <select class="form-control select2" style="width: 100%;"
+                                            id="executive-group-type">
+                                        <option selected="selected">Weekly</option>
+                                        <option>Daily</option>
+                                        <option>Monthly</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div style="margin-top: 24px;">
+                                        <button type="button" class="btn btn-success" id="btn-executive-apply">Apply
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-12" style="margin-top: 21px">
+                            <div id="charts" style="height: 550px; width: 100%;"></div>
+                        </div>
+
+
                     </div>
                 </div>
             </div>
@@ -152,9 +152,12 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
@@ -291,8 +294,8 @@
 
         var dom = document.getElementById("charts");
         var myChart = echarts.init(dom, 'shine');
-        var grid_top_response = (screen.width < 550 ) ? "33%" : "14%";
-        var tool_top_response = (screen.width < 550 ) ? "29%" : "9%";
+        var grid_top_response = (screen.width < 550 ) ? "47%" : "26%";
+        var tool_top_response = (screen.width < 550 ) ? "41%" : "18%";
         var tool_right_response = (screen.width < 550 ) ? "2%" : "4%";
 
 
@@ -321,8 +324,8 @@
                     'one_day_retention(%)': 0,
                     'seven_day_retention(%)': 0,
                     'thirty_day_retention(%)': 0,
-                    'stickiness_weekly(%)': 0,
-                    'stickiness_monthly(%)': 0,
+                    'stickiness_weekly': 0,
+                    'stickiness_monthly': 0,
                     'ARPDAU': 0,
                     'ARPPU': 0,
                     'thirty_day_retention': 0,
@@ -374,7 +377,7 @@
             },
             yAxis: {
                 type: 'value',
-                splitNumber: 10
+                splitNumber: 8
             },
             series: []
         };
@@ -382,74 +385,146 @@
 
         $(document).ready(function () {
 
+            $(".select2").select2();
+
+            $('#executive-date-range').daterangepicker({
+                opens: 'right',
+                showDropdowns: true,
+                autoApply: true,
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: '  -  '
+                },
+                ranges: {
+                    'This Week': [moment().startOf('week'), moment().endOf('week')],
+                    'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+
+                },
+                startDate: moment().subtract(180, 'days'),
+                endDate: moment(),
+                minDate: moment().subtract(6, 'month'),
+                maxDate: moment()
+            });
+
+
             var resultDataTable = null;
 
-            $.ajax({
-                type: 'GET',
-                url: '/report/daily_summary_data',
-                dataType: "json",
+            var loadingOverlayConfig = {
+                image: '',
+                fontawesome: 'fa fa-spinner fa-spin',
+                maxSize: "16px",
+                minSize: "16px"
+            };
 
-                success: function (result) {
+            function startRequestLoading() {
+                $('#btn-executive-apply').LoadingOverlay('show', loadingOverlayConfig);
+            }
 
-                    ////////////////////
-
-                    $.extend($.fn.dataTable.defaults, {
-                        "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
-                    });
-
-                    if (resultDataTable !== null) {
-                        resultDataTable.destroy();
-                        $('#result-table').empty();
-                    }
-
-                    resultDataTable = $('#result-table').DataTable({
-                        retrieve: true,
-                        searching: true,
-                        'buttons': [
-                            'copy', 'csv', 'excel', 'pdf'
-                        ],
-                        iDisplayLength: 18,
-                        "order": [[0, "desc"]],
-                        lengthChange: false,
-                        scrollX: true,
-                        data: result.tables_result.tables_data,
-                        columns: result.tables_result.tables_title
+            function stopRequestLoading() {
+                $('#btn-executive-apply').LoadingOverlay('hide', true);
+            }
 
 
-                    });
+            function getExecutiveData(date_range, game, platform, report_type, group) {
 
-                    ////////////////////
+                startRequestLoading();
+                $.ajax({
+                    type: 'GET',
+                    url: '/report/metrics_summary_data',
+                    data: {
+                        date_range: date_range,
+                        game: game,
+                        platform: platform,
+                        report_type: report_type,
+                        group: group
 
-                    for (var c = 0; c < result.charts_result.charts_legend.length; c++) {
-                        option.series.push({
-                            name: result.charts_result.charts_legend[c],
-                            type: 'line',
-                            smooth: true,
-                            data: []
+                    },
+                    dataType: "json",
+
+                    success: function (result) {
+                        ////////////////////
+
+                        stopRequestLoading();
+
+                        $.extend($.fn.dataTable.defaults, {
+                            "dom": '<"table-button"B><"table-filter"f><"table-length"l>tip'
                         });
+
+                        if (resultDataTable !== null) {
+                            resultDataTable.destroy();
+                            $('#result-table').empty();
+                        }
+
+                        resultDataTable = $('#result-table').DataTable({
+                            retrieve: true,
+                            searching: true,
+                            'buttons': [
+                                'copy', 'csv', 'excel', 'pdf'
+                            ],
+                            iDisplayLength: 18,
+                            "order": [[0, "desc"]],
+                            lengthChange: false,
+                            scrollX: true,
+                            data: result.tables_result.tables_data,
+                            columns: result.tables_result.tables_title
+
+
+                        });
+
+                        ////////////////////
+
+                        for (var c = 0; c < result.charts_result.charts_legend.length; c++) {
+                            option.series.push({
+                                name: result.charts_result.charts_legend[c],
+                                type: 'line',
+                                smooth: true,
+                                data: []
+                            });
+                        }
+
+                        var data;
+                        for (var d = 0; d < result.charts_result.charts_data.length; d++) {
+                            data = result.charts_result.charts_data[d];
+                            option.series[d]['data'] = data;
+
+                        }
+
+                        option.xAxis.data = result.charts_result.charts_labels;
+                        option.legend.data = result.charts_result.charts_legend;
+
+                        if (screen.width > 550) {
+                            option.legend.width = 800;
+                            option.legend.itemHeight = 16;
+                            option.legend.itemWidth = 16;
+                            option.legend.itemGap = 15;
+
+                        }
+
+                        myChart.setOption(option, true);
+                    },
+
+                    error: function (xhr) {
+                        stopRequestLoading();
                     }
+                });
 
-                    var data;
-                    for (var d = 0; d < result.charts_result.charts_data.length; d++) {
-                        data = result.charts_result.charts_data[d];
-                        option.series[d]['data'] = data;
+            };
 
-                    }
 
-                    option.xAxis.data = result.charts_result.charts_labels;
-                    option.legend.data = result.charts_result.charts_legend;
+            $('#btn-executive-apply').click(function () {
+                var date_range = $('#executive-date-range').val();
+                var game = $('#executive-game').val();
+                var platform = $('#executive-platform').val();
+                var report_type = $('#executive-report-type').val();
+                var group = $('#executive-group-type').val();
 
-                    if (screen.width > 550) {
-                        option.legend.width = 1400;
-                        option.legend.itemHeight = 16;
-                        option.legend.itemWidth = 16;
-                        option.legend.itemGap = 15;
-
-                    }
-
-                    myChart.setOption(option, true);
-                }
+                getExecutiveData(date_range, game, platform, report_type, group);
             });
+            $('#btn-executive-apply').trigger('click');
+
         });
+
     </script>
 {% endblock %}
