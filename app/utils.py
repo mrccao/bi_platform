@@ -1,12 +1,42 @@
-import importlib
+import calendar
 import logging
 import signal
-from calendar import monthrange
 
 import arrow
+import importlib
 from flask import current_app as app
 
 from app.exceptions import TimeoutException
+
+
+def get_day_range_of_month(now):
+    current_year = now.year
+    current_month = now.month
+    previous_month = current_month - 1
+    previous_year = current_year
+    _, last_day_of_current_month = calendar.monthrange(current_year, current_month)
+
+    if current_month == 1:
+        previous_year = current_year - 1
+        previous_month = 12
+
+    _, last_day_of_current_month = calendar.monthrange(current_year, current_month)
+    _, last_day_of_previous_month = calendar.monthrange(previous_year, previous_month)
+
+    first_day_of_current_month = str(current_year) + '-' + str(current_month) + '-' + '01'
+    last_day_of_current_month = str(current_year) + '-' + str(current_month) + '-' + str(last_day_of_current_month)
+    first_day_of_previous_month = str(previous_year) + '-' + str(previous_month) + '-' + '01'
+    last_day_of_previous_month = str(previous_year) + '-' + str(previous_month) + '-' + str(last_day_of_previous_month)
+
+
+    first_day_of_current_month = arrow.Arrow.strptime(first_day_of_current_month, '%Y-%m-%d').format('YYYY-MM-DD')
+    last_day_of_current_month = arrow.Arrow.strptime(last_day_of_current_month, '%Y-%m-%d').format('YYYY-MM-DD')
+
+
+    first_day_of_previous_month = arrow.Arrow.strptime(first_day_of_previous_month, '%Y-%m-%d').format('YYYY-MM-DD')
+    last_day_of_previous_month = arrow.Arrow.strptime(last_day_of_previous_month, '%Y-%m-%d').format('YYYY-MM-DD')
+
+    return first_day_of_current_month, last_day_of_current_month, first_day_of_previous_month, last_day_of_previous_month
 
 
 def generate_sql_date(target):
@@ -78,7 +108,7 @@ def generate_date_range_group_by_daily_or_weekly_or_monthly(start_time, end_time
 
         return start_week, end_week
 
-    return  start_time,end_time
+    return start_time, end_time
 
 
 def current_time_as_float(timezone=None):

@@ -15,114 +15,75 @@
     </section>
     <section class="content">
         <div class="row">
+
+
+            {#                        <div class="col-md-2" style="float: right">#}
+            {#                            <div class="form-group">#}
+            {#                                <select class="form-control select2" style="width: 100%;" id="executive-platform">#}
+            {#                                    <option selected="selected">All Platform</option>#}
+            {#                                    <option>Web</option>#}
+            {#                                    <option>iOS</option>#}
+            {#                                    <option>Android</option>#}
+            {#                                    <option>Facebook Game</option>#}
+            {#                                </select>#}
+            {#                            </div>#}
+            {#                        </div>#}
+
             <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <div class="tab-content">
-                                    <div class="tab-pane active" id="tab_1">
-                                        <div class="row">
 
-                                            <div id="All-Platform" class="col-md-8">
+                <div class="col-md-8">
 
-                                            </div>
+                    <div class="box box-primary">
 
-                                            <div id="each-platform" class="col-md-4" hidden="hidden">
-                                                <div id="iOS" class="col-md-3">
+                        <div class="box-body">
 
+                            <div id="chart2" style="height: 380px; width: 100%;"></div>
 
-                                                    <svg t="1493622397938" class="icon" style=""
-                                                         viewBox="0 0 1024 1024"
-                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10690"
-                                                         width="35" height="40">
-                                                        <defs>
-                                                            <style type="text/css"></style>
-                                                        </defs>
-                                                        <path d="M517.392097 360.456569 428.783963 331.810276C428.783963 331.810276 296.493731 280.356061 197.448509 389.075727 96.176766 500.18901 103.92032 637.19364 148.226529 761.237601 192.528454 885.310126 276.884917 1021.919152 369.716158 1023.681517 441.443288 1025.042566 447.060292 984.825216 546.909575 985.522165 546.909575 985.522165 582.770998 990.275124 635.517709 1009.355515 688.265848 1028.467325 733.036214 1031.753551 788.109419 975.949121 866.85459 896.21137 906.240744 775.59788 906.240744 775.59788 906.240744 775.59788 774.748861 727.168536 778.273592 584.713997 781.766903 442.259459 881.610473 408.156117 881.610473 408.156117 881.610473 408.156117 806.391461 280.027582 635.517709 322.270081L517.392097 360.456569ZM512.372069 235.352904C512.372069 235.352904 493.325954 29.14901 748.556169 0 748.556169 0 765.013006 218.900351 512.372069 235.352904L512.372069 235.352904Z"
-                                                              p-id="10691" fill="#bfbfbf"></path>
-                                                    </svg>
+                            <div id="chart1" style="height: 380px; width: 100%; margin-top: 100px"></div>
 
-                                                </div>
-
-
-                                                <div id="Android" class="col-md-3">
-                                                    <svg t="1493622033922" class="icon" style=""
-                                                         viewBox="0 0 1024 1024"
-                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="8580"
-                                                         width="35" height="40">
-                                                        <defs>
-                                                            <style type="text/css"></style>
-                                                        </defs>
-                                                        <path d="M862.778202 640.174593c-17.774874 0-32.175395-13.876101-32.175395-30.980825L830.602807 414.807258c0-17.134486 14.399495-30.981851 32.175395-30.981851 17.773847 0 32.203104 13.847365 32.203104 30.981851l0 194.385484C894.981306 626.298492 880.553076 640.174593 862.778202 640.174593zM380.771249 151.679606 380.771249 151.679606l-56.204315-70.516577c-3.83925-4.829593-2.675467-11.578298 2.619023-15.097354 5.293464-3.520082 12.682557-2.443532 16.523859 2.385035l58.093665 72.901612c33.367912-14.662218 70.603809-22.865138 109.905574-22.865138 39.302791 0 76.509952 8.203946 109.875812 22.865138l58.094691-72.901612c3.83925-4.829593 11.258104-5.905117 16.552594-2.385035 5.265755 3.520082 6.429537 10.268787 2.589261 15.097354l-56.204315 70.516577c64.726402 35.578483 111.504491 96.640099 124.53803 168.465162L256.233218 320.144767C269.295493 248.319705 316.042794 187.258088 380.771249 151.679606zM622.341222 254.749242 622.341222 254.749242c17.716377 0 32.058401-13.439939 32.058401-29.992534 0-16.552594-14.34305-29.963798-32.058401-29.963798-17.65788 0-32.028639 13.411204-32.028639 29.963798C590.312583 241.309303 604.683343 254.749242 622.341222 254.749242zM401.01839 254.749242 401.01839 254.749242c17.716377 0 32.028639-13.439939 32.028639-29.992534 0-16.552594-14.312263-29.963798-32.028639-29.963798-17.687641 0-32.029665 13.411204-32.029665 29.963798C368.988724 241.309303 383.330748 254.749242 401.01839 254.749242zM161.221798 640.174593 161.221798 640.174593c-17.803609 0-32.20413-13.876101-32.20413-30.980825L129.017668 414.807258c0-17.134486 14.400521-30.981851 32.20413-30.981851 17.773847 0 32.175395 13.847365 32.175395 30.981851l0 194.385484C193.397193 626.298492 178.995645 640.174593 161.221798 640.174593zM766.691258 718.719625 766.691258 718.719625c0 31.011613-25.658625 56.117082-57.3096 56.117082l-40.116617 0 0 131.868626c0 29.440404-24.349114 53.294859-54.42888 53.294859-30.079766 0-54.42888-23.854455-54.42888-53.294859L560.407282 774.836707l-97.425191 0 0 131.868626c0 29.440404-24.378875 53.294859-54.429906 53.294859-30.050004 0-54.42888-23.854455-54.42888-53.294859L354.123306 774.836707l-40.116617 0c-31.621213 0-57.308573-25.10547-57.308573-56.117082L256.698115 384.348801l509.992117 0L766.690232 718.719625z"
-                                                              p-id="8581" fill="#a6d534"></path>
-                                                    </svg>
-
-
-                                                </div>
-
-                                                <div id="Web" class="col-md-3">
-                                                    <svg t="1493620428519" class="icon" style="" viewBox="0 0 1024 1024"
-                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5679"
-                                                         width="35" height="40">
-                                                        <defs>
-                                                            <style type="text/css"></style>
-                                                        </defs>
-                                                        <path d="M323.086419 628.072599c6.720052 7.310499 15.10093 10.815323 25.142633 10.815323 12.774955 0 21.819958-4.431939 27.137057-13.145391 4.504594-7.457856 8.380878-15.802918 11.629875-24.959461 3.175319 8.344039 5.464455 14.011108 6.867408 17.039072 3.101641 6.571672 7.088442 11.878538 11.962449 15.940041 3.913123 3.175319 8.971325 4.758374 15.174608 4.758374 15.432481 0 25.697265-10.118452 30.792307-30.351262l35.554774-139.339512-26.028816-0.11154-32.785707 127.265522c-1.550309 6.128581-3.248997 9.894348-5.095042 11.2973-1.181919 0.812505-2.62171 1.218758-4.319375 1.218758s-2.990101-0.406253-3.876284-1.218758c-1.772366-1.772366-3.839445-5.734608-6.202259-14.742772l-32.453133-121.185037-26.250874 0 24.478508 92.497671-14.620999 39.935548c-0.664126 1.698688-2.14178 3.187599-4.430916 5.180999-1.9934 1.62501-4.245697 2.258437-6.756891 2.258437-3.248997 0-5.870708-1.270946-7.864108-3.63376-2.215458-2.65855-4.282536-6.646374-6.202259-14.399965l-30.902824-121.838929-26.250874 0 31.677467 124.563994C313.670979 612.752682 318.212412 622.829178 323.086419 628.072599z"
-                                                              p-id="5680" fill="#1296db"></path>
-                                                        <path d="M513.534959 633.336486c7.16212 2.732228 18.006096 3.792373 24.430412 3.792373l73.493851 0 0-23.536043-73.493851 0c-3.839445 0-10.94733-1.272993-13.384845-3.487428-2.879584-2.65855-8.289804-6.55223-8.289804-11.351536l0-37.34863 95.167476 0 0-28.652574-95.167476 0L516.290723 507.041058c0-9.673313 14.031575-12.152784 26.215058-12.152784l68.952418 0 0-23.536043-78.588893 0c-10.706853 0-23.248494 1.746784-29.525454 8.540514-7.088442 7.753591-14.683421 15.998369-14.683421 28.034497l0 87.50189C488.661456 615.588263 499.652787 628.019387 513.534959 633.336486z"
-                                                              p-id="5681" fill="#1296db"></path>
-                                                        <path d="M670.769027 637.127835l57.485249 0c8.270361 0 11.509125-2.75781 18.080797-8.887414 7.014764-6.571672 6.339382-14.572904 6.339382-24.615631l0-34.003442c0-5.390777 1.486864-11.666714-3.90289-18.829857 2.51017-3.839445 2.228761-7.088442 3.335978-9.746992 1.772366-4.356214 0.566912-12.479219 0.566912-24.367991l0-16.724917c0-8.344039 0.933255-15.645328-5.564739-21.552875-8.048303-7.310499-12.985756-11.140735-23.175839-11.140735l-55.712883 0c-9.969049 0-21.457708 3.719718-28.694529 10.80816-7.236821 6.941086-13.741979 15.940041-13.741979 26.647917l0 94.369298c0 11.223622 6.39464 20.147876 13.409404 27.384697C646.283356 633.779577 658.732899 637.127835 670.769027 637.127835zM653.413753 503.94044c0-3.618411 4.431939-5.282307 7.679913-7.7935 2.362814-1.772366 7.828292-1.258667 10.781554-1.258667l47.960315 0c4.65195 0 3.933589 0.039909 6.370081 2.919493 2.068102 2.436492-1.161453 4.211928-1.161453 8.125051l0 18.718317c0 3.839445 2.970658 7.161097 0.385786 9.597589-2.51017 2.289136-1.533936 3.617387-5.595438 3.617387l-66.421782 0L653.41273 503.94044zM653.413753 561.403177l64.760956 0c4.578272 0 4.007267 1.690502 6.813173 4.496407 2.879584 2.805906 0.057305 6.121418 0.057305 9.370415l0 24.035416c0 3.618411 3.044336 6.847965 0.607844 9.358135-3.175319 3.175319-3.416819 4.927219-9.250688 4.927219l-44.415582 0c-8.639774 0-18.573008-5.757121-18.573008-16.612353L653.413753 561.403177z"
-                                                              p-id="5682" fill="#1296db"></path>
-                                                        <path d="M960.405613 173.812651c0-5.219885-4.231371-9.451256-9.451256-9.451256L72.418356 164.361395c-5.219885 0-9.451256 4.231371-9.451256 9.451256l0 675.921373c0 5.219885 4.231371 9.451256 9.451256 9.451256l878.536001 0c5.219885 0 9.451256-4.231371 9.451256-9.451256L960.405613 173.812651zM927.659815 830.532707l-831.947939 0 0-529.049305 831.947939 0L927.659815 830.532707zM912.692938 265.37809c-18.270109 0-33.081443-14.810311-33.081443-33.081443 0-18.270109 14.811334-33.081443 33.081443-33.081443 18.270109 0 33.081443 14.811334 33.081443 33.081443C945.774381 250.567779 930.963047 265.37809 912.692938 265.37809z"
-                                                              p-id="5683" fill="#1296db"></path>
-                                                        <path d="M931.962817 213.027791c-2.662643-2.662643-6.971785-2.662643-9.634428 0l-9.634428 9.634428-9.634428-9.634428c-2.662643-2.662643-6.971785-2.662643-9.634428 0-2.662643 2.662643-2.662643 6.971785 0 9.634428l9.634428 9.634428-9.634428 9.634428c-2.662643 2.662643-2.662643 6.971785 0 9.634428 2.662643 2.662643 6.971785 2.662643 9.634428 0l9.634428-9.634428 9.634428 9.634428c2.662643 2.662643 6.971785 2.662643 9.634428 0 2.662643-2.662643 2.662643-6.971785 0-9.634428l-9.634428-9.634428 9.634428-9.634428C934.62546 220.0006 934.62546 215.690434 931.962817 213.027791z"
-                                                              p-id="5684" fill="#1296db"></path>
-                                                    </svg>
-                                                </div>
-
-                                                <div id="Facebook_Game" class="col-md-3">
-                                                    <svg t="1493622238067" class="icon" style=""
-                                                         viewBox="0 0 1024 1024"
-                                                         version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9927"
-                                                         width="27" height="40">
-                                                        <defs>
-                                                            <style type="text/css"></style>
-                                                        </defs>
-                                                        <path d="M965.7344 2.7648c14.848 0 28.2624 5.5296 40.2432 16.6912C1017.9584 30.5152 1024 43.52 1024 58.2656l0 910.2336c0 14.848-6.0416 27.7504-18.0224 38.8096C993.8944 1018.4704 980.48 1024 965.7344 1024L704.9216 1024 704.9216 629.9648l133.2224 0 19.456-155.4432-152.576 0L705.024 373.0432c0-50.688 25.9072-76.0832 77.7216-76.0832l80.4864 0L863.232 163.5328c-27.7504-5.4272-67.4816-8.192-119.296-8.192-59.1872 0-106.8032 18.0224-142.9504 54.0672C564.736 245.5552 546.7136 296.0384 546.7136 360.7552l0 113.7664L413.4912 474.5216l0 155.4432 133.2224 0L546.7136 1024 55.5008 1024c-14.848 0-27.7504-5.5296-38.8096-16.6912C5.5296 996.2496 0 983.3472 0 968.4992L0 58.2656C0 43.52 5.5296 30.5152 16.6912 19.456c11.0592-11.0592 24.064-16.6912 38.8096-16.6912L965.7344 2.7648z"
-                                                              p-id="9928" fill="#404b9b"></path>
-                                                    </svg>
-
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-12" style=" height: 20px;">
-                                                <div>
-                                                    <canvas id="executive-chart" width="100%" height="42%"></canvas>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
-                        <div id="line_every_platform" style="height: 400px; width: 100%;"></div>
                     </div>
                 </div>
+
+
+                <div class="col-md-4">
+
+                    <div id="chart1_platform" style="height: 179px; width: 100%;"></div>
+                    <div id="chart1_reg_method" style="height: 179px; width: 100%;"></div>
+
+
+                    <div id="chart2_platform" style="height: 179px; width: 100%;"></div>
+                    <div id="chart2_reg_method" style="height: 179px; width: 100%;"></div>
+
+
+                </div>
+
+
             </div>
+
+
         </div>
+
+
+        {#        <div class="row">#}
+        {#            <div class="col-md-12">#}
+        {#                <div class="box box-primary">#}
+        {#                    <div class="box-body">#}
+        {##}
+        {#                    </div>#}
+        {##}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
 
         <div class="row">
             <div class="col-md-12">
                 <div class="box box-primary">
 
-                    <div id="charts_every_platform" style="height: 740px; width: 100%;"></div>
                     <div class="box-body">
 
+                        <div id="chart3" style="height: 650px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
@@ -143,14 +104,21 @@
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 
+
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+
     <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts-all-3.js"></script>
+
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+
     <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+
     <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+
     <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+
     <script type="text/javascript"
             src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
     <script type="text/javascript">
@@ -285,24 +253,190 @@
 
         echarts.registerTheme('shine', echartsTheme);
 
-        var dom = document.getElementById("charts_every_platform");
-        var dom1 = document.getElementById("line_every_platform");
-        var myChart_every_platform_pie = echarts.init(dom, 'shine');
-        var myChart_every_platform_line = echarts.init(dom1, 'shine');
+        var dom1 = document.getElementById("chart1");
+        var dom2 = document.getElementById("chart2");
+        var dom3 = document.getElementById("chart3");
+        var dom4 = document.getElementById("chart1_platform");
+        var dom5 = document.getElementById("chart1_reg_method");
+        var dom6 = document.getElementById("chart2_platform");
+        var dom7 = document.getElementById("chart2_reg_method");
 
-        option_every_platform_line = {
+
+        var myChart1 = echarts.init(dom1, 'shine');
+        var myChart2 = echarts.init(dom2, 'shine');
+        var myChart3 = echarts.init(dom3, 'shine');
+        var myChart4 = echarts.init(dom4, 'shine');
+        var myChart5 = echarts.init(dom5, 'shine');
+        var myChart6 = echarts.init(dom6, 'shine');
+        var myChart7 = echarts.init(dom7, 'shine');
+
+
+        chart1_platform_option = {
+            title: {
+                text: '某站点用户访问来源',
+                subtext: '纯属虚构',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value: 335, name: '直接访问'},
+                        {value: 310, name: '邮件营销'},
+                        {value: 234, name: '联盟广告'},
+                        {value: 135, name: '视频广告'},
+                        {value: 1548, name: '搜索引擎'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chart1_reg_method_option = {
+            title: {
+                text: '某站点用户访问来源',
+                subtext: '纯属虚构',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value: 335, name: '直接访问'},
+                        {value: 310, name: '邮件营销'},
+                        {value: 234, name: '联盟广告'},
+                        {value: 135, name: '视频广告'},
+                        {value: 1548, name: '搜索引擎'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chart2_platform_option = {
+            title: {
+                text: '某站点用户访问来源',
+                subtext: '纯属虚构',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value: 335, name: '直接访问'},
+                        {value: 310, name: '邮件营销'},
+                        {value: 234, name: '联盟广告'},
+                        {value: 135, name: '视频广告'},
+                        {value: 1548, name: '搜索引擎'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chart2_reg_method_option = {
+            title: {
+                text: '某站点用户访问来源',
+                subtext: '纯属虚构',
+                x: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+            },
+            series: [
+                {
+                    name: '访问来源',
+                    type: 'pie',
+                    radius: '55%',
+                    center: ['50%', '60%'],
+                    data: [
+                        {value: 335, name: '直接访问'},
+                        {value: 310, name: '邮件营销'},
+                        {value: 234, name: '联盟广告'},
+                        {value: 135, name: '视频广告'},
+                        {value: 1548, name: '搜索引擎'}
+                    ],
+                    itemStyle: {
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+        chart1_option = {
             tooltip: {
                 trigger: 'axis'
             },
+
+            title: {
+                text: 'Last Month'
+
+            },
             legend: {
 
-                data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    saveAsImage: {show: true}
-                }
+
+                selected: {'email_reg': 1, 'guest_reg': 0, 'facebook_login_reg': 0, 'facebook_game_reg': 0},
+                data: []
             },
 
             grid: {
@@ -312,17 +446,64 @@
                 right: '4%',
                 containLabel: true
             },
-            xAxis: [{type: 'category', boundaryGap: false, data: []}, {type: 'category', name:'saved', boundaryGap: false, data: []}
-            ],
+            xAxis: {type: 'category', boundaryGap: false, data: []}
+            ,
+            yAxis: {
+                type: 'value',
+                max: 1000
+            },
+            series: []
+
+        };
+        chart2_option = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg'],
+
+                selected: {'email_reg': 1, 'guest_reg': 0, 'facebook_login_reg': 0, 'facebook_game_reg': 0}
+            },
+
+            title: {
+                text: 'This Month'
+
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    saveAsImage: {show: true}
+                }
+            },
+            markPoint: {
+                data: [
+                    {type: 'max', name: '最大值'},
+                    {type: 'min', name: '最小值'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: '平均值'}
+                ]
+            },
+            grid: {
+                top: '15%',
+                bottom: '3%',
+                left: '1%',
+                right: '4%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category', boundaryGap: false, data: []
+            }
+            ,
             yAxis: {
                 type: 'value',
                 max: 1000
             },
             series: []
         };
-
-
-        option_every_platform_pie = {
+        chart3_option = {
             baseOption: {
                 timeline: {
                     axisType: 'category',
@@ -336,12 +517,9 @@
                     },
                     loop: true
                 },
-                {#                tooltip: {#}
-                {#                    formatter: "{a}{b}{c}{d}"#}
-                {#                },#}
                 legend: {
                     top: '3%',
-                    left: '45%',
+                    left: '33%',
                     data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
                 },
                 calculable: true,
@@ -378,14 +556,14 @@
 
                         type: 'pie',
                         center: ['73%', '25%'],
-                        radius: '18%'
+                        radius: '23%'
 
                     },
 
                     {
                         type: 'pie',
                         center: ['73%', '53%'],
-                        radius: '18%'
+                        radius: '23%'
                     }
 
                 ]
@@ -394,15 +572,11 @@
 
         };
 
-        {#        var platform = $#}
-
-        window.onresize = myChart_every_platform_pie.resize;
-        window.onresize = myChart_every_platform_line.resize;
-
 
         $(function () {
 
 
+            $(".select2").select2();
             $.ajax({
                 type: 'GET',
                 url: '/report/reg_platform_data',
@@ -467,156 +641,220 @@
                     }
 
 
-                    option_every_platform_pie.baseOption.timeline.data = result.day_range;
-                    option_every_platform_pie.options = options;
-                    ////////////////////
-                    myChart_every_platform_pie.setOption(option_every_platform_pie, true);
+                    chart3_option.baseOption.timeline.data = result.day_range;
+                    chart3_option.options = options;
+                    myChart3.setOption(chart3_option, true);
 
 
                 }
             });
 
 
-            function getExecutiveData(platform) {
+            $.ajax({
+                type: 'GET',
+                url: '/report/user_reg_data',
+                dataType: "json",
 
-                $.ajax({
-                    type: 'GET',
-                    url: '/report/user_reg_data',
-                    dataType: "json",
-                    data: {
-                        platform: platform
-
-                    },
-
-                    success: function (result) {
-
-                        console.log(result)
-
-                        option_every_platform_line.series = [
-
-                            {
-
-                                name: 'email_reg',
-                                type: 'line',
-                                smooth: true,
-                                data: result.data[0]
+                success: function (result) {
 
 
+                    chart1_option.series = [
+
+                        {
+
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
                             },
-                            {
-                                name: 'guest_reg',
-                                type: 'line',
-                                smooth: true,
 
-                                data: result.data[1]
-
-
-                            }, {
-                                name: 'facebook_login_reg',
-                                type: 'line',
-                                smooth: true,
-                                data: result.data[2]
-
-
-                            }, {
-                                name: 'facebook_game_reg',
-                                type: 'line',
-                                smooth: true,
-                                data: result.data[3]
-
-
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
                             },
-                            {
-
-                                name: 'email_reg_records_saved',
-                                type: 'line',
-                                smooth: true,
-                                data: result.previous_data[0]
+                            name: 'email_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.current_month_data[0]
 
 
+                        },
+                        {
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
                             },
-                            {
-                                name: 'guest_reg_records_saved',
-                                type: 'line',
-                                smooth: true,
 
-                                data: result.previous_data[1]
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'guest_reg',
+                            type: 'line',
+                            smooth: true,
 
-
-                            }, {
-                                name: 'facebook_login_reg_records_saved',
-                                type: 'line',
-                                smooth: true,
-                                data: result.previous_data[2]
+                            data: result.current_month_data[1]
 
 
-                            }, {
-                                name: 'facebook_game_reg_records_saved',
-                                type: 'line',
-                                smooth: true,
-                                data: result.previous_data[3]
+                        }, {
 
-                            }
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
 
-                        ];
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'facebook_login_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.current_month_data[2]
 
-                        option_every_platform_line.xAxis[0].data = result.day_range;
-                        option_every_platform_line.xAxis[1].data = result.previous_day_range;
-                        myChart_every_platform_line.setOption(option_every_platform_line, true);
 
-                    }
-                })
-            }
+                        }, {
+
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
+
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'facebook_game_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.current_month_data[3]
 
 
-            $('#iOS').dblclick(function () {
-                getExecutiveData('iOS');
+                        }
 
-                {#                $('#Android').attr("color", "red");#}
-                {#                $('#Web').attr("hidden", "hidden");#}
-                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
+
+                    ];
+
+
+                    chart2_option.series = [
+
+                        {
+
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
+
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'email_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.previous_month_data[0]
+
+
+                        },
+                        {
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
+
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'guest_reg',
+                            type: 'line',
+                            smooth: true,
+
+                            data: result.previous_month_data[1]
+
+
+                        }, {
+
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
+
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'facebook_login_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.previous_month_data[2]
+
+
+                        }, {
+
+                            markPoint: {
+                                data: [
+                                    {type: 'max', name: '最大值'},
+                                    {type: 'min', name: '最小值'}
+                                ]
+                            },
+
+                            markLine: {
+                                data: [
+                                    {type: 'average', name: '平均值'}
+                                ]
+                            },
+                            name: 'facebook_game_reg',
+                            type: 'line',
+                            smooth: true,
+                            data: result.previous_month_data[3]
+
+                        }
+
+
+                    ];
+
+                    chart2_option.xAxis.data = result.previous_month_day_range;
+
+                    chart1_option.xAxis.data = result.current_month_day_range;
+
+                    myChart1.setOption(chart1_option, true);
+                    myChart2.setOption(chart2_option, true);
+                    myChart4.setOption(chart1_platform_option, true);
+                    myChart5.setOption(chart1_reg_method_option, true);
+                    myChart6.setOption(chart2_platform_option, true);
+                    myChart7.setOption(chart2_reg_method_option, true);
+
+
+                    echarts.connect([myChart1, myChart2]);
+
+
+                }
             });
 
-            $('#Android').dblclick(function () {
-                getExecutiveData('Android');
-
-
-                {#                $('#iOS').attr("hidden", "hidden");#}
-                {#                $('#Web').attr("hidden", "hidden");#}
-                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
-            });
-
-            $('#Web').dblclick(function () {
-                getExecutiveData('Web');
-
-
-                {#                $('#Facebook_Game').attr("hidden", "hidden");#}
-                {#                $('#Android').attr("hidden", "hidden");#}
-                {#                $('#iOS').attr("hidden", "hidden");#}
-            });
-
-
-            $('#Facebook_Game').dblclick(function () {
-                getExecutiveData('Facebook Game');
-
-            });
-
-            $('#All-Platform').click(function () {
-
-                getExecutiveData('All Platform');
-            });
-            {#            $('h1').dblclick(function () {#}
-            {##}
-            {#            $('#each-platform').removeAttribute("hidden")#}
-            {##}
-            {#            });#}
-
-
-            {#                $('#iOS').attr("hidden", "hidden");#}
-            {#                $('#Android').attr("hidden", "hidden");#}
-            {#                $('#Web').attr("hidden", "hidden");#}
-
-            $('#All-Platform').trigger('click');
+            window.onresize = myChart1.resize;
+            window.onresize = myChart2.resize;
+            window.onresize = myChart3.resize;
 
         });
 

@@ -238,6 +238,7 @@ def reset_bi_statistic():
                 facebook_game_reg = randrange(8,400)
                 facebook_login_reg = randrange(9,500)
                 dau = randrange(2, 100)
+                new_reg = randrange(2, 300)
                 wau = randrange(3, 200)
                 mau = randrange(5, 300)
                 facebook_game_reg = randrange(5, 400)
@@ -260,6 +261,7 @@ def reset_bi_statistic():
                 mtt_winnings = randrange(9, 100)
                 sng_winnings = randrange(9, 200)
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
+                                           new_reg=new_reg,
                                            dau=dau,wau=wau,mau=mau,
                                            email_reg=email_reg, guest_reg=guest_reg,
                                            facebook_game_reg=facebook_game_reg,

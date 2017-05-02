@@ -87,8 +87,8 @@
                                     <label>Grouping</label>
                                     <select class="form-control select2" style="width: 100%;"
                                             id="executive-group-type">
-                                        <option selected="selected">Weekly</option>
-                                        <option>Daily</option>
+                                        <option selected="selected">Daily</option>
+                                        <option>Weekly</option>
                                         <option>Monthly</option>
                                     </select>
                                 </div>
@@ -152,12 +152,9 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
@@ -402,7 +399,7 @@
                     'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
 
                 },
-                startDate: moment().subtract(180, 'days'),
+                startDate: moment().subtract(60, 'days'),
                 endDate: moment(),
                 minDate: moment().subtract(6, 'month'),
                 maxDate: moment()

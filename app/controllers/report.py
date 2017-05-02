@@ -1,6 +1,8 @@
+import datetime
 from decimal import Decimal
 
-from flask import Blueprint, render_template, jsonify, request, session
+import arrow
+from flask import Blueprint, render_template, jsonify, request
 from flask import current_app as app
 from numpy import array
 from sqlalchemy import and_, func, text
@@ -9,6 +11,7 @@ from app.extensions import db
 from app.models.bi import BIStatistic
 from app.utils import current_time
 from app.utils import generate_date_range_group_by_daily_or_weekly_or_monthly
+from  app.utils import get_day_range_of_month
 
 report = Blueprint('report', __name__)
 
@@ -30,6 +33,14 @@ def metrics_summary_data():
     # get default date range
     start_time, end_time = request.args.get('date_range').split('  -  ')
 
+    if group_type == 'Weekly':
+        start_time = arrow.Arrow.strptime(start_time, '%Y-%m-%d') - datetime.timedelta(120)
+        start_time = start_time.format('YYYY-MM-DD')
+
+    if group_type == 'Monthly':
+        start_time = arrow.Arrow.strptime(start_time, '%Y-%m-%d') - datetime.timedelta(120)
+        start_time = start_time.format('YYYY-MM-DD')
+
     if days_ago:
         now = current_time(app.config['APP_TIMEZONE'])
         start_time = now.replace(days=-int(days_ago)).format('YYYY-MM-DD')
@@ -41,25 +52,25 @@ def metrics_summary_data():
     if group_type == 'Weekly':
         query_result = db.engine.execute(text("""
                                       SELECT DATE_FORMAT(on_day,'%Y-%u') AS  week,
-                                             SUM(dau)/7,
-                                             SUM(wau)/7,
-                                             SUM(mau)/7,
-                                             SUM(facebook_game_reg)/7,
-                                             SUM(facebook_login_reg)/7,
-                                             SUM(guest_reg)/7,
-                                             SUM(email_reg)/7,
-                                             SUM(new_reg_game_dau)/7,
-                                             SUM(paid_user_count)/7,
-                                             SUM(paid_count)/7,
-                                             SUM(revenue)/7,
-                                             SUM(email_validated)/7,
-                                             SUM(mtt_buy_ins)/7,
-                                             SUM(sng_buy_ins)/7,
-                                             SUM(mtt_rake)/7,
-                                             SUM(sng_rake)/7,
-                                             SUM(ring_game_rake)/7,
-                                             SUM(mtt_winnings)/7,
-                                             SUM(sng_winnings)/7
+                                             AVG(dau),
+                                             AVG(wau),
+                                             AVG(mau),
+                                             AVG(facebook_game_reg),
+                                             AVG(facebook_login_reg),
+                                             AVG(guest_reg),
+                                             AVG(email_reg),
+                                             AVG(new_reg_game_dau),
+                                             AVG(paid_user_count),
+                                             AVG(paid_count),
+                                             AVG(revenue),
+                                             AVG(email_validated),
+                                             AVG(mtt_buy_ins),
+                                             AVG(sng_buy_ins),
+                                             AVG(mtt_rake),
+                                             AVG(sng_rake),
+                                             AVG(ring_game_rake),
+                                             AVG(mtt_winnings),
+                                             AVG(sng_winnings)
                                       FROM   bi_statistic
                                       WHERE  platform = :platform
                                              AND game = :game
@@ -70,25 +81,25 @@ def metrics_summary_data():
     elif group_type == 'Monthly':
         query_result = db.engine.execute(text("""
                                       SELECT DATE_FORMAT(on_day,'%Y-%m') AS  month,
-                                             SUM(dau)/30,
-                                             SUM(wau)/30,
-                                             SUM(mau)/30,
-                                             SUM(facebook_game_reg)/30,
-                                             SUM(facebook_login_reg)/30,
-                                             SUM(guest_reg)/30,
-                                             SUM(email_reg)/30,
-                                             SUM(new_reg_game_dau)/30,
-                                             SUM(paid_user_count)/30,
-                                             SUM(paid_count)/30,
-                                             SUM(revenue)/30,
-                                             SUM(email_validated)/30,
-                                             SUM(mtt_buy_ins)/30,
-                                             SUM(sng_buy_ins)/30,
-                                             SUM(mtt_rake)/30,
-                                             SUM(sng_rake)/30,
-                                             SUM(ring_game_rake)/30,
-                                             SUM(mtt_winnings)/30,
-                                             SUM(sng_winnings)/30
+                                             AVG(dau),
+                                             AVG(wau),
+                                             AVG(mau),
+                                             AVG(facebook_game_reg),
+                                             AVG(facebook_login_reg),
+                                             AVG(guest_reg),
+                                             AVG(email_reg),
+                                             AVG(new_reg_game_dau),
+                                             AVG(paid_user_count),
+                                             AVG(paid_count),
+                                             AVG(revenue),
+                                             AVG(email_validated),
+                                             AVG(mtt_buy_ins),
+                                             AVG(sng_buy_ins),
+                                             AVG(mtt_rake),
+                                             AVG(sng_rake),
+                                             AVG(ring_game_rake),
+                                             AVG(mtt_winnings),
+                                             AVG(sng_winnings)
                                       FROM   bi_statistic
                                       WHERE  platform = :platform
                                              AND game = :game
@@ -246,36 +257,171 @@ def reg_platform_data():
 @report.route("/report/user_reg_data", methods=["GET"])
 # @login_required
 def user_reg_data():
-    # start_time = request.args.get("start_day")
-    # end_time = request.args.get("end_day")
-    # last_time = request.args.get("last_time")
-    # platform = request.args.get("platform")
+    now = current_time(app.config['APP_TIMEZONE'])
+    previous_month_start_day, previous_month_end_day, current_month_start_day, current_month_end_day = get_day_range_of_month(
+        now)
+    platform = request.args.get('platform', 'All Platform')
 
-    start_time = '2017-03-03'
-    end_time = '2017-04-01'
-    last_time = 'True'
-    platform = 'iOS'
 
-    previous_day_range = session.get("previous_day_range")
-    previous_data = session.get("previous_data")
 
-    result = db.session.query(func.DATE_FORMAT(BIStatistic.on_day, '%Y-%m-%d'),
-                              BIStatistic.email_reg, BIStatistic.guest_reg,
-                              BIStatistic.facebook_game_reg, BIStatistic.facebook_login_reg).filter(
-        and_(BIStatistic.on_day >= start_time, BIStatistic.on_day < end_time, BIStatistic.game == 'All Game',
-             BIStatistic.platform != 'Web Mobile', BIStatistic.platform == platform))
+    #   previous_month
 
-    transpose_query_result = list(map(list, zip(*result)))
-    data = transpose_query_result[1:]
-    day_range = transpose_query_result[0]
+    query_result = db.engine.execute(text("""
+                                      SELECT DATE_FORMAT(on_day,'%Y-%m-%d') AS  on_day,
+                                             email_reg,
+                                             guest_reg,
+                                             facebook_game_reg,
+                                             facebook_login_reg
+                                      FROM   bi_statistic
+                                      WHERE  platform = :platform
+                                             AND  game = 'All Game'
+                                             AND on_day BETWEEN :start_time AND :end_time
+                                      """), platform=platform, start_time=previous_month_start_day,
+                                     end_time=previous_month_end_day)
 
-    if last_time:
-        if previous_day_range and previous_data is not None:
+    previous_result = list(map(list, zip(*query_result)))
+    previous_month_data = previous_result[1:]
+    previous_month_end_day_range = previous_result[0]
 
-            return jsonify(day_range=day_range, data=data, previous_day_range=previous_day_range,
-                           previous_data=previous_data)
+    query_result = db.engine.execute(text("""
+                                      SELECT platform                    AS  name,
+                                             SUM(new_reg)                AS  value
+                                      FROM   bi_statistic
+                                      WHERE  game = 'All Game'
+                                             AND platform !='All Platform'
+                                             AND on_day BETWEEN :start_time AND :end_time
+                                      GROUP  BY platform, 
+                                             DATE_FORMAT(on_day,'%Y-%m') 
+                                      """), start_time=previous_month_start_day,
+                                     end_time=previous_month_end_day)
 
-    session["previous_day_range"] = [day_range]
-    session["previous_data"] = [data]
+    previous_month_each_platform_reg_count_proxy = []
 
-    return jsonify(day_range=day_range, result=data)
+    for row in query_result:
+        row_as_dict = dict(row)
+        previous_month_each_platform_reg_count_proxy.append(row_as_dict)
+
+    query_result = db.engine.execute(text("""
+                                    SELECT 'email_reg'    AS name,
+                                           SUM(email_reg) AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'guest_reg'    AS name,
+                                           SUM(guest_reg) AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'facebook_login_reg' AS name,
+                                           SUM(email_reg)       AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'facebook_game_reg' AS name,
+                                           SUM(email_reg)      AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')  
+                                      """), start_time=previous_month_start_day,
+                                     end_time=previous_month_end_day)
+
+    previous_month_each_reg_reg_count_proxy = []
+
+    for row in query_result:
+        row_as_dict = dict(row)
+        previous_month_each_reg_reg_count_proxy.append(row_as_dict)
+
+    # current_month
+
+    query_result = db.engine.execute(text("""
+                                      SELECT DATE_FORMAT(on_day,'%Y-%m-%d') AS  on_day,
+                                             email_reg,
+                                             guest_reg,
+                                             facebook_game_reg,
+                                             facebook_login_reg
+                                      FROM   bi_statistic
+                                      WHERE  platform = :platform
+                                             AND  game = 'All Game'
+                                             AND on_day BETWEEN :start_time AND :end_time
+                                      """), platform=platform, start_time=current_month_start_day,
+                                     end_time=current_month_end_day)
+
+    current_result = list(map(list, zip(*query_result)))
+    current_month_data = current_result[1:]
+    current_month_day_range = current_result[0]
+
+    query_result = db.engine.execute(text("""
+                                      SELECT platform                    AS  name,
+                                             SUM(new_reg)                AS  value
+                                      FROM   bi_statistic
+                                      WHERE  game = 'All Game'
+                                             AND platform !='All Platform'
+                                             AND on_day BETWEEN :start_time AND :end_time
+                                      GROUP  BY platform,
+                                             DATE_FORMAT(on_day,'%Y-%m') 
+                                      """), start_time=current_month_start_day,
+                                     end_time=current_month_end_day)
+
+    current_month_each_platform_reg_count_proxy = []
+
+    for row in query_result:
+        row_as_dict = dict(row)
+        current_month_each_platform_reg_count_proxy.append(row_as_dict)
+
+    query_result = db.engine.execute(text("""   SELECT 'email_reg'    AS name,
+                                           SUM(email_reg) AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'guest_reg'    AS name,
+                                           SUM(guest_reg) AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'facebook_login_reg' AS name,
+                                           SUM(email_reg)       AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')
+                                    UNION
+                                    SELECT 'facebook_game_reg' AS name,
+                                           SUM(email_reg)      AS value
+                                    FROM   bi_statistic
+                                    WHERE  game = 'All Game'
+                                           AND platform = 'All Platform'
+                                           AND on_day BETWEEN :start_time AND :end_time
+                                    GROUP  BY DATE_FORMAT(on_day, '%Y-%m')  
+                                      """), start_time=current_month_start_day,
+                                     end_time=current_month_end_day)
+
+    current_month_each_reg_reg_count_proxy = []
+
+    for row in query_result:
+        row_as_dict = dict(row)
+        current_month_each_reg_reg_count_proxy.append(row_as_dict)
+
+    return jsonify(current_month_data=current_month_data, current_month_day_range=current_month_day_range,
+                   previous_month_data=previous_month_data, previous_month_end_day_range=previous_month_end_day_range,
+                   current_month_each_platform_reg_count_proxy=current_month_each_platform_reg_count_proxy,
+                   current_month_each_reg_reg_count_proxy=current_month_each_reg_reg_count_proxy,
+                   previous_month_each_reg_reg_count_proxy=previous_month_each_reg_reg_count_proxy
+                   )
