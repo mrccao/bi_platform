@@ -415,6 +415,7 @@
                 },
                 error: function(xhr) {
                     stopRequestLoading();
+                    console.log('Error: ' + xhr.responseText);
                     alert('Error: ' + JSON.parse(xhr.responseText).error);
                 }
             });
