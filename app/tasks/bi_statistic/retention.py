@@ -14,13 +14,8 @@ from app.utils import current_time
 
 def process_bi_statistic_retention(target):
     now = current_time(app.config['APP_TIMEZONE'])
+    today = now.format('YYYY-MM-DD')
     timezone_offset = '-04:00'
-
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
-    the_day_before_yesterday = now.replace(days=-2).format('YYYY-MM-DD')
-    
-    day = {'today': yesterday, 'yesterday': the_day_before_yesterday}
-    someday = day.get(target, target)
 
     def collection_retention(connection, transaction, day, timedelta):
 
@@ -43,7 +38,7 @@ def process_bi_statistic_retention(target):
         result_proxy = []
 
         if target == 'lifetime':
-            date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), the_day_before_yesterday), reverse=True)
+            date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), today), reverse=True)
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
 
@@ -63,7 +58,29 @@ def process_bi_statistic_retention(target):
         else:
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
-                print(str(timedelta) + ' retention on ' + str(someday))
+                if timedelta == 1:
+                    day = {'today': now.replace(days=-1).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-2).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 7:
+                    day = {'today': now.replace(days=-7).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-8).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 30:
+                    day = {'today': now.replace(days=-30).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-31).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
 
                 specific_day_retention = with_db_context(db, collection_retention, day=someday, timedelta=timedelta)
 
