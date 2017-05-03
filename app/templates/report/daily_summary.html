@@ -1,6 +1,6 @@
 {% extends "layout/app.html" %}
 
-{% block page_title %}Metrics Summary{% endblock %}
+{% block page_title %}Daily Summary{% endblock %}
 
 {% block head_tail %}
     <link rel="stylesheet"
@@ -152,9 +152,12 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.27/pdfmake.min.js"></script>
     <script type="text/javascript" src="https://cdn.rawgit.com/bpampuch/pdfmake/0.1.18/build/vfs_fonts.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
@@ -332,7 +335,9 @@
                     'sng_rake': 0,
                     'ring_game_rake': 0,
                     'mtt_winnings': 0,
-                    'sng_winnings': 0
+                    'sng_winnings': 0,
+                    'free_gold': 0,
+                    'free_silver': 0
                 },
                 data: []
             },
@@ -429,7 +434,7 @@
                 startRequestLoading();
                 $.ajax({
                     type: 'GET',
-                    url: '/report/metrics_summary_data',
+                    url: '/report/daily_summary_data',
                     data: {
                         date_range: date_range,
                         game: game,

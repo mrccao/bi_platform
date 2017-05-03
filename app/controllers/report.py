@@ -4,6 +4,7 @@ from decimal import Decimal
 import arrow
 from flask import Blueprint, render_template, jsonify, request
 from flask import current_app as app
+from flask_login import login_required
 from numpy import array
 from sqlalchemy import and_, func, text
 
@@ -16,15 +17,15 @@ from  app.utils import get_day_range_of_month
 report = Blueprint('report', __name__)
 
 
-@report.route("/report/metrics_summary", methods=["GET"])
-# @login_required
-def metrics_summary():
-    return render_template('report/metrics_summary.html')
+@report.route("/report/daily_summary", methods=["GET"])
+@login_required
+def daily_summary():
+    return render_template('report/daily_summary.html')
 
 
-@report.route("/report/metrics_summary_data", methods=["GET"])
-# @login_required
-def metrics_summary_data():
+@report.route("/report/daily_summary_data", methods=["GET"])
+@login_required
+def daily_summary_data():
     # get custom date range
     days_ago = request.args.get('days_ago')
     game = request.args.get("game")
@@ -214,13 +215,13 @@ def metrics_summary_data():
 
 
 @report.route("/report/reg_platform", methods=["GET"])
-# @login_required
+@login_required
 def reg_platform():
     return render_template('report/reg_platform_distributed.html')
 
 
 @report.route("/report/reg_platform_data", methods=["GET"])
-# @login_required
+@login_required
 def reg_platform_data():
     now = current_time(app.config['APP_TIMEZONE'])
     start_time = now.replace(days=-30).format('YYYY-MM-DD')
@@ -255,7 +256,7 @@ def reg_platform_data():
 
 
 @report.route("/report/user_reg_data", methods=["GET"])
-# @login_required
+@login_required
 def user_reg_data():
     now = current_time(app.config['APP_TIMEZONE'])
     previous_month_start_day, previous_month_end_day, current_month_start_day, current_month_end_day = get_day_range_of_month(
@@ -353,4 +354,3 @@ def user_reg_data():
                    previous_month_data=previous_month_data, previous_month_day_range=previous_month_day_range,
                    previous_each_platform_reg_count_proxy=previous_each_platform_reg_count_proxy,
                    previous_each_reg_method_count_proxy=previous_each_reg_method_count_proxy)
-

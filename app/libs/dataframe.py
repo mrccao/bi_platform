@@ -5,17 +5,40 @@ Wrapper around pandas.DataFrame.
 import arrow
 import pandas as pd
 
+from datetime import datetime
+
 from flask import current_app as app
+
+
+def convert_datetime(obj):
+    if pd.isnull(obj):
+        return ''
+
+    if isinstance(obj, datetime):
+        return arrow.get(obj).to(app.config['APP_TIMEZONE']).format()
+    else:
+        return obj
+
+
+def convert_integer(obj):
+    if pd.isnull(obj):
+        return None
+
+    if obj == 0:
+        return None
+
+    return str(obj)
 
 
 class DataFrame(object):
     def __init__(self, df):
         self.__df = df.where((pd.notnull(df)), None)
 
-    @property
-    def dateframe(self):
+        for column in self.__df.select_dtypes(include=['object']).columns:
+            self.__df[column] = self.__df[column].apply(convert_datetime)
+
         for column in self.__df.select_dtypes(include=['datetime', 'datetime64']).columns:
-            self.__df[column] = self.__df[column].apply(lambda x: None if pd.isnull(x) else arrow.get(x).to(app.config['APP_TIMEZONE']).format())
+            self.__df[column] = self.__df[column].apply(convert_datetime)
             self.__df[column].astype(str)
 
         for column in [col for col in self.__df.dtypes.keys() if
@@ -23,9 +46,11 @@ class DataFrame(object):
                        col.endswith('_count') or
                        col.startswith('count_of_') or
                        col.startswith('amount_of_')]:
-            self.__df[column] = self.__df[column].apply(lambda x: None if (x == None or x == 0) else str(x))
+            self.__df[column] = self.__df[column].apply(convert_integer)
             self.__df[column].astype(str)
 
+    @property
+    def dateframe(self):
         return self.__df
 
     @property
@@ -38,27 +63,5 @@ class DataFrame(object):
 
     @property
     def data(self):
-        for column in self.__df.select_dtypes(include=['datetime', 'datetime64']).columns:
-            self.__df[column] = self.__df[column].apply(lambda x: None if pd.isnull(x) else arrow.get(x).to(app.config['APP_TIMEZONE']).format())
-            self.__df[column].astype(str)
-
-        for column in [col for col in self.__df.dtypes.keys() if
-                       col.endswith('_amount') or
-                       col.endswith('_count') or
-                       col.startswith('count_of_') or
-                       col.startswith('amount_of_')]:
-            self.__df[column] = self.__df[column].apply(lambda x: None if (x == None or x == 0) else str(x))
-            self.__df[column].astype(str)
-
-        # def format_row_value(column, value):
-        #     if value == 0 and (
-        #             column.endswith('_amount') or
-        #             column.endswith('_count') or
-        #             column.startswith('count_of_') or
-        #             column.startswith('amount_of_')
-        #         ):
-        #         return None
-        #     return value
-
         columns = self.__df.dtypes.keys()
         return [[row[column] for column in columns] for _, row in self.__df.iterrows()]

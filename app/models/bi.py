@@ -33,7 +33,7 @@ class BIStatistic(db.Model):
     email_validated = db.Column(db.Integer, nullable=False, default=0)
 
     mtt_buy_ins = db.Column(db.Integer, nullable=False, default=0)
-    ring_game_ins = db.Column(db.Integer, nullable=False, default=0)
+    ring_game_buy_ins = db.Column(db.Integer, nullable=False, default=0)
     sng_buy_ins = db.Column(db.Integer, nullable=False, default=0)
 
     mtt_rake = db.Column(db.Integer, nullable=False, default=0)

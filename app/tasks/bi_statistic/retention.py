@@ -1,6 +1,7 @@
 from datetime import date
 
 import pandas as pd
+from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -8,11 +9,13 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import generate_sql_date
+from app.utils import current_time
 
 
 def process_bi_statistic_retention(target):
-    today, someday, _, timezone_offset = generate_sql_date(target)
+    now = current_time(app.config['APP_TIMEZONE'])
+    today = now.format('YYYY-MM-DD')
+    timezone_offset = '-04:00'
 
     def collection_retention_all_platform(connection, transaction, day, timedelta):
 
@@ -55,7 +58,29 @@ def process_bi_statistic_retention(target):
         else:
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
-                print(str(timedelta) + ' retention on ' + str(someday))
+                if timedelta == 1:
+                    day = {'today': now.replace(days=-1).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-2).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 7:
+                    day = {'today': now.replace(days=-7).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-8).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 30:
+                    day = {'today': now.replace(days=-30).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-31).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
 
                 specific_day_retention = with_db_context(db, collection_retention_all_platform, day=someday,
                                                          timedelta=timedelta)
@@ -145,13 +170,35 @@ def process_bi_statistic_retention(target):
         else:
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
-                print(str(timedelta) + ' retention on ' + str(someday))
+                if timedelta == 1:
+                    day = {'today': now.replace(days=-1).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-2).format('YYYY-MM-DD')}
 
-                specific_day_retention = with_db_context(db, collection_retention, day=someday, timedelta=timedelta)
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 7:
+                    day = {'today': now.replace(days=-7).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-8).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                if timedelta == 30:
+                    day = {'today': now.replace(days=-30).format('YYYY-MM-DD'),
+                           'yesterday': now.replace(days=-31).format('YYYY-MM-DD')}
+
+                    someday = day.get(target, target)
+
+                    print(str(timedelta) + ' retention on ' + str(someday))
+
+                specific_day_retention = with_db_context(db, collection_retention_all_platform, day=someday,
+                                                         timedelta=timedelta)
 
                 specific_day_retention_rows = [
-                    {'_on_day': str(someday), '_platform': row['platform'], 'sum': row['sum']}
-                    for row in
+                    {'_on_day': str(someday), 'sum': row['sum'], '_platform': row['platform']} for row in
                     specific_day_retention]
 
                 all_day_retention_rows = dict([(timedelta_str, specific_day_retention_rows)])
