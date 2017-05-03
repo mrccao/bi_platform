@@ -31,30 +31,53 @@
 
             <div class="col-md-12">
 
-                <div class="col-md-8">
 
-                    <div class="box box-primary">
+                <div class="box box-primary" style="margin-bottom: 0; ">
 
-                        <div class="box-body">
+                    <div class="box-body">
 
-                            <div id="chart2" style="height: 380px; width: 100%;"></div>
+                        <div class="col-md-8">
 
-                            <div id="chart1" style="height: 380px; width: 100%; margin-top: 100px"></div>
+
+                            <div id="chart2" style="height: 420px; width: 100%;"></div>
 
                         </div>
 
+                        <div class="col-md-4">
+                            <div id="chart2_platform" style="height: 219px; width: 100%;"></div>
+                            <div id="chart2_reg_method" style="height: 219px; width: 100%;"></div>
+
+
+                        </div>
                     </div>
+
                 </div>
 
-
-                <div class="col-md-4">
-
-                    <div id="chart1_platform" style="height: 179px; width: 100%;"></div>
-                    <div id="chart1_reg_method" style="height: 179px; width: 100%;"></div>
+                <div class="row">
+                    <div class="col-md-12">
 
 
-                    <div id="chart2_platform" style="height: 179px; width: 100%;"></div>
-                    <div id="chart2_reg_method" style="height: 179px; width: 100%;"></div>
+                        <div class="box box-primary" style="border-top-width: 0;margin-bottom: 0; ">
+
+                            <div class="box-body">
+
+                                <div class="col-md-8">
+
+
+                                    <div id="chart1" style="height: 420px; width: 100%;"></div>
+
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div id="chart1_platform" style="height: 219px; width: 100%;"></div>
+                                    <div id="chart1_reg_method" style="height: 219px; width: 100%;"></div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
 
 
                 </div>
@@ -63,27 +86,14 @@
             </div>
 
 
-        </div>
+            <div class="row" style="display: ">
+                <div class="col-md-12">
+                    <div class="box box-primary" style="border-top-width: 0; ">
 
+                        <div class="box-body">
 
-        {#        <div class="row">#}
-        {#            <div class="col-md-12">#}
-        {#                <div class="box box-primary">#}
-        {#                    <div class="box-body">#}
-        {##}
-        {#                    </div>#}
-        {##}
-        {#                </div>#}
-        {#            </div>#}
-        {#        </div>#}
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="box box-primary">
-
-                    <div class="box-body">
-
-                        <div id="chart3" style="height: 650px; width: 100%;"></div>
+                            <div id="chart3" style="height: 420px; width: 100%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,12 +264,12 @@
         echarts.registerTheme('shine', echartsTheme);
 
         var dom1 = document.getElementById("chart1");
-        var dom2 = document.getElementById("chart2");
-        var dom3 = document.getElementById("chart3");
         var dom4 = document.getElementById("chart1_platform");
         var dom5 = document.getElementById("chart1_reg_method");
+        var dom2 = document.getElementById("chart2");
         var dom6 = document.getElementById("chart2_platform");
         var dom7 = document.getElementById("chart2_reg_method");
+        var dom3 = document.getElementById("chart3");
 
 
         var myChart1 = echarts.init(dom1, 'shine');
@@ -273,32 +283,24 @@
 
         chart1_platform_option = {
             title: {
-                text: '某站点用户访问来源',
-                subtext: '纯属虚构',
+                {#                text: 'This Month Platform Distribution',#}
                 x: 'center'
             },
             tooltip: {
                 trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                formatter: "----------------------------------------------{a} <br/>{b} : {c} ({d}%)"
             },
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+                {#                data: ['iOS', 'Android', 'Web', 'Facebook Game']#}
             },
             series: [
                 {
-                    name: '访问来源',
                     type: 'pie',
                     radius: '55%',
                     center: ['50%', '60%'],
-                    data: [
-                        {value: 335, name: '直接访问'},
-                        {value: 310, name: '邮件营销'},
-                        {value: 234, name: '联盟广告'},
-                        {value: 135, name: '视频广告'},
-                        {value: 1548, name: '搜索引擎'}
-                    ],
+                    data: [],
                     itemStyle: {
                         emphasis: {
                             shadowBlur: 10,
@@ -311,32 +313,24 @@
         };
         chart1_reg_method_option = {
             title: {
-                text: '某站点用户访问来源',
-                subtext: '纯属虚构',
+                {#                text: 'This Month User Source Distribution',#}
                 x: 'center'
             },
             tooltip: {
                 trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                formatter: "------------------------------------------------{a} <br/>{b} : {c} ({d}%)"
             },
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+                {#                data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']#}
             },
             series: [
                 {
-                    name: '访问来源',
                     type: 'pie',
                     radius: '55%',
                     center: ['50%', '60%'],
-                    data: [
-                        {value: 335, name: '直接访问'},
-                        {value: 310, name: '邮件营销'},
-                        {value: 234, name: '联盟广告'},
-                        {value: 135, name: '视频广告'},
-                        {value: 1548, name: '搜索引擎'}
-                    ],
+                    data: [],
                     itemStyle: {
                         emphasis: {
                             shadowBlur: 10,
@@ -349,32 +343,24 @@
         };
         chart2_platform_option = {
             title: {
-                text: '某站点用户访问来源',
-                subtext: '纯属虚构',
+                {#                text: 'Last Month User Source Distribution',#}
                 x: 'center'
             },
             tooltip: {
                 trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                formatter: "-------------------------------------------------{a} <br/>{b} : {c} ({d}%)"
             },
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+                {#                data: ['iOS', 'Android', 'Web', 'Facebook Game']#}
             },
             series: [
                 {
-                    name: '访问来源',
                     type: 'pie',
                     radius: '55%',
                     center: ['50%', '60%'],
-                    data: [
-                        {value: 335, name: '直接访问'},
-                        {value: 310, name: '邮件营销'},
-                        {value: 234, name: '联盟广告'},
-                        {value: 135, name: '视频广告'},
-                        {value: 1548, name: '搜索引擎'}
-                    ],
+                    data: [],
                     itemStyle: {
                         emphasis: {
                             shadowBlur: 10,
@@ -387,32 +373,24 @@
         };
         chart2_reg_method_option = {
             title: {
-                text: '某站点用户访问来源',
-                subtext: '纯属虚构',
+                {#                text: 'Last Month Platform Distribution',#}
                 x: 'center'
             },
             tooltip: {
                 trigger: 'item',
-                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                formatter: "-----------------------------------------------{a} <br/>{b} : {c} ({d}%)"
             },
             legend: {
                 orient: 'vertical',
                 left: 'left',
-                data: ['直接访问', '邮件营销', '联盟广告', '视频广告', '搜索引擎']
+                {#                data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']#}
             },
             series: [
                 {
-                    name: '访问来源',
                     type: 'pie',
                     radius: '55%',
                     center: ['50%', '60%'],
-                    data: [
-                        {value: 335, name: '直接访问'},
-                        {value: 310, name: '邮件营销'},
-                        {value: 234, name: '联盟广告'},
-                        {value: 135, name: '视频广告'},
-                        {value: 1548, name: '搜索引擎'}
-                    ],
+                    data: [],
                     itemStyle: {
                         emphasis: {
                             shadowBlur: 10,
@@ -469,12 +447,12 @@
                 text: 'This Month'
 
             },
-            toolbox: {
-                show: true,
-                feature: {
-                    saveAsImage: {show: true}
-                }
-            },
+            {#            toolbox: {#}
+            {#                show: true,#}
+            {#                feature: {#}
+            {#                    saveAsImage: {show: true}#}
+            {#                }#}
+            {#            },#}
             markPoint: {
                 data: [
                     {type: 'max', name: '最大值'},
@@ -523,12 +501,6 @@
                     data: ['email_reg', 'guest_reg', 'facebook_login_reg', 'facebook_game_reg']
                 },
                 calculable: true,
-                toolbox: {
-                    show: true,
-                    feature: {
-                        saveAsImage: {show: true}
-                    }
-                },
 
                 grid: {
                     top: 99,
@@ -539,6 +511,7 @@
                         'type': 'category',
                         'axisLabel': {'interval': 0},
                         'data': ["iOS", "Android", "Web", "Facebook Game"]
+
                     }
                 ],
                 yAxis: [
@@ -555,15 +528,15 @@
                     {
 
                         type: 'pie',
-                        center: ['73%', '25%'],
-                        radius: '23%'
+                        center: ['82%', '25%'],
+                        radius: '20%'
 
                     },
 
                     {
                         type: 'pie',
-                        center: ['73%', '53%'],
-                        radius: '23%'
+                        center: ['82%', '53%'],
+                        radius: '20%'
                     }
 
                 ]
@@ -658,7 +631,7 @@
                 success: function (result) {
 
 
-                    chart1_option.series = [
+                    chart2_option.series = [
 
                         {
 
@@ -745,9 +718,7 @@
 
 
                     ];
-
-
-                    chart2_option.series = [
+                    chart1_option.series = [
 
                         {
 
@@ -834,14 +805,27 @@
 
                     ];
 
-                    chart2_option.xAxis.data = result.previous_month_day_range;
 
-                    chart1_option.xAxis.data = result.current_month_day_range;
+                    chart1_platform_option.series[0].data = result.previous_each_platform_reg_count_proxy;
+                    chart1_reg_method_option.series[0].data = result.previous_each_reg_method_count_proxy;
+
+
+                    chart2_platform_option.series[0].data = result.current_month_each_platform_reg_count_proxy;
+
+                    chart2_reg_method_option.series[0].data = result.current_month_each_reg_method_count_proxy;
+
+
+                    chart1_option.xAxis.data = result.previous_month_day_range;
+                    chart2_option.xAxis.data = result.current_month_day_range;
 
                     myChart1.setOption(chart1_option, true);
                     myChart2.setOption(chart2_option, true);
+
+
                     myChart4.setOption(chart1_platform_option, true);
                     myChart5.setOption(chart1_reg_method_option, true);
+
+
                     myChart6.setOption(chart2_platform_option, true);
                     myChart7.setOption(chart2_reg_method_option, true);
 
@@ -851,6 +835,7 @@
 
                 }
             });
+
 
             window.onresize = myChart1.resize;
             window.onresize = myChart2.resize;

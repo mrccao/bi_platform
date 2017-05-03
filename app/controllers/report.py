@@ -354,4 +354,3 @@ def user_reg_data():
                    previous_each_platform_reg_count_proxy=previous_each_platform_reg_count_proxy,
                    previous_each_reg_method_count_proxy=previous_each_reg_method_count_proxy)
 
-
