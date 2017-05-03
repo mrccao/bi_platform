@@ -1,6 +1,7 @@
 from datetime import date
 
 import pandas as pd
+from flask import current_app as app
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -8,11 +9,18 @@ from app.constants import FREE_TRANSACTION_TYPES_TUPLE
 from app.extensions import db
 from app.models.bi import BIStatistic
 from app.tasks import with_db_context
-from app.utils import generate_sql_date
+from app.utils import current_time
 
 
 def process_bi_statistic_retention(target):
-    today, someday, _, timezone_offset = generate_sql_date(target)
+    now = current_time(app.config['APP_TIMEZONE'])
+    timezone_offset = '-04:00'
+
+    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    the_day_before_yesterday = now.replace(days=-2).format('YYYY-MM-DD')
+    
+    day = {'today': yesterday, 'yesterday': the_day_before_yesterday}
+    someday = day.get(target, target)
 
     def collection_retention(connection, transaction, day, timedelta):
 
@@ -35,7 +43,7 @@ def process_bi_statistic_retention(target):
         result_proxy = []
 
         if target == 'lifetime':
-            date_range_reversed =sorted(pd.date_range(date(2016, 6, 1), today),reverse=True)
+            date_range_reversed = sorted(pd.date_range(date(2016, 6, 1), the_day_before_yesterday), reverse=True)
 
             for timedelta, timedelta_str in [(1, 'one'), (7, 'seven'), (30, 'thirty')]:
 
