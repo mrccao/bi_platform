@@ -50,6 +50,9 @@ def daily_summary_data():
                                              AVG(paid_user_count),
                                              AVG(paid_count),
                                              AVG(revenue),
+                                             AVG(one_day_retention),
+                                             AVG(seven_day_retention),
+                                             AVG(thirty_day_retention),
                                              AVG(email_validated),
                                              AVG(mtt_buy_ins),
                                              AVG(sng_buy_ins),
@@ -57,7 +60,9 @@ def daily_summary_data():
                                              AVG(sng_rake),
                                              AVG(ring_game_rake),
                                              AVG(mtt_winnings),
-                                             AVG(sng_winnings)
+                                             AVG(sng_winnings),
+                                             AVG(free_gold),
+                                             AVG(free_silver)
                                       FROM   bi_statistic
                                       WHERE  platform = :platform
                                              AND game = :game
@@ -82,6 +87,9 @@ def daily_summary_data():
                                              AVG(paid_user_count),
                                              AVG(paid_count),
                                              AVG(revenue),
+                                             AVG(one_day_retention),
+                                             AVG(seven_day_retention),
+                                             AVG(thirty_day_retention),
                                              AVG(email_validated),
                                              AVG(mtt_buy_ins),
                                              AVG(sng_buy_ins),
@@ -89,7 +97,9 @@ def daily_summary_data():
                                              AVG(sng_rake),
                                              AVG(ring_game_rake),
                                              AVG(mtt_winnings),
-                                             AVG(sng_winnings)
+                                             AVG(sng_winnings),
+                                             AVG(free_gold),
+                                             AVG(free_silver)
                                       FROM   bi_statistic
                                       WHERE  platform = :platform
                                              AND game = :game
@@ -121,7 +131,9 @@ def daily_summary_data():
                                              sng_rake,
                                              ring_game_rake,
                                              mtt_winnings,
-                                             sng_winnings
+                                             sng_winnings,
+                                             free_gold,
+                                             free_silver
                                       FROM   bi_statistic
                                       WHERE  platform = :platform
                                              AND game = :game
@@ -132,46 +144,35 @@ def daily_summary_data():
     transpose_query_result = list(map(list, zip(*query_result)))
     charts_data = transpose_query_result
 
-    if group_type == 'Daily':
+    column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
+                    'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue', 'one_day_retention(%)',
+                    'seven_day_retention(%)', 'thirty_day_retention(%)', 'email_validated', 'mtt_buy_ins',
+                    'sng_buy_ins', 'mtt_rake', 'sng_rake', 'ring_game_rake', 'mtt_winnings', 'sng_winnings',
+                    'free_gold', 'free_silver',
+                    'stickiness_weekly', 'stickiness_monthly', 'ARPPU']
+    tables_columns_names = copy(column_names)
+    tables_columns_names.insert(0, 'date')
 
-        column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
-                        'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue', 'one_day_retention(%)',
-                        'seven_day_retention(%)', 'thirty_day_retention(%)', 'email_validated', 'mtt_buy_ins',
-                        'sng_buy_ins', 'mtt_rake', 'sng_rake', 'ring_game_rake', 'mtt_winnings', 'sng_winnings',
-                        'stickiness_weekly', 'stickiness_monthly', 'ARPPU']
-        tables_columns_names = copy(column_names)
-        tables_columns_names.insert(0, 'date')
+    new_reg_game_dau = transpose_query_result[8]
+    one_day_retention_count = transpose_query_result[12]
+    seven_day_retention_count = transpose_query_result[13]
+    thirty_day_retention_count = transpose_query_result[14]
 
-        new_reg_game_dau = transpose_query_result[8]
-        one_day_retention_count = transpose_query_result[12]
-        seven_day_retention_count = transpose_query_result[13]
-        thirty_day_retention_count = transpose_query_result[14]
+    try:
+        one_day_retention = [int(round(i, 2) * 100) for i in
+                             array(one_day_retention_count) / array(new_reg_game_dau)]
+        seven_day_retention = [int(round(i, 2) * 100) for i in
+                               array(seven_day_retention_count) / array(new_reg_game_dau)]
+        thirty_day_retention = [int(round(i, 2) * 100) for i in
+                                array(thirty_day_retention_count) / array(new_reg_game_dau)]
 
-        try:
-            one_day_retention = [int(round(i, 2) * 100) for i in
-                                 array(one_day_retention_count) / array(new_reg_game_dau)]
-            seven_day_retention = [int(round(i, 2) * 100) for i in
-                                   array(seven_day_retention_count) / array(new_reg_game_dau)]
-            thirty_day_retention = [int(round(i, 2) * 100) for i in
-                                    array(thirty_day_retention_count) / array(new_reg_game_dau)]
+    except Exception:
 
-        except Exception:
+        one_day_retention = [0 for i in range(len(one_day_retention_count))]
+        seven_day_retention = [0 for i in range(len(seven_day_retention_count))]
+        thirty_day_retention = [0 for i in range(len(thirty_day_retention_count))]
 
-            one_day_retention = [0 for i in range(len(one_day_retention_count))]
-            seven_day_retention = [0 for i in range(len(seven_day_retention_count))]
-            thirty_day_retention = [0 for i in range(len(thirty_day_retention_count))]
-
-        charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
-
-    else:
-        column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
-                        'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
-                        'email_validated', 'mtt_buy_ins', 'sng_buy_ins', 'mtt_rake', 'sng_rake',
-                        'ring_game_rake', 'mtt_winnings', 'sng_winnings', 'stickiness_weekly', 'stickiness_monthly',
-                        'ARPPU']
-
-        tables_columns_names = copy(column_names)
-        tables_columns_names.insert(0, 'date')
+    charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
 
     dau = transpose_query_result[1]
     wau = transpose_query_result[2]
@@ -203,8 +204,6 @@ def daily_summary_data():
 
 
     tables_title = [{'title': column_name} for column_name in tables_columns_names]
-
-    transpose_query_result[0] = charts_labels
 
     tables_data = list(map(list, zip(*transpose_query_result)))
 

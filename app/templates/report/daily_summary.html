@@ -296,34 +296,38 @@
                     'dau': 1,
                     'wau': 1,
                     'mau': 1,
-                    'new_reg': 1,
                     'facebook_game_reg': 0,
                     'facebook_login_reg': 0,
-                    'facebook_reg': 0,
-                    'email_reg': 0,
-                    'email_validated': 0,
                     'guest_reg': 0,
+                    'email_reg': 0,
                     'new_reg_game_dau': 0,
+
                     'paid_user_count': 0,
                     'paid_count': 0,
+                    'new_reg': 1,
+
                     'revenue': 1,
                     'one_day_retention(%)': 0,
                     'seven_day_retention(%)': 0,
                     'thirty_day_retention(%)': 0,
-                    'stickiness_weekly': 0,
-                    'stickiness_monthly': 0,
-                    'ARPDAU': 0,
-                    'ARPPU': 0,
-                    'thirty_day_retention': 0,
+
+                    'email_validated': 0,
+
                     'mtt_buy_ins': 0,
                     'sng_buy_ins': 0,
+
                     'mtt_rake': 0,
                     'sng_rake': 0,
+
                     'ring_game_rake': 0,
                     'mtt_winnings': 0,
                     'sng_winnings': 0,
                     'free_gold': 0,
-                    'free_silver': 0
+                    'free_silver': 0,
+                    'stickiness_weekly': 0,
+                    'stickiness_monthly': 0,
+                    'ARPDAU': 0,
+                    'ARPPU': 0
                 },
                 data: []
             },
@@ -375,6 +379,7 @@
 
             var resultDataTable = null;
 
+            $(".select2").select2();
             var loadingOverlayConfig = {
                 image: '',
                 fontawesome: 'fa fa-spinner fa-spin',
