@@ -48,18 +48,6 @@
 
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <label>Date range</label>
-                                    <div class="input-group">
-                                        <div class="input-group-addon">
-                                            <i class="fa fa-calendar"></i>
-                                        </div>
-                                        <input type="text" class="form-control pull-right" id="executive-date-range">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-2">
-                                <div class="form-group">
                                     <label>Game</label>
                                     <select class="form-control select2" style="width: 100%;" id="executive-game">
                                         <option selected="selected">All Game</option>
@@ -156,8 +144,6 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/echarts.common.min.js"></script>
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script type="text/javascript">
 
         var echartsColorPalette = [
@@ -387,30 +373,6 @@
 
         $(document).ready(function () {
 
-            $(".select2").select2();
-
-            $('#executive-date-range').daterangepicker({
-                opens: 'right',
-                showDropdowns: true,
-                autoApply: true,
-                locale: {
-                    format: 'YYYY-MM-DD',
-                    separator: '  -  '
-                },
-                ranges: {
-                    'This Week': [moment().startOf('week'), moment().endOf('week')],
-                    'Last Week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-
-                },
-                startDate: moment().subtract(60, 'days'),
-                endDate: moment(),
-                minDate: moment().subtract(6, 'month'),
-                maxDate: moment()
-            });
-
-
             var resultDataTable = null;
 
             var loadingOverlayConfig = {
@@ -429,17 +391,15 @@
             }
 
 
-            function getExecutiveData(date_range, game, platform, report_type, group) {
+            function getExecutiveData(game, platform, group) {
 
                 startRequestLoading();
                 $.ajax({
                     type: 'GET',
                     url: '/report/daily_summary_data',
                     data: {
-                        date_range: date_range,
                         game: game,
                         platform: platform,
-                        report_type: report_type,
                         group: group
 
                     },
@@ -516,13 +476,11 @@
 
 
             $('#btn-executive-apply').click(function () {
-                var date_range = $('#executive-date-range').val();
                 var game = $('#executive-game').val();
                 var platform = $('#executive-platform').val();
-                var report_type = $('#executive-report-type').val();
                 var group = $('#executive-group-type').val();
 
-                getExecutiveData(date_range, game, platform, report_type, group);
+                getExecutiveData(game, platform, group);
             });
             $('#btn-executive-apply').trigger('click');
 

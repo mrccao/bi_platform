@@ -74,41 +74,41 @@ def current_time(timezone=None):
         return now
     return now.to(timezone)
 
+#
+# def get_week_order_of_date_range(start_time, end_time):
+#     if end_time == start_time:
+#         return
+#
+#     end_year, end_week = end_time.isocalendar()[0:2]
+#     start_year, start_week = start_time.isocalendar()[0:2]
+#
+#     if end_week < 10:
+#         end_week = '0' + str(end_week)
+#     if start_week < 10:
+#         start_week = '0' + str(start_week)
+#
+#     end_week = str(end_year) + '-' + str(end_week)
+#     start_week = str(start_year) + '-' + str(start_week)
+#
+#     return start_week, end_week
 
-def get_week_order_of_date_range(start_time, end_time):
-    if end_time == start_time:
-        return
-
-    end_year, end_week = end_time.isocalendar()[0:2]
-    start_year, start_week = start_time.isocalendar()[0:2]
-
-    if end_week < 10:
-        end_week = '0' + str(end_week)
-    if start_week < 10:
-        start_week = '0' + str(start_week)
-
-    end_week = str(end_year) + '-' + str(end_week)
-    start_week = str(start_year) + '-' + str(start_week)
-
-    return start_week, end_week
-
-
-def generate_date_range_group_by_daily_or_weekly_or_monthly(start_time, end_time, group_type):
-    start_day = arrow.Arrow.strptime(start_time, "%Y-%m-%d")
-    end_day = arrow.Arrow.strptime(end_time, "%Y-%m-%d")
-
-    if group_type == 'Monthly':
-        start_month = start_day.format("YYYY-MM")
-        end_month = end_day.format("YYYY-MM")
-
-        return start_month, end_month
-
-    if group_type == 'Weekly':
-        start_week, end_week = get_week_order_of_date_range(start_day, end_day)
-
-        return start_week, end_week
-
-    return start_time, end_time
+#
+# def generate_date_range_group_by_daily_or_weekly_or_monthly(start_time, end_time, group_type):
+#     start_day = arrow.Arrow.strptime(start_time, "%Y-%m-%d")
+#     end_day = arrow.Arrow.strptime(end_time, "%Y-%m-%d")
+#
+#     if group_type == 'Monthly':
+#         start_month = start_day.format("YYYY-MM")
+#         end_month = end_day.format("YYYY-MM")
+#
+#         return start_month, end_month
+#
+#     if group_type == 'Weekly':
+#         start_week, end_week = get_week_order_of_date_range(start_day, end_day)
+#
+#         return start_week, end_week
+#
+#     return start_time, end_time
 
 
 def current_time_as_float(timezone=None):
@@ -117,7 +117,7 @@ def current_time_as_float(timezone=None):
 
 def get_last_day_of_prev_month(timezone=None):
     prev_month = current_time(timezone).replace(months=-1)
-    return arrow.get(prev_month.year, prev_month.month, monthrange(prev_month.year, prev_month.month)[1])
+    return arrow.get(prev_month.year, prev_month.month, calendar.monthrange(prev_month.year, prev_month.month)[1])
 
 
 class timeout(object):
