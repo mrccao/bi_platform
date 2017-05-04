@@ -88,7 +88,8 @@ def process_bi_statistic_game_records(target):
                                                 ON matchinfo.matchid = userreward.matchid
                                             WHERE  matchinfo.type = :game_type_id
                                                    AND DATE(CONVERT_TZ(userreward.time, '+08:00', :timezone_offset)) = :on_day ;
-                                          """), timezone_offset=timezone_offset, game_type_id=game_type_id, on_day=someday)
+                                          """), timezone_offset=timezone_offset, game_type_id=game_type_id,
+                                      on_day=someday)
 
     if target == 'lifetime':
 

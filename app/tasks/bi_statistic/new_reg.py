@@ -311,7 +311,7 @@ def process_bi_statistic_new_reg(target):
                                            WHERE reg_source = 'Facebook Game'
                                            GROUP  BY on_day,
                                                      platform
-    #                                         """), timezone_offset=timezone_offset)
+                                             """), timezone_offset=timezone_offset)
 
         else:
 
@@ -479,253 +479,251 @@ def process_bi_statistic_new_reg(target):
                 print(target + ' facebook_login_reg for every platform transaction.commit()')
 
         with_db_context(db, sync_collection_facebook_login_reg)
-    #
-    # def collection_email_reg_all_platforms(connection, transaction):
-    #
-    #     if target == 'lifetime':
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-    #                                                COUNT(*)                                               AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  reg_facebook_connect = 0
-    #                                                AND reg_platform != 'Facebook Game'
-    #                                                AND email IS NOT NULL
-    #                                         GROUP  BY on_day;
-    #                                         """), timezone_offset=timezone_offset)
-    #     else:
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT COUNT(*)      AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  facebook_id IS NOT NULL
-    #                                                AND    reg_platform != 'Facebook Game'
-    #                                                AND    email IS NOT NULL
-    #                                                AND    DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-    #                                        """), on_day=someday, timezone_offset=timezone_offset)
-    #
-    # result_proxy = with_db_context(db, collection_email_reg_all_platforms)
-    #
-    # if target == 'lifetime':
-    #
-    #     rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # else:
-    #
-    #     rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-    #
-    # if rows:
-    #
-    #     def sync_collection_email_reg_all_platforms(connection, transaction):
-    #
-    #         where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-    #                      BIStatistic.__table__.c.platform == 'All Platform',
-    #                      BIStatistic.__table__.c.game == 'All Game')
-    #         values = {'email_reg': bindparam('sum')}
-    #
-    #         try:
-    #             connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-    #         except:
-    #             print(target + ' email_reg for all platforms transaction.rollback()')
-    #             transaction.rollback()
-    #             raise
-    #         else:
-    #             transaction.commit()
-    #             print(target + ' email_reg for all platforms transaction.commit()')
-    #
-    #     with_db_context(db, sync_collection_email_reg_all_platforms)
-    #
-    # def collection_email_reg(connection, transaction):
-    #
-    #     if target == 'lifetime':
-    #         return connection.execute(text("""
-    #                                         SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-    #                                                CASE
-    #                                                  WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-    #                                                  WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-    #                                                  WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-    #                                                  WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-    #                                                  WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-    #                                                end                                                    AS platform,
-    #                                                COUNT(*)                                               AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  facebook_id IS NULL
-    #                                                AND email IS NOT NULL
-    #                                         GROUP  BY on_day;
-    #                                          """), timezone_offset=timezone_offset)
-    #
-    #     else:
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT COUNT(*) AS sum,
-    #                                                CASE
-    #                                                  WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-    #                                                  WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-    #                                                  WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-    #                                                  WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-    #                                                  WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-    #                                                end      AS platform
-    #                                         FROM   bi_user
-    #                                         WHERE  facebook_id IS NOT NULL
-    #                                                AND email IS NOT NULL
-    #                                                AND DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-    #                                         GROUP  BY platform;
-    #                                          """), on_day=someday, timezone_offset=timezone_offset)
-    #
-    # result_proxy = with_db_context(db, collection_email_reg)
-    #
-    # if target == 'lifetime':
-    #
-    #     rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # else:
-    #
-    #     rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # if rows:
-    #
-    #     def sync_collection_email_reg(connection, transaction):
-    #         where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-    #                      BIStatistic.__table__.c.platform == bindparam('_platform'),
-    #                      BIStatistic.__table__.c.game == 'All Game')
-    #         values = {'email_reg': bindparam('sum')}
-    #
-    #         try:
-    #             connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-    #         except:
-    #             print(target + ' email_reg for every platform  transaction.rollback()')
-    #             transaction.rollback()
-    #             raise
-    #         else:
-    #             transaction.commit()
-    #             print(target + ' email_reg for every platform transaction.commit()')
-    #
-    #     with_db_context(db, sync_collection_email_reg)
-    #
-    # def collection_email_validated_all_platforms(connection, transaction):
-    #
-    #     if target == 'lifetime':
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-    #                                                COUNT(*)                                               AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  facebook_id IS NULL
-    #                                                AND email_validate_time IS NOT NULL
-    #                                         GROUP  BY on_day
-    #                                         """), timezone_offset=timezone_offset)
-    #     else:
-    #
-    #         return connection.execute(text("""
-    #                                        SELECT COUNT(*)                                               AS sum
-    #                                        FROM   bi_user
-    #                                        WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-    #                                               AND    facebook_id IS NULL
-    #                                               AND    email_validate_time  IS NOT NULL
-    #                                        """), on_day=someday, timezone_offset=timezone_offset)
-    #
-    # result_proxy = with_db_context(db, collection_email_validated_all_platforms)
-    #
-    # if target == 'lifetime':
-    #
-    #     rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # else:
-    #
-    #     rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
-    #
-    # if rows:
-    #
-    #     def sync_collection_email_validated_all_platforms(connection, transaction):
-    #
-    #         where = and_(
-    #             BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-    #             BIStatistic.__table__.c.platform == 'All Platform',
-    #             BIStatistic.__table__.c.game == 'All Game'
-    #         )
-    #         values = {'email_validated': bindparam('sum')}
-    #
-    #         try:
-    #             connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-    #         except:
-    #             print(target + ' email_validated for all platforms transaction.rollback()')
-    #             transaction.rollback()
-    #             raise
-    #         else:
-    #             transaction.commit()
-    #             print(target + ' email_validated for all platforms transaction.commit()')
-    #
-    #     with_db_context(db, sync_collection_email_validated_all_platforms)
 
-    # def collection_email_validated(connection, transaction):
-    #
-    #     if target == 'lifetime':
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
-    #                                                CASE
-    #                                                  WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-    #                                                  WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-    #                                                  WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-    #                                                  WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-    #                                                  WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-    #                                                end                                                    AS platform,
-    #                                                COUNT(*)                                               AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  facebook_id IS NULL
-    #                                                AND email_validate_time IS NOT NULL
-    #                                         GROUP  BY on_day,
-    #                                                   platform
-    #                                         """), timezone_offset=timezone_offset)
-    #
-    #     else:
-    #
-    #         return connection.execute(text("""
-    #                                         SELECT CASE
-    #                                                  WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
-    #                                                  WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
-    #                                                  WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
-    #                                                  WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
-    #                                                  WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-    #                                                end      AS platform,
-    #                                                COUNT(*) AS sum
-    #                                         FROM   bi_user
-    #                                         WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
-    #                                                AND facebook_id IS NULL
-    #                                                AND email_validate_time IS NOT NULL
-    #                                         GROUP  BY platform;
-    #                                        """), on_day=someday, timezone_offset=timezone_offset)
-    #
-    # result_proxy = with_db_context(db, collection_email_validated)
-    #
-    # if target == 'lifetime':
-    #
-    #     rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # else:
-    #
-    #     rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
-    #
-    # if rows:
-    #
-    #     def sync_collection_email_validated(connection, transaction):
-    #
-    #         where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
-    #                      BIStatistic.__table__.c.platform == bindparam('_platform'),
-    #                      BIStatistic.__table__.c.game == 'All Game')
-    #         values = {'email_validated': bindparam('sum')}
-    #
-    #         try:
-    #             connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
-    #         except:
-    #             print(target + ' new_reg_validate for every platform transaction.rollback()')
-    #             transaction.rollback()
-    #             raise
-    #         else:
-    #             transaction.commit()
-    #             print(target + ' email_validated for every platform transaction.commit()')
-    #
-    #     with_db_context(db, sync_collection_email_validated)
+    def collection_email_reg_all_platforms(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
+                                                   COUNT(*)                                               AS sum
+                                            FROM   bi_user
+                                            WHERE  reg_facebook_connect = 0
+                                                   AND email IS NOT NULL
+                                            GROUP  BY on_day;
+                                            """), timezone_offset=timezone_offset)
+        else:
+
+            return connection.execute(text("""
+                                            SELECT COUNT(*)      AS sum
+                                            FROM   bi_user
+                                            WHERE  facebook_id IS NOT NULL
+                                                   AND    email IS NOT NULL
+                                                   AND    DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                           """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_email_reg_all_platforms)
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_email_reg_all_platforms(connection, transaction):
+
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == 'All Platform',
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'email_reg': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' email_reg for all platforms transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' email_reg for all platforms transaction.commit()')
+
+        with_db_context(db, sync_collection_email_reg_all_platforms)
+
+    def collection_email_reg(connection, transaction):
+
+        if target == 'lifetime':
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
+                                                   CASE
+                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
+                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
+                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
+                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
+                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
+                                                   end                                                    AS platform,
+                                                   COUNT(*)                                               AS sum
+                                            FROM   bi_user
+                                            WHERE  facebook_id IS NULL
+                                                   AND email IS NOT NULL
+                                            GROUP  BY on_day;
+                                             """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                            SELECT COUNT(*) AS sum,
+                                                   CASE
+                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
+                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
+                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
+                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
+                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
+                                                   end      AS platform
+                                            FROM   bi_user
+                                            WHERE  facebook_id IS NOT NULL
+                                                   AND email IS NOT NULL
+                                                   AND DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                            GROUP  BY platform;
+                                             """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_email_reg)
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_email_reg(connection, transaction):
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('_platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'email_reg': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' email_reg for every platform  transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' email_reg for every platform transaction.commit()')
+
+        with_db_context(db, sync_collection_email_reg)
+
+    def collection_email_validated_all_platforms(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
+                                                   COUNT(*)                                               AS sum
+                                            FROM   bi_user
+                                            WHERE  facebook_id IS NULL
+                                                   AND email_validate_time IS NOT NULL
+                                            GROUP  BY on_day
+                                            """), timezone_offset=timezone_offset)
+        else:
+
+            return connection.execute(text("""
+                                           SELECT COUNT(*)                                               AS sum
+                                           FROM   bi_user
+                                           WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                                  AND    facebook_id IS NULL
+                                                  AND    email_validate_time  IS NOT NULL
+                                           """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_email_validated_all_platforms)
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, 'sum': row['sum']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_email_validated_all_platforms(connection, transaction):
+
+            where = and_(
+                BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                BIStatistic.__table__.c.platform == 'All Platform',
+                BIStatistic.__table__.c.game == 'All Game'
+            )
+            values = {'email_validated': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' email_validated for all platforms transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' email_validated for all platforms transaction.commit()')
+
+        with_db_context(db, sync_collection_email_validated_all_platforms)
+
+    def collection_email_validated(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                            SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
+                                                   CASE
+                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
+                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
+                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
+                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
+                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
+                                                   end                                                    AS platform,
+                                                   COUNT(*)                                               AS sum
+                                            FROM   bi_user
+                                            WHERE  facebook_id IS NULL
+                                                   AND email_validate_time IS NOT NULL
+                                            GROUP  BY on_day,
+                                                      platform
+                                            """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                            SELECT CASE
+                                                     WHEN LEFT(reg_source, 10) = 'Web Mobile' THEN 'Web Mobile'
+                                                     WHEN LEFT(reg_source, 3) = 'Web' THEN 'Web'
+                                                     WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
+                                                     WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
+                                                     WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
+                                                   end      AS platform,
+                                                   COUNT(*) AS sum
+                                            FROM   bi_user
+                                            WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
+                                                   AND facebook_id IS NULL
+                                                   AND email_validate_time IS NOT NULL
+                                            GROUP  BY platform;
+                                           """), on_day=someday, timezone_offset=timezone_offset)
+
+    result_proxy = with_db_context(db, collection_email_validated)
+
+    if target == 'lifetime':
+
+        rows = [{'_on_day': row['on_day'], '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    else:
+
+        rows = [{'_on_day': someday, '_platform': row['platform'], 'sum': row['sum']} for row in result_proxy]
+
+    if rows:
+
+        def sync_collection_email_validated(connection, transaction):
+
+            where = and_(BIStatistic.__table__.c.on_day == bindparam('_on_day'),
+                         BIStatistic.__table__.c.platform == bindparam('_platform'),
+                         BIStatistic.__table__.c.game == 'All Game')
+            values = {'email_validated': bindparam('sum')}
+
+            try:
+                connection.execute(BIStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' new_reg_validate for every platform transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' email_validated for every platform transaction.commit()')
+
+        with_db_context(db, sync_collection_email_validated)
 
     def collection_guest_reg_all_platform(connection, transaction):
 

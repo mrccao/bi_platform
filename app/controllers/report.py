@@ -149,7 +149,7 @@ def daily_summary_data():
                         'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue', 'one_day_retention(%)',
                         'seven_day_retention(%)', 'thirty_day_retention(%)', 'email_validated', 'mtt_buy_ins',
                         'sng_buy_ins', 'mtt_rake', 'sng_rake', 'ring_game_rake', 'mtt_winnings', 'sng_winnings',
-                        'stickiness_weekly', 'stickiness_monthly', 'ARPDAU', 'ARPPU']
+                        'stickiness_weekly', 'stickiness_monthly', 'ARPPU']
 
         new_reg_game_dau = transpose_query_result[8]
         one_day_retention_count = transpose_query_result[12]
@@ -177,7 +177,7 @@ def daily_summary_data():
                         'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
                         'email_validated', 'mtt_buy_ins', 'sng_buy_ins', 'mtt_rake', 'sng_rake',
                         'ring_game_rake', 'mtt_winnings', 'sng_winnings', 'stickiness_weekly', 'stickiness_monthly',
-                        'ARPDAU', 'ARPPU']
+                         'ARPPU']
 
     dau = transpose_query_result[1]
     wau = transpose_query_result[2]
@@ -190,15 +190,15 @@ def daily_summary_data():
     try:
         stickiness_weekly = array(dau) / array(wau)
         stickiness_monthly = array(dau) / array(mau)
-        ARPDAU = [int(round(i, 2)) for i in array(revenue) / array(dau)]
+        # ARPDAU = [int(round(i, 2)) for i in array(revenue) / array(dau)]
         ARPPU = [int(round(i, 2)) for i in array(revenue) / array(paid_user_count)]
     except Exception:
         stickiness_weekly = [0 for i in range(len(dau))]
         stickiness_monthly = [0 for i in range(len(mau))]
-        ARPDAU = [0 for i in range(len(dau))]
+        # ARPDAU = [0 for i in range(len(dau))]
         ARPPU = [0 for i in range(len(dau))]
 
-    compound_metrics = [stickiness_weekly, stickiness_monthly, ARPDAU, ARPPU]
+    compound_metrics = [stickiness_weekly, stickiness_monthly, ARPPU]
     # process charts
     charts_data.extend(compound_metrics)
     charts_labels = charts_data[0]
