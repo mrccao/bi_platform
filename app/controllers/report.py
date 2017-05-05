@@ -6,7 +6,7 @@ from copy import copy
 from flask import Blueprint, render_template, jsonify, request
 from flask import current_app as app
 from flask_login import login_required
-from numpy import array
+from numpy import array, isnan
 from sqlalchemy import and_, func, text
 
 from app.extensions import db
@@ -46,6 +46,8 @@ def daily_summary_data():
                                              ROUND(AVG(facebook_login_reg),0),
                                              ROUND(AVG(guest_reg),0),
                                              ROUND(AVG(email_reg),0),
+                                             ROUND(AVG(email_validated),0),
+                                             ROUND(AVG(new_reg),0),
                                              ROUND(AVG(new_reg_game_dau),0),
                                              ROUND(AVG(paid_user_count),0),
                                              ROUND(AVG(paid_count),0),
@@ -53,7 +55,6 @@ def daily_summary_data():
                                              ROUND(AVG(one_day_retention),0),
                                              ROUND(AVG(seven_day_retention),0),
                                              ROUND(AVG(thirty_day_retention),0),
-                                             ROUND(AVG(email_validated),0),
                                              ROUND(AVG(mtt_buy_ins),0),
                                              ROUND(AVG(sng_buy_ins),0),
                                              ROUND(AVG(mtt_rake),0),
@@ -83,6 +84,8 @@ def daily_summary_data():
                                              ROUND(AVG(facebook_login_reg),0),
                                              ROUND(AVG(guest_reg),0),
                                              ROUND(AVG(email_reg),0),
+                                             ROUND(AVG(email_validated),0),
+                                             ROUND(AVG(new_reg),0),
                                              ROUND(AVG(new_reg_game_dau),0),
                                              ROUND(AVG(paid_user_count),0),
                                              ROUND(AVG(paid_count),0),
@@ -90,7 +93,6 @@ def daily_summary_data():
                                              ROUND(AVG(one_day_retention),0),
                                              ROUND(AVG(seven_day_retention),0),
                                              ROUND(AVG(thirty_day_retention),0),
-                                             ROUND(AVG(email_validated),0),
                                              ROUND(AVG(mtt_buy_ins),0),
                                              ROUND(AVG(sng_buy_ins),0),
                                              ROUND(AVG(mtt_rake),0),
@@ -117,6 +119,8 @@ def daily_summary_data():
                                              facebook_login_reg,
                                              guest_reg,
                                              email_reg,
+                                             email_validated,
+                                             new_reg,
                                              new_reg_game_dau,
                                              paid_user_count,
                                              paid_count,
@@ -124,7 +128,6 @@ def daily_summary_data():
                                              one_day_retention,
                                              seven_day_retention,
                                              thirty_day_retention ,
-                                             email_validated,
                                              mtt_buy_ins,
                                              sng_buy_ins,
                                              mtt_rake,
@@ -145,18 +148,20 @@ def daily_summary_data():
     charts_data = transpose_query_result
 
     column_names = ['dau', 'wau', 'mau', 'facebook_game_reg', 'facebook_login_reg', 'guest_reg', 'email_reg',
-                    'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue', 'one_day_retention(%)',
-                    'seven_day_retention(%)', 'thirty_day_retention(%)', 'email_validated', 'mtt_buy_ins',
+                    'email_validated', 'new_reg', 'new_reg_game_dau', 'paid_user_count', 'paid_count', 'revenue',
+                    'one_day_retention(%)', 'seven_day_retention(%)', 'thirty_day_retention(%)', 'mtt_buy_ins',
                     'sng_buy_ins', 'mtt_rake', 'sng_rake', 'ring_game_rake', 'mtt_winnings', 'sng_winnings',
-                    'free_gold', 'free_silver',
-                    'stickiness_weekly', 'stickiness_monthly', 'ARPPU']
+                    'free_gold', 'free_silver', 'stickiness_weekly', 'stickiness_monthly', 'ARPPU']
+
     tables_columns_names = copy(column_names)
     tables_columns_names.insert(0, 'date')
 
-    new_reg_game_dau = transpose_query_result[8]
-    one_day_retention_count = transpose_query_result[12]
-    seven_day_retention_count = transpose_query_result[13]
-    thirty_day_retention_count = transpose_query_result[14]
+    new_reg_game_dau = transpose_query_result[10]
+    one_day_retention_count = transpose_query_result[14]
+    seven_day_retention_count = transpose_query_result[15]
+    thirty_day_retention_count = transpose_query_result[16]
+
+    # calculate  retention
 
     try:
         one_day_retention = [int(round(i, 2) * 100) for i in
@@ -172,19 +177,20 @@ def daily_summary_data():
         seven_day_retention = [0 for i in range(len(seven_day_retention_count))]
         thirty_day_retention = [0 for i in range(len(thirty_day_retention_count))]
 
-    charts_data[12:15] = [one_day_retention, seven_day_retention, thirty_day_retention]
+    charts_data[14:17] = [one_day_retention, seven_day_retention, thirty_day_retention]
 
     dau = transpose_query_result[1]
     wau = transpose_query_result[2]
     mau = transpose_query_result[3]
-    paid_user_count = transpose_query_result[9]
-    revenue = [Decimal(row) for row in transpose_query_result[11]]
+    paid_user_count = transpose_query_result[11]
+    revenue = [Decimal(row) for row in transpose_query_result[13]]
 
     # calculate  Compound metrics
 
     try:
-        stickiness_weekly = array(dau) / array(wau)
-        stickiness_monthly = array(dau) / array(mau)
+
+        stickiness_weekly = list(map(lambda i: 0 if isnan(i)  else round(i, 2), array(dau) / array(wau)))
+        stickiness_monthly = list(map(lambda i: 0 if isnan(i)  else round(i, 2), array(dau) / array(mau)))
         # ARPDAU = [int(round(i, 2)) for i in array(revenue) / array(dau)]
         ARPPU = [int(round(i, 2)) for i in array(revenue) / array(paid_user_count)]
     except Exception:
