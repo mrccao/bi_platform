@@ -1,9 +1,9 @@
 import calendar
+import importlib
 import logging
 import signal
 
 import arrow
-import importlib
 from flask import current_app as app
 
 from app.exceptions import TimeoutException
@@ -28,10 +28,8 @@ def get_day_range_of_month(now):
     first_day_of_previous_month = str(previous_year) + '-' + str(previous_month) + '-' + '01'
     last_day_of_previous_month = str(previous_year) + '-' + str(previous_month) + '-' + str(last_day_of_previous_month)
 
-
     first_day_of_current_month = arrow.Arrow.strptime(first_day_of_current_month, '%Y-%m-%d').format('YYYY-MM-DD')
     last_day_of_current_month = arrow.Arrow.strptime(last_day_of_current_month, '%Y-%m-%d').format('YYYY-MM-DD')
-
 
     first_day_of_previous_month = arrow.Arrow.strptime(first_day_of_previous_month, '%Y-%m-%d').format('YYYY-MM-DD')
     last_day_of_previous_month = arrow.Arrow.strptime(last_day_of_previous_month, '%Y-%m-%d').format('YYYY-MM-DD')
@@ -73,6 +71,7 @@ def current_time(timezone=None):
     if timezone is None:
         return now
     return now.to(timezone)
+
 
 #
 # def get_week_order_of_date_range(start_time, end_time):

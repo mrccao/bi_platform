@@ -369,7 +369,7 @@ def process_bi_statistic_new_reg(target):
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect =1
-                                            AND   reg_source != 'Facebook Game'
+                                            AND    reg_source != 'Facebook Game'
                                             GROUP  BY on_day; 
                                             """), timezone_offset=timezone_offset)
         else:

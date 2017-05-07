@@ -97,7 +97,7 @@ def register_blueprints(app):
 
     from app.controllers.account import account
     from app.controllers.dashboard import dashboard
-    from app.controllers.report import report
+    from app.controllers.report   import report
 
 
     from app.controllers.sql_lab import sql_lab
