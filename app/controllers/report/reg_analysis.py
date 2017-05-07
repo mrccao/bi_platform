@@ -15,7 +15,7 @@ from . import report
 @report.route("/reg/reg_platform", methods=["GET"])
 # @login_required
 def reg_platform():
-    return render_template('report/reg_platform_distributed.html')
+    return render_template('report/new_users.html')
 
 
 @report.route("/report/reg_platform_data", methods=["GET"])

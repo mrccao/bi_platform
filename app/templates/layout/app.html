@@ -8,18 +8,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="icon" type="image/ico" href="http://www.worldpokertour.com/wp-content/themes/worldpokertour/images/wpt_favicon.ico">
     {% endblock %}
 
     {% block head_css %}
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/AdminLTE.min.css">
-        <link rel="stylesheet"
-              href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/skins/_all-skins.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/skins/_all-skins.min.css">
     {% endblock %}
 
     {% assets "common_css" %}
@@ -53,18 +51,18 @@
         </header>
         <aside class="main-sidebar">
             <section class="sidebar">
-                <div class="user-panel">
-                    <div class="pull-left image">
-                        <img src="{{ current_user.email | gravatar(size=60, default='mm', use_ssl=True) }}"
+                <div class="user-panel" style="height: 90px;padding-top: 25px ;padding-right: 20px">
+                    <a class="pull-left image" href="http://www.playwpt.com" target="_blank" style="display: block">
+                        <img src="{{ current_user.email | gravatar(size=60, default='https://pbs.twimg.com/profile_images/502599149464739840/WDjX4Sv0.jpeg', use_ssl=True) }}"
                              class="img-circle">
-                    </div>
+                    </a>
+
                     <div class="pull-left info">
                         <p>{{ current_user.name }}</p>
                         <a href="javascript:void(0);">{{ current_user.email }}</a>
                     </div>
                 </div>
                 <ul class="sidebar-menu">
-                    <li class="header">MAIN NAVIGATION</li>
                     <li class="{{ ' active' if request.path == '/' else '' }}">
                         <a href="{{ url_for('dashboard.index') }}">
                             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
@@ -86,8 +84,8 @@
                         <ul class="treeview-menu">
                             <li><a href="{{ url_for('report.daily_summary') }}"><i class="fa fa-circle-o"></i>Daily
                                 Summary</a></li>
-                            <li><a href="{{ url_for('report.reg_platform') }}"><i class="fa fa-circle-o"></i>Reg
-                                Platform Distribution</a></li>
+                            <li><a href="{{ url_for('report.reg_platform') }}"><i class="fa fa-circle-o"></i>New
+                                Users</a></li>
                         </ul>
                     </li>
                     <li class="treeview{{ ' active' if request.path.startswith('/promotion') else '' }}">
