@@ -8,16 +8,20 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="icon" type="image/ico" href="http://www.worldpokertour.com/wp-content/themes/worldpokertour/images/wpt_favicon.ico">
+        <link rel="icon" type="image/ico"
+              href="http://www.worldpokertour.com/wp-content/themes/worldpokertour/images/wpt_favicon.ico">
     {% endblock %}
 
     {% block head_css %}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/AdminLTE.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/skins/_all-skins.min.css">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.8/css/skins/_all-skins.min.css">
     {% endblock %}
 
     {% assets "common_css" %}
@@ -32,11 +36,11 @@
 {% block html_body %}
     <div class="wrapper">
         <header class="main-header">
-            <a href="#" class="logo">
+            <a href="https://bi.playwpt.com" class="logo">
                 <span class="logo-mini">DWH</span>
                 <span class="logo-lg"><b>WPT</b> Data Warehouse</span>
             </a>
-            <nav class="navbar navbar-static-top">
+{#            <nav class="navbar navbar-static-top">#}
                 <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                     <span class="sr-only">Toggle navigation</span>
                 </a>
@@ -47,7 +51,7 @@
                         </li>
                     </ul>
                 </div>
-            </nav>
+{#            </nav>#}
         </header>
         <aside class="main-sidebar">
             <section class="sidebar">
@@ -84,7 +88,7 @@
                         <ul class="treeview-menu">
                             <li><a href="{{ url_for('report.daily_summary') }}"><i class="fa fa-circle-o"></i>Daily
                                 Summary</a></li>
-                            <li><a href="{{ url_for('report.reg_platform') }}"><i class="fa fa-circle-o"></i>New
+                            <li><a href="{{ url_for('report.new_users') }}"><i class="fa fa-circle-o"></i>New
                                 Users</a></li>
                         </ul>
                     </li>
