@@ -134,7 +134,7 @@ def process_bi_statistic_new_reg(target):
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NOT NULL
+                                            WHERE  reg_facebook_connect =1
                                             GROUP  BY on_day  
                                            """), timezone_offset=timezone_offset)
         else:
@@ -191,7 +191,7 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                  AS platform,
                                                   COUNT(*)                                             AS sum
                                            FROM   bi_user
-                                           WHERE  facebook_id IS NOT NULL
+                                           WHERE  reg_facebook_connect =1
                                            GROUP  BY on_day,
                                                      platform
     #                                         """), timezone_offset=timezone_offset)
@@ -308,7 +308,7 @@ def process_bi_statistic_new_reg(target):
                                                   END                                                  AS platform,
                                                   COUNT(*)                                             AS sum
                                            FROM   bi_user
-                                           WHERE reg_source = 'Facebook Game'
+                                           WHERE  reg_source = 'Facebook Game'
                                            GROUP  BY on_day,
                                                      platform
                                              """), timezone_offset=timezone_offset)
@@ -497,7 +497,7 @@ def process_bi_statistic_new_reg(target):
             return connection.execute(text("""
                                             SELECT COUNT(*)      AS sum
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NOT NULL
+                                            WHERE  reg_facebook_connect = 0
                                                    AND    email IS NOT NULL
                                                    AND    DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                            """), on_day=someday, timezone_offset=timezone_offset)
@@ -547,7 +547,7 @@ def process_bi_statistic_new_reg(target):
                                                    end                                                    AS platform,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NULL
+                                            WHERE  reg_facebook_connect = 0
                                                    AND email IS NOT NULL
                                             GROUP  BY on_day;
                                              """), timezone_offset=timezone_offset)
@@ -564,7 +564,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
                                                    end      AS platform
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NOT NULL
+                                            WHERE  reg_facebook_connect = 0
                                                    AND email IS NOT NULL
                                                    AND DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
                                             GROUP  BY platform;
@@ -608,7 +608,7 @@ def process_bi_statistic_new_reg(target):
                                             SELECT DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) AS on_day,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NULL
+                                            WHERE  reg_facebook_connect = 0
                                                    AND email_validate_time IS NOT NULL
                                             GROUP  BY on_day
                                             """), timezone_offset=timezone_offset)
@@ -670,7 +670,7 @@ def process_bi_statistic_new_reg(target):
                                                    end                                                    AS platform,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
-                                            WHERE  facebook_id IS NULL
+                                            WHERE  reg_facebook_connect = 0
                                                    AND email_validate_time IS NOT NULL
                                             GROUP  BY on_day,
                                                       platform
