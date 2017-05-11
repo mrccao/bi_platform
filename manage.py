@@ -18,7 +18,6 @@ from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.bi_user_statistic import process_bi_user_statistic
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi
 
@@ -402,37 +401,37 @@ def sync_bi_statistic_for_someday(target):
 
 
 # process bi_user_statistic
-
-@manager.command
-def sync_bi_user_statistic_for_lifetime():
-    if app.config['ENV'] == 'prod':
-        process_bi_user_statistic.delay('lifetime')
-    else:
-        process_bi_user_statistic('lifetime')
-
-
-@manager.command
-def sync_bi_user_statistic_for_yesterday():
-    if app.config['ENV'] == 'prod':
-        process_bi_user_statistic.delay('yesterday')
-    else:
-        process_bi_user_statistic('yesterday')
-
-
-@manager.command
-def sync_bi_user_statistic_for_today():
-    if app.config['ENV'] == 'prod':
-        process_bi_user_statistic.delay('today')
-    else:
-        process_bi_user_statistic('today')
-
-
-@manager.command
-def sync_bi_user_statistic_for_someday(target):
-    if app.config['ENV'] == 'prod':
-        process_bi_user_statistic.delay(target)
-    else:
-        process_bi_user_statistic(target)
+#
+# @manager.command
+# def sync_bi_user_statistic_for_lifetime():
+#     if app.config['ENV'] == 'prod':
+#         process_bi_user_statistic.delay('lifetime')
+#     else:
+#         process_bi_user_statistic('lifetime')
+#
+#
+# @manager.command
+# def sync_bi_user_statistic_for_yesterday():
+#     if app.config['ENV'] == 'prod':
+#         process_bi_user_statistic.delay('yesterday')
+#     else:
+#         process_bi_user_statistic('yesterday')
+#
+#
+# @manager.command
+# def sync_bi_user_statistic_for_today():
+#     if app.config['ENV'] == 'prod':
+#         process_bi_user_statistic.delay('today')
+#     else:
+#         process_bi_user_statistic('today')
+#
+#
+# @manager.command
+# def sync_bi_user_statistic_for_someday(target):
+#     if app.config['ENV'] == 'prod':
+#         process_bi_user_statistic.delay(target)
+#     else:
+#         process_bi_user_statistic(target)
 
 
 @manager.command
