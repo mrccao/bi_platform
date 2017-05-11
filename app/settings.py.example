@@ -114,8 +114,17 @@ class DevConfig(Config):
         'orig_wpt_ods': 'mysql+pymysql://localhost/orig_wpt_ods',
     }
 
+    CELERY_IGNORE_RESULT = True
     CELERY_BROKER_URL = 'amqp://localhost:5672'
     CELERY_TIMEZONE = 'America/New_York'
+
+    CELERY_DEFAULT_QUEUE = 'default'
+    CELERY_CREATE_MISSING_QUEUES = 'default'
+    CELERY_QUEUES = (
+        Queue('default', Exchange('default'), routing_key='default'),
+        Queue('for_sync_data', Exchange('for_sync_data'), routing_key='for_sync_data'),
+        Queue('for_promotion', Exchange('for_promotion'), routing_key='for_promotion'),
+    )
     CELERY_IMPORTS = (
         'app.tasks.bi_user',
         'app.tasks.bi_user_bill',
@@ -129,26 +138,29 @@ class DevConfig(Config):
     CELERYBEAT_SCHEDULE = {
         'process_scheduled_bi': {
             'task': 'app.tasks.scheduled.process_bi',
-            'schedule': timedelta(seconds=8 * 60)
+            'schedule': timedelta(seconds=10 * 60),
+            'options': {'queue': 'for_sync_data'}
         },
         'process_scheduled_bi_currency': {
             'task': 'app.tasks.scheduled.process_bi_currency',
-            'schedule': timedelta(seconds=120 * 60)
+            'schedule': timedelta(seconds=120 * 60),
+            'options': {'queue': 'for_sync_data'}
         },
         'process_scheduled_promotion_push': {
             'task': 'app.tasks.scheduled.process_promotion_push',
-            'schedule': timedelta(seconds=6 * 60)
+            'schedule': timedelta(seconds=6 * 60),
+            'options': {'queue': 'for_promotion'}
         },
         'process_scheduled_bi_statistic_for_yesterday': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_yesterday',
-            'schedule': crontab(hour=3, minute=0)
+            'schedule': crontab(hour=3, minute=0),
+            'options': {'queue': 'for_sync_data'}
         },
-
         'process_scheduled_bi_statistic_for_today': {
             'task': 'app.tasks.scheduled.process_bi_statistic_for_today',
-            'schedule': timedelta(seconds=15 * 60)
+            'schedule': timedelta(seconds=20 * 60),
+            'options': {'queue': 'for_sync_data'}
         },
-
     }
 
     MAIL_SUBJECT_PREFIX = '[BI System] '
