@@ -75,7 +75,7 @@ def process_bi_user_statistic_consumption_records(target):
             for category in ['charms', 'avatar', 'emoji']:
                 category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
 
-                category_sales_record = with_db_context(db, collection_user_consumption_records, day=someday,
+                category_sales_record = with_db_context(db, collection_user_gold_consumption_records, day=someday,
                                                         category_orig=category_orig)
                 every_category_sales_record = [{'stats_date': str(someday), 'user_id': row['user_id'],
                                                 '{}_spend'.format(category): row['consumption_amount']} for
@@ -173,17 +173,14 @@ def process_bi_user_statistic_convert_records(target):
                                                         sum(currency_amount)       AS  convert_amount
                                             FROM  bi_user_bill
                                             WHERE currency_type = 'gold'
-                                            AND   category_orig IN :category_orig
+                                            AND   product_orig =2
                                             AND     DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
                                             GROUP BY  user_id
-                                           """), stats_date=day, timezone_offset=timezone_offset,
-                                      category_orig=tuple(category_orig))
+                                           """), stats_date=day, timezone_offset=timezone_offset)
 
     def get_user_convert_records():
 
         result_proxy = []
-
-        category = 'silver'
 
         if target == 'lifetime':
 
@@ -194,33 +191,23 @@ def process_bi_user_statistic_convert_records(target):
 
                 print('gold to silver history game on ' + str(day))
 
-                category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
-
-                category_convert_record = with_db_context(db, collection_user_convert_records, day=day,
-                                                          category_orig=category_orig)
+                category_convert_record = with_db_context(db, collection_user_convert_records, day=day)
 
                 every_category_convert_record_row = [{'_stats_date': str(day), '_user_id': row['user_id'],
                                                       'gold_to_silver': row['convert_amount']}
                                                      for row in category_convert_record]
 
-                all_category_convert_records = dict([(category, every_category_convert_record_row)])
-
-                result_proxy.append(all_category_convert_records)
+                result_proxy.append(every_category_convert_record_row)
 
         else:
 
-            category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
-
-            category_convert_record = with_db_context(db, collection_user_convert_records, day=someday,
-                                                      category_orig=category_orig)
+            category_convert_record = with_db_context(db, collection_user_convert_records, day=someday)
 
             every_category_convert_record_row = [{'_stats_date': str(someday), '_user_id': row['user_id'],
                                                   'gold_to_silver': row['convert_amount']}
                                                  for row in category_convert_record]
 
-            all_category_convert_records = dict([(category, every_category_convert_record_row)])
-
-            result_proxy.append(all_category_convert_records)
+            result_proxy.append(every_category_convert_record_row)
 
         return result_proxy
 
@@ -228,34 +215,35 @@ def process_bi_user_statistic_convert_records(target):
 
     if gold_convert_silver_records_result_proxy:
 
-        for category_convert_record_rows in gold_convert_silver_records_result_proxy:
+        for rows in gold_convert_silver_records_result_proxy:
 
-            for category_name, rows in category_convert_record_rows.items():
+            if rows:
 
-                if rows:
+                def sync_collection_user_convert_records(connection, transaction):
 
-                    def sync_collection_user_convert_records(connection, transaction):
+                    where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
+                                 BIUserStatistic.__table__.c.user_id == bindparam('_user_id'))
 
-                        where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
-                                     BIUserStatistic.__table__.c.user_id == bindparam('_user_id'))
+                    values = {'gold_to_silver': bindparam('convert_amount')}
 
-                        values = {'gold_to_silver': bindparam('convert_amount')}
+                    try:
 
-                        try:
+                        connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
 
-                            connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
+                    except:
+                        print(target + ' Convert history  transaction.rollback()')
+                        transaction.rollback()
+                        raise
+                    else:
+                        print(target + ' Convert history transaction.commit()')
+                        transaction.commit()
 
-                        except:
-                            print(target + ' Convert history  transaction.rollback()')
-                            transaction.rollback()
-                            raise
-                        else:
-                            print(target + ' Convert history transaction.commit()')
-                            transaction.commit()
-
-                    with_db_context(db, sync_collection_user_convert_records)
+                with_db_context(db, sync_collection_user_convert_records)
 
 
+
+
+#TODO 使用原始表
 def process_bi_user_statistic_free_transaction(target):
     _, someday, index_time, timezone_offset = generate_sql_date(target)
 

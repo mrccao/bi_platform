@@ -42,24 +42,31 @@ def process_bi_user_statistic_dau(target):
         def sync_collection_user_ring_game_dau(connection, transaction):
 
 
-            where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
-                         BIUserStatistic.__table__.c.username == bindparam('_username'))
+    ## TODO
+            for row in rows:
 
-            values = {'ring_dau': 1}
+                table_index=  row['_stats_date']
+                BIUserStatistic = model[table_index]
 
-            try:
-                connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
 
-            except:
+                where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
+                             BIUserStatistic.__table__.c.username == bindparam('_username'))
 
-                print(target + ' ring dau transaction.rollback()')
+                values = {'ring_dau': 1}
 
-                transaction.rollback()
+                try:
+                    connection.execute(BIUserStatistic.__table__.update().where(where).values(values), row)
 
-                raise
-            else:
-                transaction.commit()
-                print(target + ' ring dau transaction.commit()')
+                except:
+
+                    print(target + ' ring dau transaction.rollback()')
+
+                    transaction.rollback()
+
+                    raise
+                else:
+                    transaction.commit()
+                    print(target + ' ring dau transaction.commit()')
 
         with_db_context(db, sync_collection_user_ring_game_dau)
 

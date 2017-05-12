@@ -214,11 +214,11 @@ def process_bi_user_statistic_game_records(target):
                                                        WHEN u.type = 1 THEN 1
                                                        WHEN u.type = 2 THEN -1
                                                        ELSE 0
-                                                       END) AS entries
-                                            FROM tj_flow_usersign AS u
+                                                      END) AS entries
+                                           FROM tj_flow_usersign AS u
                                               LEFT JOIN tj_matchinfo AS m ON u.matchid = m.matchid
-                                            WHERE m.type = 1 
-                                            GROUP BY stats_date,u.username;
+                                           WHERE m.type = 1 
+                                           GROUP BY stats_date,u.username;
                                               """), timezone_offset=timezone_offset)
 
         else:
