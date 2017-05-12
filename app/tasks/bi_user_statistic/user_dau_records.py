@@ -8,6 +8,7 @@ from app.utils import generate_sql_date
 
 
 def process_bi_user_statistic_dau(target):
+
     _, someday, index_time, timezone_offset = generate_sql_date(target)
 
     def collection_user_ring_game_dau(connection, transaction):
@@ -15,15 +16,13 @@ def process_bi_user_statistic_dau(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-                                        SELECT  DISTINCT(username),
-                                                DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) AS stats_date
+                                        SELECT  DISTINCT(username)                                      AS username,
+                                               DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) AS stats_date
                                         FROM tj_cgz_flow_userpaninfo
-                                        GROUP BY DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) ,
-                                                 username 
                                            """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
-                                        SELECT  DISTINCT(username)
+                                        SELECT  DISTINCT(username)                                      AS username
                                         FROM tj_cgz_flow_userpaninfo
                                         WHERE DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) = :stats_date
                                            """), stats_date=someday, timezone_offset=timezone_offset)
@@ -49,9 +48,13 @@ def process_bi_user_statistic_dau(target):
 
             try:
                 connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
+
             except:
+
                 print(target + ' ring dau transaction.rollback()')
+
                 transaction.rollback()
+
                 raise
             else:
                 transaction.commit()
@@ -65,16 +68,15 @@ def process_bi_user_statistic_dau(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-                                            SELECT  username,
+                                            SELECT  DISTINCT(username)                             AS org_account,
                                             DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset))  AS stats_date
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =1
-                                            GROUP BY stats_date
                                                """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
-                                            SELECT  username
+                                            SELECT  DISTINCT(username)                             AS org_account
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =1
@@ -85,18 +87,18 @@ def process_bi_user_statistic_dau(target):
 
     if target == 'lifetime':
 
-        rows = [{'_stats_date': row['stats_date'], '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': row['stats_date'], '_org_account': row['org_account']} for row in result_proxy]
 
     else:
 
-        rows = [{'_stats_date': someday, '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': someday, '_org_account': row['org_account']} for row in result_proxy]
 
     if rows:
 
         def sync_collection_user_sng_dau(connection, transaction):
 
             where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
-                         BIUserStatistic.__table__.c.username == bindparam('_username'))
+                         BIUserStatistic.__table__.c.username == bindparam('_org_account'))
 
             values = {'sng_dau': 1}
 
@@ -122,16 +124,15 @@ def process_bi_user_statistic_dau(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-                                            SELECT  username,
+                                            SELECT  DISTINCT(username) AS org_account,
                                             DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset))  AS stats_date
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =2
-                                            GROUP BY stats_date
                                                """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
-                                            SELECT  username
+                                            SELECT  DISTINCT(username) AS org_account
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =2
@@ -142,18 +143,18 @@ def process_bi_user_statistic_dau(target):
 
     if target == 'lifetime':
 
-        rows = [{'_stats_date': row['stats_date'], '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': row['stats_date'], '_org_account': row['_org_account']} for row in result_proxy]
 
     else:
 
-        rows = [{'_stats_date': someday, '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': someday, '_org_account': row['_org_account']} for row in result_proxy]
 
     if rows:
 
         def sync_collection_user_sng_dau(connection, transaction):
 
             where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
-                         BIUserStatistic.__table__.c.username == bindparam('_username'))
+                         BIUserStatistic.__table__.c.username == bindparam('_org_account'))
 
             values = {'mtt_dau': 1}
 
@@ -175,22 +176,18 @@ def process_bi_user_statistic_dau(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-
                                               SELECT  DISTINCT(user_id)  AS user_id,
                                               DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS stats_date
                                               FROM bi_user_bill
-                                              GROUP BY  stats_date
-                                              
                                                """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
                                               SELECT  DISTINCT(user_id)  AS user_id
                                               FROM bi_user_bill
                                               WHERE DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
- 
                                                """), stats_date=someday, timezone_offset=timezone_offset)
 
-    result_proxy = with_db_context(db, collection_user_store_dau, bind='wpt_ods')
+    result_proxy = with_db_context(db, collection_user_store_dau)
 
     if target == 'lifetime':
 
@@ -222,8 +219,6 @@ def process_bi_user_statistic_dau(target):
 
         with_db_context(db, sync_collection_user_store_dau)
 
-
-
     # user_id_orig
 
     def collection_user_slots_dau(connection, transaction):
@@ -231,15 +226,13 @@ def process_bi_user_statistic_dau(target):
         if target == 'lifetime':
 
             return connection.execute(text("""
-
-                                              SELECT  DISTINCT(username)  AS username,
+                                              SELECT  DISTINCT(username)  AS org_account,
                                               DATE(CONVERT_TZ(recdate, '+08:00', :timezone_offset)) AS stats_date
                                               FROM gamecoin_detail
-                                              GROUP BY  stats_date
                                                """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
-                                              SELECT  DISTINCT(username)  AS username
+                                              SELECT  DISTINCT(username)  AS org_account
                                               FROM gamecoin_detail
                                               WHERE DATE(CONVERT_TZ(recdate, '+08:00', :timezone_offset)) = :stats_date
                                                """), stats_date=someday, timezone_offset=timezone_offset)
@@ -248,18 +241,18 @@ def process_bi_user_statistic_dau(target):
 
     if target == 'lifetime':
 
-        rows = [{'_stats_date': row['stats_date'], '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': row['stats_date'], '_org_account': row['org_account']} for row in result_proxy]
 
     else:
 
-        rows = [{'_stats_date': someday, '_username': row['username']} for row in result_proxy]
+        rows = [{'_stats_date': someday, '_org_account': row['org_account']} for row in result_proxy]
 
     if rows:
 
         def sync_collection_user_slots_dau(connection, transaction):
 
             where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
-                         BIUserStatistic.__table__.c.user_id == bindparam('_username'))
+                         BIUserStatistic.__table__.c.user_id == bindparam('_org_account'))
 
             values = {'slots_dau': 1}
 

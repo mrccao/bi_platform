@@ -82,16 +82,14 @@ SILVER_FREE_TRANSACTION_TYPES = [923118301, 923118302, 923118303, 923118304, 923
 FREE_TRANSACTION_TYPES = GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_TYPES
 
 SILVER_FREE_TRANSACTION_TYPES_TUPLE = tuple(GOLD_FREE_TRANSACTION_TYPES)
-GOLD_FREE_TRANSACTION_TYPES_TUPLE   = tuple(SILVER_FREE_TRANSACTION_TYPES)
+GOLD_FREE_TRANSACTION_TYPES_TUPLE = tuple(SILVER_FREE_TRANSACTION_TYPES)
 
 FREE_TRANSACTION_TYPES_TUPLE = tuple(GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_TYPES)
 
 PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
-    'charms': [28, 42, 39, 36, 33, 34, 44, 27, 41, 29, 43, 40, 16, 31, 32, 30, 35, 37, 38],
-    'avatar': [53, 23, 22, 18, 10, 50, 14, 21, 20, 15, 48, 56, 49, 25, 52, 13, 51, 19, 26, 57, 12, 47, 17, 24, 55, 11,
-               54],
-    'emoji': [46], 'gold': [1], 'silver': [2], 'spin_accelerator': [8], 'spin_ticket': [9],
-    'lucky_spin': [-1]}
+    'charms': [17, 18, 21, 20, 10],
+    'avatar': [34, 24, 23, 33, 15, 28, 25, 11, 29, 27, 12, 26, 22, 32, 14, 31, 37, 38, 41, 39, 40, 42, 45, 44, 43, 46],
+    'emoji': [36,0], 'gold': [1,0], 'silver': [2,0], 'spin_ticket': [16,0], 'lucky_spin': [-1,0]}
 
 
 class BaseEnum(Enum):

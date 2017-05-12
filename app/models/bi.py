@@ -317,7 +317,7 @@ class BIUserStatistic(db.Model):
     #
     # user_id = db.Column(db.BIGINT, index=True)
     # og_account = db.Column(db.BIGINT, index=True)
-    # og_role_name = db.Column(db.String(255), nullable=False)
+    # user_name = db.Column(db.String(255), nullable=False)
     # stats_date = db.Column(db.Date, index=True)
 
 
@@ -338,11 +338,11 @@ class BIUserStatistic(db.Model):
     mtt_rebuy_count = db.Column(db.Integer, nullable=False, default=0)
 
 
-    # sng_rake = db.Column(db.Integer, nullable=False, default=0)
-    # mtt_rake = db.Column(db.Integer, nullable=False, default=0)
+    sng_rake = db.Column(db.Integer, nullable=False, default=0)
+    mtt_rake = db.Column(db.Integer, nullable=False, default=0)
 
-    # mtt_buyins = db.Column(db.Integer, nullable=False, default=0)
-    # sng_buyins = db.Column(db.Integer, nullable=False, default=0)
+    mtt_buyins = db.Column(db.Integer, nullable=False, default=0)
+    sng_buyins = db.Column(db.Integer, nullable=False, default=0)
 
 
     # sng_winnings = db.Column(db.Integer, nullable=False, default=0)

@@ -14,34 +14,30 @@ from app.utils import generate_sql_date
 def process_bi_user_statistic_dollar_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
 
-    column_name = {'silver': 'dollar_silver_pkg_spend', 'gold': 'dollar_gold_pkg_spend',
-                   'spin_ticket': 'lucky_ticket_spin_spend', 'lucky_spin': 'lucky_spin_spend', }
-
-    def collection_user_dollar_consumption_records(connection, transaction, product_orig, day):
+    def collection_user_dollar_consumption_records(connection, transaction, category, day):
         return connection.execute(text("""
-                                            SELECT      user_id,
-                                                        SUM(currency_amount)                  AS consumption_amount
-                                            FROM  bi_user_bill
-                                            WHERE currency_type = 'Dollar'
-                                            AND   product_orig IN :product_orig
-                                            AND   DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
-                                            GROUP BY  user_id
-                                    """), stats_date=day, timezone_offset=timezone_offset,
-                                  # TODO ???
-                                  product_orig=tuple(product_orig))
+
+                                    SELECT      user_id,
+                                                SUM(currency_amount)                  AS consumption_amount
+                                    FROM  bi_user_bill
+                                    WHERE currency_type = 'Dollar'
+                                    AND   category =:category
+                                    AND   DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
+                                    GROUP BY  user_id
+                                    """), stats_date=day, timezone_offset=timezone_offset, category=category)
 
     def confirm_first_recharge_time(connection, transaction, day):
         return connection.execute(text("""
-                                        SELECT user_id,
-                                          CASE
-                                          WHEN min(date((CONVERT_TZ(created_at, '+00:00', :timezone_offset)))) = :day
-                                            THEN 1
-                                          ELSE
-                                            0
-                                          END                                               AS dollar_purchase_1st_time
-                                        FROM bi_user_bill
-                                        WHERE currency_type = 'Dollar'
-                                        GROUP BY user_id;
+                                    SELECT user_id,
+                                      CASE
+                                      WHEN min(date((CONVERT_TZ(created_at, '+00:00', :timezone_offset)))) = :day
+                                        THEN 1
+                                      ELSE
+                                        0
+                                      END                                            AS dollar_purchase_1st_time
+                                    FROM bi_user_bill
+                                    WHERE currency_type = 'Dollar'
+                                    GROUP BY user_id;
                                            """), stats_date=day, timezone_offset=timezone_offset)
 
     def confirm_first_recharge_time_for_gold(connection, transaction, day):
@@ -53,7 +49,7 @@ def process_bi_user_statistic_dollar_records(target):
                                             THEN 1
                                           ELSE
                                             0
-                                          END                                               AS dollar_purchase_1st_time
+                                          END                                              AS dollar_purchase_1st_time_gold
                                         FROM bi_user_bill
                                         WHERE currency_type = 'Dollar'
                                               AND product_orig=1
@@ -64,8 +60,8 @@ def process_bi_user_statistic_dollar_records(target):
 
         return connection.execute(text("""
                                         SELECT user_id,
-                                               Count(*)                                        AS  dollar_purchase_count,
-                                               ROUND(SUM(currency_amount), 2)                  AS  dollar_spend
+                                               Count(*)                                       AS  dollar_purchase_count,
+                                               ROUND(SUM(currency_amount), 2)                 AS  dollar_spend
                                         FROM   bi_user_bill
                                         WHERE  currency_type = 'Dollar'
                                               AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
@@ -87,27 +83,21 @@ def process_bi_user_statistic_dollar_records(target):
 
                 day = day.strftime("%Y-%m-%d")
 
-                print('user dollar history on ' + str(day))
+                print('user dollar records on ' + str(day))
 
-                for product in ['gold', 'silver', 'spin_ticket', 'lucky_spin']:
-
-                    product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
-
-
-
+                for category in ['Lucky Spin Set', 'Gold', 'Avatar Set', 'Poker Lucky Charm Set', 'Silver Coin',
+                                 'Emoji Set']:
+                    
                     product_sales_record = with_db_context(db, collection_user_dollar_consumption_records, day=day,
-                                                           product_orig=product_orig)
+                                                           category=category)
+
                     every_product_sales_records = [{'_stats_date': str(day), '_user_id': row['user_id'],
-                                                    column_name[product]: row['consumption_amount']}
+                                                    column_name[category]: row['consumption_amount']}
                                                    for row in product_sales_record]
 
-
-
-                    every_product_sales_record_dict = dict([(product, every_product_sales_records)])
+                    every_product_sales_record_dict = dict([(category, every_product_sales_records)])
 
                     dollar_consumption_records_result_proxy.append(every_product_sales_record_dict)
-
-
 
                 take_the_first_dollar_recharge = with_db_context(db, confirm_first_recharge_time, day=day)
                 every_user_the_first_time_of_dollar_recharge = [{'_stats_date': str(day),
@@ -115,7 +105,6 @@ def process_bi_user_statistic_dollar_records(target):
                                                                  'dollar_purchase_1st_time': row[
                                                                      'dollar_purchase_1st_time']}
                                                                 for row in take_the_first_dollar_recharge]
-
 
                 take_the_first_dollar_recharge_for_gold = with_db_context(db, confirm_first_recharge_time_for_gold,
                                                                           day=day)
@@ -125,24 +114,19 @@ def process_bi_user_statistic_dollar_records(target):
                                                                       'dollar_purchase_1st_time_gold']}
                                                                  for row in take_the_first_dollar_recharge_for_gold]
 
-
-
                 dollar_recharge_records = with_db_context(db, collection_user_dollar_recharge_records, day=day)
                 every_user_dollar_recharge_records = [{'_stats_date': str(day), '_user_id': row['user_id'],
                                                        'dollar_spend': row['dollar_spend'],
                                                        'dollar_purchase_count': row['dollar_purchase_count']}
                                                       for row in dollar_recharge_records]
 
-
-
                 dollar_first_time_records_result_proxy.append(every_user_the_first_time_of_dollar_recharge)
                 dollar_first_time_records_for_gold_result_proxy.append(every_user_the_first_dollar_recharge_for_gold)
                 dollar_recharge_records_result_proxy.append(every_user_dollar_recharge_records)
 
-
         else:
 
-            print('user dollar history on ' + str(someday))
+            print('user dollar records on ' + str(someday))
 
             for product in ['gold', 'silver', 'spin_ticket', 'lucky_spin']:
                 product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
@@ -206,11 +190,11 @@ def process_bi_user_statistic_dollar_records(target):
 
                             connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
                         except:
-                            print(target + ' dollar consumption history  transaction.rollback()')
+                            print(target + ' dollar consumption records  transaction.rollback()')
                             transaction.rollback()
                             raise
                         else:
-                            print(target + ' dollar consumption history  transaction.commit()')
+                            print(target + ' dollar consumption records  transaction.commit()')
                             transaction.commit()
 
                     with_db_context(db, sync_collection_dollar_consumption_records)
@@ -301,7 +285,7 @@ def process_bi_user_statistic_dollar_records(target):
 
                     except:
 
-                        print(target + ' dollar recharge history transaction.rollback()')
+                        print(target + ' dollar recharge records transaction.rollback()')
 
                         transaction.rollback()
 
@@ -309,7 +293,7 @@ def process_bi_user_statistic_dollar_records(target):
 
                     else:
 
-                        print(target + ' dollar recharge history transaction.commit()')
+                        print(target + ' dollar recharge records transaction.commit()')
 
                         transaction.commit()
 
