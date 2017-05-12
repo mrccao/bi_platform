@@ -14,6 +14,10 @@ from app.utils import generate_sql_date
 def process_bi_user_statistic_dollar_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
 
+    column_name = {'Lucky Spin Set': 'lucky_spin_spend', 'Gold': 'dollar_gold_pkg_spend', 'Avatar Set': 'avatar_spend',
+                   'Poker Lucky Charm Set': 'charms_spend', 'Silver Coin': 'dollar_silver_pkg_spend',
+                   'Emoji Set': 'emoji_spend'}
+
     def collection_user_dollar_consumption_records(connection, transaction, category, day):
         return connection.execute(text("""
 
@@ -52,7 +56,7 @@ def process_bi_user_statistic_dollar_records(target):
                                           END                                              AS dollar_purchase_1st_time_gold
                                         FROM bi_user_bill
                                         WHERE currency_type = 'Dollar'
-                                              AND product_orig=1
+                                              AND category_orig=1
                                         GROUP BY user_id;
                                            """), stats_date=day, timezone_offset=timezone_offset)
 
@@ -85,19 +89,18 @@ def process_bi_user_statistic_dollar_records(target):
 
                 print('user dollar records on ' + str(day))
 
-                for category in ['Lucky Spin Set', 'Gold', 'Avatar Set', 'Poker Lucky Charm Set', 'Silver Coin',
-                                 'Emoji Set']:
-                    
-                    product_sales_record = with_db_context(db, collection_user_dollar_consumption_records, day=day,
-                                                           category=category)
+                for category in ['Lucky Spin Set', 'Gold',  'Silver Coin', ]:
 
-                    every_product_sales_records = [{'_stats_date': str(day), '_user_id': row['user_id'],
-                                                    column_name[category]: row['consumption_amount']}
-                                                   for row in product_sales_record]
+                    category_sales_record = with_db_context(db, collection_user_dollar_consumption_records, day=day,
+                                                            category=category)
 
-                    every_product_sales_record_dict = dict([(category, every_product_sales_records)])
+                    every_category_sales_records = [{'_stats_date': str(day), '_user_id': row['user_id'],
+                                                     column_name[category]: row['consumption_amount']}
+                                                    for row in category_sales_record]
 
-                    dollar_consumption_records_result_proxy.append(every_product_sales_record_dict)
+                    every_category_sales_record_dict = dict([(category, every_category_sales_records)])
+
+                    dollar_consumption_records_result_proxy.append(every_category_sales_record_dict)
 
                 take_the_first_dollar_recharge = with_db_context(db, confirm_first_recharge_time, day=day)
                 every_user_the_first_time_of_dollar_recharge = [{'_stats_date': str(day),
@@ -128,17 +131,17 @@ def process_bi_user_statistic_dollar_records(target):
 
             print('user dollar records on ' + str(someday))
 
-            for product in ['gold', 'silver', 'spin_ticket', 'lucky_spin']:
-                product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
+            for category in ['gold', 'silver', 'spin_ticket', 'lucky_spin']:
+                category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
 
-                product_sales_record = with_db_context(db, collection_user_dollar_consumption_records, day=someday,
-                                                       product_orig=product_orig)
-                every_product_sales_records = [{'_stats_date': str(someday), '_user_id': row['user_id'],
-                                                column_name[product]: row['consumption_amount']}
-                                               for row in product_sales_record]
+                category_sales_record = with_db_context(db, collection_user_dollar_consumption_records, day=someday,
+                                                        category_orig=category_orig)
+                every_category_sales_records = [{'_stats_date': str(someday), '_user_id': row['user_id'],
+                                                 column_name[category]: row['consumption_amount']}
+                                                for row in category_sales_record]
 
-                every_product_sales_record_dict = dict([(product, every_product_sales_records)])
-                dollar_consumption_records_result_proxy.append(every_product_sales_record_dict)
+                every_category_sales_record_dict = dict([(category, every_category_sales_records)])
+                dollar_consumption_records_result_proxy.append(every_category_sales_record_dict)
 
             take_the_first_dollar_recharge = with_db_context(db, confirm_first_recharge_time, day=someday)
             every_user_the_first_time_of_dollar_recharge = [{'_stats_date': str(someday),
@@ -173,9 +176,9 @@ def process_bi_user_statistic_dollar_records(target):
 
     if dollar_consumption_records_result_proxy:
 
-        for product_sales_record_rows in dollar_consumption_records_result_proxy:
+        for category_sales_record_rows in dollar_consumption_records_result_proxy:
 
-            for product_name, rows in product_sales_record_rows.items():
+            for category_name, rows in category_sales_record_rows.items():
 
                 if rows:
 
@@ -184,7 +187,7 @@ def process_bi_user_statistic_dollar_records(target):
                         where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
                                      BIUserStatistic.__table__.c.user_id == bindparam('_user_id'))
 
-                        values = {column_name[product_name]: bindparam('consumption_amount')}
+                        values = {column_name[category_name]: bindparam('consumption_amount')}
 
                         try:
 

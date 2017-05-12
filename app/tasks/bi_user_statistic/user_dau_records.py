@@ -41,6 +41,7 @@ def process_bi_user_statistic_dau(target):
 
         def sync_collection_user_ring_game_dau(connection, transaction):
 
+
             where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
                          BIUserStatistic.__table__.c.username == bindparam('_username'))
 

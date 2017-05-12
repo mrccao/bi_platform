@@ -14,19 +14,22 @@ from app.utils import generate_sql_date
 def process_bi_user_statistic_consumption_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
 
-    def collection_user_consumption_records(connection, transaction, product_orig, day):
+    column_name = {'Lucky Spin Set': 'lucky_spin_spend', 'Gold': 'dollar_gold_pkg_spend', 'Avatar Set': 'avatar_spend',
+                   'Poker Lucky Charm Set': 'charms_spend', 'Silver Coin': 'dollar_silver_pkg_spend',
+                   'Emoji Set': 'emoji_spend'}
+
+    def collection_user_gold_consumption_records(connection, transaction, category, day):
 
         return connection.execute(text("""
                                             SELECT user_id, sum(currency_amount) AS consumption_amount
                                             FROM bi_user_bill
                                             WHERE currency_type = 'gold'
-                                                  AND product_orig IN :product_orig
+                                                  AND category_orig = :category
                                                   AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
-                                            GROUP BY user_id
-                                           """), stats_date=day, timezone_offset=timezone_offset,
-                                  product_orig=tuple(product_orig))
+                                            GROUP BY  user_id
+                                           """), stats_date=day, timezone_offset=timezone_offset, category=category)
 
-    def collection_table_gift_records(connection, transaction, product_orig, day):
+    def collection_table_gift_records(connection, transaction, category, day):
 
         return connection.execute(text("""
                                             SELECT u.from_user                   AS user_name,
@@ -34,10 +37,9 @@ def process_bi_user_statistic_consumption_records(target):
                                             FROM prop_user_table_gift u
                                             INNER JOIN prop_table_gift t ON u.itemcode=t.itemcode
                                                   AND DATE(CONVERT_TZ(created_time, '+08:00', :timezone_offset)) = :stats_date
-                                            WHERE t.product =3
+                                            WHERE t.category =3
                                             GROUP BY u.from_user;
-                                           """), stats_date=day, timezone_offset=timezone_offset,
-                                  product_orig=tuple(product_orig))
+                                           """), stats_date=day, timezone_offset=timezone_offset)
 
     def get_user_consumption_records():
 
@@ -50,17 +52,16 @@ def process_bi_user_statistic_consumption_records(target):
             for day in date_range_reversed:
                 day = day.strftime("%Y-%m-%d")
                 print('Consumption history on ' + str(day))
-                for product in ['charms', 'avatar', 'emoji']:
-                    product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
+                for category in ['Poker Lucky Charm Set', 'Avatar Set', 'Emoji Set']:
+                    category_sales_record = with_db_context(db, collection_user_gold_consumption_records, day=day,
+                                                            category=category)
 
-                    product_sales_record = with_db_context(db, collection_user_consumption_records, day=day,
-                                                           product_orig=product_orig)
-                    every_product_sales_record = [{'stats_date': str(day), 'user_id': row['user_id'],
-                                                   '{}_spend'.format(product): row['consumption_amount']}
-                                                  for row in product_sales_record]
+                    every_category_sales_record = [{'stats_date': str(day), 'user_id': row['user_id'],
+                                                    column_name[category]: row['consumption_amount']}
+                                                   for row in category_sales_record]
 
-                    all_product_sales_records = dict([(product, every_product_sales_record)])
-                    result_proxy.append(all_product_sales_records)
+                    all_category_sales_records = dict([(category, every_category_sales_record)])
+                    result_proxy.append(all_category_sales_records)
 
                 table_gift_records = with_db_context(db, collection_table_gift_records, day=day)
 
@@ -71,17 +72,17 @@ def process_bi_user_statistic_consumption_records(target):
                 table_gift_result_proxy.append(table_gift_records_rows)
         else:
 
-            for product in ['charms', 'avatar', 'emoji']:
-                product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
+            for category in ['charms', 'avatar', 'emoji']:
+                category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
 
-                product_sales_record = with_db_context(db, collection_user_consumption_records, day=someday,
-                                                       product_orig=product_orig)
-                every_product_sales_record = [{'stats_date': str(someday), 'user_id': row['user_id'],
-                                               '{}_spend'.format(product): row['consumption_amount']} for
-                                              row in product_sales_record]
+                category_sales_record = with_db_context(db, collection_user_consumption_records, day=someday,
+                                                        category_orig=category_orig)
+                every_category_sales_record = [{'stats_date': str(someday), 'user_id': row['user_id'],
+                                                '{}_spend'.format(category): row['consumption_amount']} for
+                                               row in category_sales_record]
 
-                all_product_sales_records = dict([(product, every_product_sales_record)])
-                result_proxy.append(all_product_sales_records)
+                all_category_sales_records = dict([(category, every_category_sales_record)])
+                result_proxy.append(all_category_sales_records)
 
             table_gift_records = with_db_context(db, collection_table_gift_records, day=someday, bind='wpt_ods')
 
@@ -97,9 +98,9 @@ def process_bi_user_statistic_consumption_records(target):
 
     if result_proxy:
 
-        for every_product_sales_record_rows in result_proxy:
+        for every_category_sales_record_rows in result_proxy:
 
-            for product_name, rows in every_product_sales_record_rows.items():
+            for category_name, rows in every_category_sales_record_rows.items():
 
                 if rows:
 
@@ -109,7 +110,7 @@ def process_bi_user_statistic_consumption_records(target):
                                      BIUserStatistic.__table__.c.user_id == bindparam('_user_id'))
 
                         values = {
-                            '{}_spend'.format(product_name): bindparam('{}_spend'.format(product_name))
+                            '{}_spend'.format(category_name): bindparam('{}_spend'.format(category_name))
                         }
 
                         try:
@@ -165,24 +166,24 @@ def process_bi_user_statistic_consumption_records(target):
 def process_bi_user_statistic_convert_records(target):
     today, someday, _, timezone_offset = generate_sql_date(target)
 
-    def collection_user_convert_records(connection, transaction, day, product_orig):
+    def collection_user_convert_records(connection, transaction, day, category_orig):
         if target == 'lifetime':
             return connection.execute(text("""
                                             SELECT      user_id,
                                                         sum(currency_amount)       AS  convert_amount
                                             FROM  bi_user_bill
                                             WHERE currency_type = 'gold'
-                                            AND   product_orig IN :product_orig
+                                            AND   category_orig IN :category_orig
                                             AND     DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
                                             GROUP BY  user_id
                                            """), stats_date=day, timezone_offset=timezone_offset,
-                                      product_orig=tuple(product_orig))
+                                      category_orig=tuple(category_orig))
 
     def get_user_convert_records():
 
         result_proxy = []
 
-        product = 'silver'
+        category = 'silver'
 
         if target == 'lifetime':
 
@@ -193,33 +194,33 @@ def process_bi_user_statistic_convert_records(target):
 
                 print('gold to silver history game on ' + str(day))
 
-                product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
+                category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
 
-                product_convert_record = with_db_context(db, collection_user_convert_records, day=day,
-                                                         product_orig=product_orig)
+                category_convert_record = with_db_context(db, collection_user_convert_records, day=day,
+                                                          category_orig=category_orig)
 
-                every_product_convert_record_row = [{'_stats_date': str(day), '_user_id': row['user_id'],
-                                                     'gold_to_silver': row['convert_amount']}
-                                                    for row in product_convert_record]
+                every_category_convert_record_row = [{'_stats_date': str(day), '_user_id': row['user_id'],
+                                                      'gold_to_silver': row['convert_amount']}
+                                                     for row in category_convert_record]
 
-                all_product_convert_records = dict([(product, every_product_convert_record_row)])
+                all_category_convert_records = dict([(category, every_category_convert_record_row)])
 
-                result_proxy.append(all_product_convert_records)
+                result_proxy.append(all_category_convert_records)
 
         else:
 
-            product_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[product]
+            category_orig = PRODUCT_AND_PRODUCT_ORIG_MAPPING[category]
 
-            product_convert_record = with_db_context(db, collection_user_convert_records, day=someday,
-                                                     product_orig=product_orig)
+            category_convert_record = with_db_context(db, collection_user_convert_records, day=someday,
+                                                      category_orig=category_orig)
 
-            every_product_convert_record_row = [{'_stats_date': str(someday), '_user_id': row['user_id'],
-                                                 'gold_to_silver': row['convert_amount']}
-                                                for row in product_convert_record]
+            every_category_convert_record_row = [{'_stats_date': str(someday), '_user_id': row['user_id'],
+                                                  'gold_to_silver': row['convert_amount']}
+                                                 for row in category_convert_record]
 
-            all_product_convert_records = dict([(product, every_product_convert_record_row)])
+            all_category_convert_records = dict([(category, every_category_convert_record_row)])
 
-            result_proxy.append(all_product_convert_records)
+            result_proxy.append(all_category_convert_records)
 
         return result_proxy
 
@@ -227,9 +228,9 @@ def process_bi_user_statistic_convert_records(target):
 
     if gold_convert_silver_records_result_proxy:
 
-        for product_convert_record_rows in gold_convert_silver_records_result_proxy:
+        for category_convert_record_rows in gold_convert_silver_records_result_proxy:
 
-            for product_name, rows in product_convert_record_rows.items():
+            for category_name, rows in category_convert_record_rows.items():
 
                 if rows:
 
