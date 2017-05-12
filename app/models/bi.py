@@ -313,74 +313,41 @@ class BIUserBill(db.Model):
 class BIUserStatistic(db.Model):
     __tablename__ = 'bi_user_statistic'
 
-    id = db.Column(db.BIGINT, primary_key=True)
-    user_id = db.Column(db.BIGINT, index=True)
-
-    on_day = db.Column(db.Date, index=True)
-    platform = db.Column(db.String(255), default='All Platform')
-
-    # ring_player = db.Column(db.Integer, nullable=False)
-    # ring_won_loss = db.Column(db.Integer, nullable=False)
-    # rake = db.Column(db.String(255), nullable=False)
+    # id = db.Column(db.BIGINT, primary_key=True)
     #
-    # sng_player = db.Column(db.Integer, nullable=False)
-    # sng_entries = db.Column(db.Integer, nullable=False)
-    # sng_buy_ins = db.Column(db.Integer, nullable=False)
-    # sng_fee = db.Column(db.Integer, nullable=False)
-    # sng_winnings = db.Column(db.Integer, nullable=False)
-    #
-    # mtt_player = db.Column(db.Integer, nullable=False)
-    # mtt_entries = db.Column(db.String(255), nullable=False)
-    # mtt_buy_ins = db.Column(db.Integer, nullable=False)
-    # mtt_fees = db.Column(db.Integer, nullable=False)
-    # mtt_rebuys = db.Column(db.Integer, nullable=False)
-    # mtt_add_ons = db.Column(db.String(255), nullable=False)
-    # mtt_winnings = db.Column(db.Integer, nullable=False)
-
-    # slots_player = db.Column(db.Integer, nullable=False)
-    # slots_spins = db.Column(db.Integer, nullable=False)
-    # slots_wagered = db.Column(db.Integer, nullable=False)
-    # slots_won_loss = db.Column(db.Integer, nullable=False)
+    # user_id = db.Column(db.BIGINT, index=True)
+    # og_account = db.Column(db.BIGINT, index=True)
+    # user_name = db.Column(db.String(255), nullable=False)
+    # stats_date = db.Column(db.Date, index=True)
 
 
-    purchase_gold_dollar = db.Column(db.Float, default=0)
-    purchase_gold_count = db.Column(db.Integer, default=0)
-    purchase_gold = db.Column(db.BIGINT, default=0)
+    # new_reg = db.Column(db.Boolean, default=False)
+    # sng_dau = db.Column(db.Boolean, default=False)
+    # mtt_dau = db.Column(db.Boolean, default=False)
+    # ring_dau = db.Column(db.Boolean, default=False)
+    # slots_dau = db.Column(db.Boolean, default=False)
+    # store_dau = db.Column(db.Boolean, default=False)
 
-    purchase_silver_dollar = db.Column(db.Float, default=0)
-    purchase_silver_count = db.Column(db.Integer, default=0)
-    purchase_silver = db.Column(db.BIGINT, default=0)
+    # ring_rake = db.Column(db.Integer, nullable=False, default=0)
+    # ring_hands = db.Column(db.Integer, nullable=False, default=0)
 
-    purchase_avatar_gold = db.Column(db.BIGINT, default=0)
-    purchase_charms_gold = db.Column(db.BIGINT, default=0)
-    purchase_emoji_gold = db.Column(db.BIGINT, default=0)
+    # sng_entries = db.Column(db.Integer, nullable=False, default=0)
+    # mtt_entries = db.Column(db.Integer, nullable=False, default=0)
 
-    # purchase_table_gifts_gold = db.Column(db.BIGINT, nullable=False)
-
-
-
-    convert_silver_gold = db.Column(db.BIGINT, default=0)
-    convert_silver_count = db.Column(db.Integer, default=0)
-    convert_silver = db.Column(db.BIGINT, default=0)
+    mtt_rebuy_value = db.Column(db.Integer, nullable=False, default=0)
+    mtt_rebuy_count = db.Column(db.Integer, nullable=False, default=0)
 
 
+    sng_rake = db.Column(db.Integer, nullable=False, default=0)
+    mtt_rake = db.Column(db.Integer, nullable=False, default=0)
 
-    # lucky_spin_free_count = db.Column(db.Integer, default=0)
-    #
-    # lucky_spin_buy_gold = db.Column(db.BIGINT, default=0)
-    # lucky_spin_buy_count = db.Column(db.Integer, default=0)
-    #
-    # lucky_spin_booster_gold = db.Column(db.BIGINT, default=0)
-    # lucky_spin_booster_count = db.Column(db.Integer, default=0)
+    mtt_buyins = db.Column(db.Integer, nullable=False, default=0)
+    sng_buyins = db.Column(db.Integer, nullable=False, default=0)
 
-    # time_slot_daily_silver = db.Column(db.Integer, nullable=False)
-    # time_slot_bonus_silver = db.Column(db.Integer, nullable=False)
-    # time_slot_wagered = db.Column(db.Integer, nullable=False)
-    # time_slot_won = db.Column(db.Integer, nullable=False)
-    #
-    # reward_points_earned = db.Column(db.Integer, nullable=False)
-    # reward_points_redeemed = db.Column(db.Integer, nullable=False)
-    # reward_points_gold = db.Column(db.BIGINT, nullable=False)
+
+    # sng_winnings = db.Column(db.Integer, nullable=False, default=0)
+    # mtt_winnings = db.Column(db.Integer, nullable=False, default=0)
+
 
 
 class BIClubWPTUser(db.Model):
