@@ -16,16 +16,16 @@ def process_bi_user_statistic_dau(target):
 
             return connection.execute(text("""
                                         SELECT  DISTINCT(username),
-                                                DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) AS stats_date
+                                                DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) AS stats_date
                                         FROM tj_cgz_flow_userpaninfo
-                                        GROUP BY DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) ,
+                                        GROUP BY DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) ,
                                                  username 
                                            """), timezone_offset=timezone_offset)
         else:
             return connection.execute(text("""
                                         SELECT  DISTINCT(username)
                                         FROM tj_cgz_flow_userpaninfo
-                                        WHERE DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
+                                        WHERE DATE(CONVERT_TZ(created_at, '+08:00', :timezone_offset)) = :stats_date
                                            """), stats_date=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_user_ring_game_dau, bind='wpt_ods')
@@ -59,8 +59,6 @@ def process_bi_user_statistic_dau(target):
 
         with_db_context(db, sync_collection_user_ring_game_dau)
 
-
-
     # user_id_orig
     def collection_user_sng_dau(connection, transaction):
 
@@ -68,7 +66,7 @@ def process_bi_user_statistic_dau(target):
 
             return connection.execute(text("""
                                             SELECT  username,
-                                            DATE(CONVERT_TZ(endtime, '+00:00', :timezone_offset))  AS stats_date
+                                            DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset))  AS stats_date
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =1
@@ -80,7 +78,7 @@ def process_bi_user_statistic_dau(target):
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =1
-                                            AND DATE(CONVERT_TZ(endtime, '+00:00', :timezone_offset)) = :stats_date
+                                            AND DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset)) = :stats_date
                                                """), stats_date=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_user_sng_dau, bind='wpt_ods')
@@ -117,8 +115,6 @@ def process_bi_user_statistic_dau(target):
 
         with_db_context(db, sync_collection_user_sng_dau)
 
-
-
     # user_id_orig
 
     def collection_user_mtt_dau(connection, transaction):
@@ -127,7 +123,7 @@ def process_bi_user_statistic_dau(target):
 
             return connection.execute(text("""
                                             SELECT  username,
-                                            DATE(CONVERT_TZ(endtime, '+00:00', :timezone_offset))  AS stats_date
+                                            DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset))  AS stats_date
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =2
@@ -139,7 +135,7 @@ def process_bi_user_statistic_dau(target):
                                             FROM usermatchrecord r INNER JOIN tj_matchinfo m
                                                 ON r.matchid =m.matchid
                                             WHERE m.type =2
-                                            AND DATE(CONVERT_TZ(endtime, '+00:00', :timezone_offset)) = :stats_date
+                                            AND DATE(CONVERT_TZ(endtime, '+08:00', :timezone_offset)) = :stats_date
                                                """), stats_date=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_user_mtt_dau, bind='wpt_ods')
@@ -228,7 +224,8 @@ def process_bi_user_statistic_dau(target):
 
 
 
-# user_id_orig
+    # user_id_orig
+
     def collection_user_slots_dau(connection, transaction):
 
         if target == 'lifetime':
@@ -236,7 +233,7 @@ def process_bi_user_statistic_dau(target):
             return connection.execute(text("""
 
                                               SELECT  DISTINCT(username)  AS username,
-                                              DATE(CONVERT_TZ(recdate, '+00:00', :timezone_offset)) AS stats_date
+                                              DATE(CONVERT_TZ(recdate, '+08:00', :timezone_offset)) AS stats_date
                                               FROM gamecoin_detail
                                               GROUP BY  stats_date
                                                """), timezone_offset=timezone_offset)
@@ -244,7 +241,7 @@ def process_bi_user_statistic_dau(target):
             return connection.execute(text("""
                                               SELECT  DISTINCT(username)  AS username
                                               FROM gamecoin_detail
-                                              WHERE DATE(CONVERT_TZ(recdate, '+00:00', :timezone_offset)) = :stats_date
+                                              WHERE DATE(CONVERT_TZ(recdate, '+08:00', :timezone_offset)) = :stats_date
                                                """), stats_date=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_user_slots_dau, bind='wpt_ods')

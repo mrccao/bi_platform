@@ -33,7 +33,7 @@ def process_bi_user_statistic_consumption_records(target):
                                                 (count(u.itemcode))*(t.price)    AS table_gift_spend
                                             FROM prop_user_table_gift u
                                             INNER JOIN prop_table_gift t ON u.itemcode=t.itemcode
-                                                  AND DATE(CONVERT_TZ(created_time, '+00:00', :timezone_offset)) = :stats_date
+                                                  AND DATE(CONVERT_TZ(created_time, '+08:00', :timezone_offset)) = :stats_date
                                             WHERE t.product =3
                                             GROUP BY u.from_user;
                                            """), stats_date=day, timezone_offset=timezone_offset,

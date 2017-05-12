@@ -204,7 +204,135 @@ def process_bi_user_statistic_game_records(target):
 
                 with_db_context(db, sync_collection_game_winnings_records)
 
-    def collection_ring_game_rake(connection, transaction):
+    def collection_user_sng_entries(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                           SELECT   DATE(CONVERT_TZ(m.time_begin, '+08:00', :timezone_offset)) AS stats_date,
+                                                   SUM(CASE
+                                                       WHEN u.type = 1 THEN 1
+                                                       WHEN u.type = 2 THEN -1
+                                                       ELSE 0
+                                                       END) AS entries
+                                            FROM tj_flow_usersign AS u
+                                              LEFT JOIN tj_matchinfo AS m ON u.matchid = m.matchid
+                                            WHERE m.type = 1 
+                                            GROUP BY stats_date,u.username;
+                                              """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                           SELECT   SUM(CASE
+                                                       WHEN u.type = 1 THEN 1
+                                                       WHEN u.type = 2 THEN -1
+                                                       ELSE 0
+                                                       END) AS entries
+                                            FROM tj_flow_usersign AS u
+                                              LEFT JOIN tj_matchinfo AS m ON u.matchid = m.matchid
+                                            WHERE m.type = 1 
+                                            AND DATE(CONVERT_TZ(m.time_begin, '+08:00', :timezone_offset))
+                                              """), timezone_offset=timezone_offset, stats_date=someday)
+
+    sng_entries_records = with_db_context(db, collection_user_sng_entries, bind='orig_wpt_ods')
+
+    if target == 'lifetime':
+
+        rows = [{'_stats_date': row['stats_date'], '_username': row['username'], 'entries': row['entries']} for row in
+                sng_entries_records]
+    else:
+
+        rows = [{'_stats_date': someday, '_username': row['username'], 'entries': row['entries']} for row in
+
+                sng_entries_records]
+
+    if rows:
+
+        def sync_collection_user_sng_entries(connection, transaction):
+
+            where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
+                         BIUserStatistic.__table__.c.username == bindparam('_username'))
+
+            values = {'sng_entries': bindparam('entries')}
+
+            try:
+                connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' user  sng entries transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' user sng entries transaction.commit()')
+
+        with_db_context(db, sync_collection_user_sng_entries)
+
+    def collection_user_mtt_entries(connection, transaction):
+
+        if target == 'lifetime':
+
+            return connection.execute(text("""
+                                           SELECT   DATE(CONVERT_TZ(m.time_begin, '+08:00', :timezone_offset)) AS stats_date,
+                                                   SUM(CASE
+                                                       WHEN u.type = 1 THEN 1
+                                                       WHEN u.type = 2 THEN -1
+                                                       ELSE 0
+                                                       END) AS entries
+                                            FROM tj_flow_usersign AS u
+                                              LEFT JOIN tj_matchinfo AS m ON u.matchid = m.matchid
+                                            WHERE m.type = 2 
+                                            GROUP BY stats_date,u.username;
+                                              """), timezone_offset=timezone_offset)
+
+        else:
+
+            return connection.execute(text("""
+                                           SELECT   SUM(CASE
+                                                       WHEN u.type = 1 THEN 1
+                                                       WHEN u.type = 2 THEN -1
+                                                       ELSE 0
+                                                       END) AS entries
+                                            FROM tj_flow_usersign AS u
+                                              LEFT JOIN tj_matchinfo AS m ON u.matchid = m.matchid
+                                            WHERE m.type = 2 
+                                            AND DATE(CONVERT_TZ(m.time_begin, '+08:00', :timezone_offset))
+                                              """), timezone_offset=timezone_offset, stats_date=someday)
+
+    mtt_entries_records = with_db_context(db, collection_user_mtt_entries, bind='orig_wpt_ods')
+
+    if target == 'lifetime':
+
+        rows = [{'_stats_date': row['stats_date'], '_username': row['username'], 'entries': row['entries']} for row in
+                mtt_entries_records]
+    else:
+
+        rows = [{'_stats_date': someday, '_username': row['username'], 'entries': row['entries']} for row in
+
+                mtt_entries_records]
+
+    if rows:
+
+        def sync_collection_user_mtt_entries(connection, transaction):
+
+            where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
+                         BIUserStatistic.__table__.c.username == bindparam('_username'))
+
+            values = {'sng_entries': bindparam('entries')}
+
+            try:
+                connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
+            except:
+                print(target + ' user  mtt entries transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+                print(target + ' user mtt entries transaction.commit()')
+
+        with_db_context(db, sync_collection_user_mtt_entries)
+
+    def collection_user_ring_game_rake(connection, transaction):
 
         if target == 'lifetime':
 
@@ -238,10 +366,10 @@ def process_bi_user_statistic_game_records(target):
         else:
 
             return connection.execute(text("""
-                                                SELECT a.dates     AS stats_date,
-                                                       a.username AS  username,
-                                                       SUM(a.rake) AS rake,
-                                                       SUM(a.hands)
+                                                SELECT a.dates          AS  stats_date,
+                                                       a.username       AS  username,
+                                                       SUM(a.rake)      AS  rake,
+                                                       SUM(a.hands)     AS  hands
                                                 FROM   (SELECT DATE(CONVERT_TZ(s.time_update, '+08:00', :timezone_offset)) AS
                                                                dates,
                                                                SUM(s.pay_num)                                              AS
@@ -269,7 +397,7 @@ def process_bi_user_statistic_game_records(target):
                                                 GROUP  BY stats_date,username
                                               """), timezone_offset=timezone_offset, stats_date=someday)
 
-    ring_game_rake_records = with_db_context(db, collection_ring_game_rake, bind='orig_wpt_ods')
+    ring_game_rake_records = with_db_context(db, collection_user_ring_game_rake, bind='orig_wpt_ods')
 
     if target == 'lifetime':
 
@@ -278,15 +406,17 @@ def process_bi_user_statistic_game_records(target):
     else:
 
         rows = [{'_stats_date': someday, '_username': row['username'], 'rake': row['rake']} for row in
+
                 ring_game_rake_records]
 
     if rows:
 
-        def sync_collection_ring_game_rake(connection, transaction):
+        def sync_collection_user_ring_game_rake(connection, transaction):
+
             where = and_(BIUserStatistic.__table__.c.stats_date == bindparam('_stats_date'),
                          BIUserStatistic.__table__.c.username == bindparam('_username'))
 
-            values = {'ring_rake': bindparam('rake')}
+            values = {'ring_rake': bindparam('rake'), 'ring_hands': bindparam('hands')}
 
             try:
                 connection.execute(BIUserStatistic.__table__.update().where(where).values(values), rows)
@@ -298,11 +428,10 @@ def process_bi_user_statistic_game_records(target):
                 transaction.commit()
                 print(target + ' Ring rake transaction.commit()')
 
-        with_db_context(db, sync_collection_ring_game_rake)
+        with_db_context(db, sync_collection_user_ring_game_rake)
+
 
 
 
         # SELECT rolename,SUM(value),count(*) from readdrecord
         # group by datetime
-
-
