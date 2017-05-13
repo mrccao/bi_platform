@@ -27,6 +27,7 @@ def daily_summary_data():
     platform = request.args.get("platform")
     group_type = request.args.get("group")
     now = current_time(app.config['APP_TIMEZONE'])
+
     start_time = now.replace(days=-int(60)).format('YYYY-MM-DD')
     end_time = now.replace(days=-1).format('YYYY-MM-DD')
 

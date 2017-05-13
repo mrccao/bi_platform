@@ -313,27 +313,27 @@ class BIUserBill(db.Model):
 class BIUserStatistic(db.Model):
     __tablename__ = 'bi_user_statistic'
 
-    # id = db.Column(db.BIGINT, primary_key=True)
+    id = db.Column(db.BIGINT, primary_key=True)
+
+    user_id = db.Column(db.BIGINT, index=True)
+    og_account = db.Column(db.BIGINT, index=True)
+    user_name = db.Column(db.String(255), nullable=False)
+    stats_date = db.Column(db.Date, index=True)
     #
-    # user_id = db.Column(db.BIGINT, index=True)
-    # og_account = db.Column(db.BIGINT, index=True)
-    # user_name = db.Column(db.String(255), nullable=False)
-    # stats_date = db.Column(db.Date, index=True)
-
-
-    # new_reg = db.Column(db.Boolean, default=False)
-    # sng_dau = db.Column(db.Boolean, default=False)
-    # mtt_dau = db.Column(db.Boolean, default=False)
-    # ring_dau = db.Column(db.Boolean, default=False)
-    # slots_dau = db.Column(db.Boolean, default=False)
-    # store_dau = db.Column(db.Boolean, default=False)
-
-    # ring_rake = db.Column(db.Integer, nullable=False, default=0)
-    # ring_hands = db.Column(db.Integer, nullable=False, default=0)
-
-    # sng_entries = db.Column(db.Integer, nullable=False, default=0)
-    # mtt_entries = db.Column(db.Integer, nullable=False, default=0)
-
+    #
+    new_reg = db.Column(db.Boolean, default=False)
+    sng_dau = db.Column(db.Boolean, default=False)
+    mtt_dau = db.Column(db.Boolean, default=False)
+    ring_dau = db.Column(db.Boolean, default=False)
+    slots_dau = db.Column(db.Boolean, default=False)
+    store_dau = db.Column(db.Boolean, default=False)
+    #
+    ring_rake = db.Column(db.Integer, nullable=False, default=0)
+    ring_hands = db.Column(db.Integer, nullable=False, default=0)
+    #
+    sng_entries = db.Column(db.Integer, nullable=False, default=0)
+    mtt_entries = db.Column(db.Integer, nullable=False, default=0)
+    #
     mtt_rebuy_value = db.Column(db.Integer, nullable=False, default=0)
     mtt_rebuy_count = db.Column(db.Integer, nullable=False, default=0)
 
