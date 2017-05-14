@@ -9,8 +9,7 @@ from sqlalchemy import and_
 
 from app import create_app
 from app.extensions import db
-from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
-    BIUserStatistic
+from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
@@ -39,7 +38,7 @@ def make_shell_context():
         in the context of the app
     """
 
-    return dict(app=app, db=db, AdminUser=AdminUser, BIStatistic=BIStatistic, and_=and_)
+    return dict(app=app, db=db, AdminUser=AdminUser, and_=and_)
 
 
 def init_bi_user_import_config():
@@ -232,10 +231,10 @@ def reset_bi_statistic():
     for day in pd.date_range(date(2016, 6, 1), date(2017, 12, 31)):
         for game in ['All Game', 'TexasPoker', 'TimeSlots']:
             for platform in ['All Platform', 'iOS', 'Android', 'Web', 'Web Mobile', 'Facebook Game']:
-                email_reg = randrange(2,200)
-                guest_reg = randrange(6,300)
-                facebook_game_reg = randrange(8,400)
-                facebook_login_reg = randrange(9,500)
+                email_reg = randrange(2, 200)
+                guest_reg = randrange(6, 300)
+                facebook_game_reg = randrange(8, 400)
+                facebook_login_reg = randrange(9, 500)
                 dau = randrange(2, 100)
                 new_reg = randrange(2, 300)
                 wau = randrange(3, 200)
@@ -261,7 +260,7 @@ def reset_bi_statistic():
                 sng_winnings = randrange(9, 200)
                 db.session.add(BIStatistic(on_day=day.strftime("%Y-%m-%d"), game=game, platform=platform,
                                            new_reg=new_reg,
-                                           dau=dau,wau=wau,mau=mau,
+                                           dau=dau, wau=wau, mau=mau,
                                            email_reg=email_reg, guest_reg=guest_reg,
                                            facebook_game_reg=facebook_game_reg,
                                            facebook_login_reg=facebook_login_reg,
@@ -281,13 +280,14 @@ def reset_bi_statistic():
     db.session.commit()
 
 
-@manager.command
-def reset_bi_user_statistic():
-    """ ReCreate Database and Seed """
-
-    BIUserStatistic.__table__.drop(db.engine, checkfirst=True)
-
-    BIUserStatistic.__table__.create(db.engine, checkfirst=True)
+#
+# @manager.command
+# def reset_bi_user_statistic():
+#     """ ReCreate Database and Seed """
+#
+#     BIUserStatistic.__table__.drop(db.engine, checkfirst=True)
+#
+#     BIUserStatistic.__table__.create(db.engine, checkfirst=True)
 
 
 # @manager.command

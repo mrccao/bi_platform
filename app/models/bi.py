@@ -1,5 +1,6 @@
 from sqlalchemy import text
 from sqlalchemy.schema import UniqueConstraint, Index
+from flask import  current_app as app
 
 from app.constants import TRANSACTION_TYPES, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
 from app.extensions import db
@@ -268,7 +269,6 @@ class BIUserCurrency(db.Model):
     __table_args__ = (UniqueConstraint('currency_type', 'orig_id', name='ix_uniq_currency_type_and_orig_id'),
                       Index('ix_og_account_and_user_id_updated', 'og_account', 'user_id_updated'),)
 
-
     def transaction_type_display(self):
         value = TRANSACTION_TYPES[self.transaction_type]
         return '%s %s' % (self.transaction_type, value) if value is not None else self.transaction_type
@@ -310,44 +310,59 @@ class BIUserBill(db.Model):
         UniqueConstraint('orig_db', 'orig_id', 'product_orig', name='ix_uniq_orig_db_and_orig_id_and_product_orig'),)
 
 
-class BIUserStatistic(db.Model):
-    __tablename__ = 'bi_user_statistic'
+class BIUserStatistic(object):
+    _mapper = {}
 
-    id = db.Column(db.BIGINT, primary_key=True)
+    @staticmethod
+    def model(stats_date):
+        table_index = stats_date
+        class_name = 'BIUserStatistic_{}'.format(table_index)
 
-    user_id = db.Column(db.BIGINT, index=True)
-    og_account = db.Column(db.BIGINT, index=True)
-    user_name = db.Column(db.String(255), nullable=False)
-    stats_date = db.Column(db.Date, index=True)
-    #
-    #
-    new_reg = db.Column(db.Boolean, default=False)
-    sng_dau = db.Column(db.Boolean, default=False)
-    mtt_dau = db.Column(db.Boolean, default=False)
-    ring_dau = db.Column(db.Boolean, default=False)
-    slots_dau = db.Column(db.Boolean, default=False)
-    store_dau = db.Column(db.Boolean, default=False)
-    #
-    ring_rake = db.Column(db.Integer, nullable=False, default=0)
-    ring_hands = db.Column(db.Integer, nullable=False, default=0)
-    #
-    sng_entries = db.Column(db.Integer, nullable=False, default=0)
-    mtt_entries = db.Column(db.Integer, nullable=False, default=0)
-    #
-    mtt_rebuy_value = db.Column(db.Integer, nullable=False, default=0)
-    mtt_rebuy_count = db.Column(db.Integer, nullable=False, default=0)
+        ModelClass = BIUserStatistic._mapper.get(class_name, None)
+        if ModelClass is None:
+            ModelClass = type(class_name, (db.Model,), {
+                '__module__': __name__,
+                '__name__': class_name,
+                '__tablename__': 'bi_user_statistic_{}'.format(table_index),
+                'id': db.Column(db.BIGINT, primary_key=True),
+                'user_id': db.Column(db.BIGINT, index=True),
+                'og_account': db.Column(db.BIGINT, index=True),
+                'user_name': db.Column(db.String(255), nullable=False),
+                'stats_date': db.Column(db.Date, index=True, default=stats_date),
 
+                'new_reg': db.Column(db.Boolean, default=False),
+                'sng_dau': db.Column(db.Boolean, default=False),
+                'mtt_dau': db.Column(db.Boolean, default=False),
+                'ring_dau': db.Column(db.Boolean, default=False),
 
-    sng_rake = db.Column(db.Integer, nullable=False, default=0)
-    mtt_rake = db.Column(db.Integer, nullable=False, default=0)
+                'slots_dau': db.Column(db.Boolean, default=False),
+                'store_dau': db.Column(db.Boolean, default=False),
 
-    mtt_buyins = db.Column(db.Integer, nullable=False, default=0)
-    sng_buyins = db.Column(db.Integer, nullable=False, default=0)
+                'ring_rake': db.Column(db.Integer, nullable=False, default=0),
+                'ring_hands': db.Column(db.Integer, nullable=False, default=0),
 
+                'sng_entries': db.Column(db.Integer, nullable=False, default=0),
+                'mtt_entries': db.Column(db.Integer, nullable=False, default=0),
 
-    # sng_winnings = db.Column(db.Integer, nullable=False, default=0)
-    # mtt_winnings = db.Column(db.Integer, nullable=False, default=0)
+                'mtt_rebuy_value': db.Column(db.Integer, nullable=False, default=0),
+                'mtt_rebuy_count': db.Column(db.Integer, nullable=False, default=0),
 
+                'sng_rake': db.Column(db.Integer, nullable=False, default=0),
+                'mtt_rake': db.Column(db.Integer, nullable=False, default=0),
+
+                'mtt_buyins': db.Column(db.Integer, nullable=False, default=0),
+                'sng_buyins': db.Column(db.Integer, nullable=False, default=0),
+
+                'sng_winnings': db.Column(db.Integer, nullable=False, default=0),
+                'mtt_winnings': db.Column(db.Integer, nullable=False, default=0),
+            })
+            BIUserStatistic._mapper[class_name] = ModelClass
+
+        with app.app_context():
+            cls = ModelClass()
+            cls.__table__.create(db.engine, checkfirst=True)
+
+        return ModelClass
 
 
 class BIClubWPTUser(db.Model):
@@ -367,3 +382,5 @@ class BIClubWPTUser(db.Model):
 
     exchanged_at = db.Column(OGInsertableAwareDateTime, index=True)
     exchanged_user_id = db.Column(db.BIGINT, index=True)
+
+

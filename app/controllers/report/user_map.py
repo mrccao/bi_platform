@@ -57,8 +57,6 @@ def get_world_user_data():
     transpose_query_result = list(map(list, zip(*reg_user_country_data)))
     date_range = transpose_query_result[0]
 
-
-
     # bar
 
     user_location_data = []
@@ -88,8 +86,7 @@ def get_world_user_data():
         del row_dict['time']
         user_location_data.append(row_dict)
 
-    return  jsonify(date_range=date_range,bar_result=bar_result,user_location_data=user_location_data)
-
+    return jsonify(date_range=date_range, bar_result=bar_result, user_location_data=user_location_data)
 
 
 @report.route("/report/America_user", methods=["GET"])
