@@ -60,7 +60,8 @@ def init_bi_user_import_config():
                  'last_imported_user_mall_order_update_time',
                  'last_imported_og_powergamecoin_add_time',
                  'last_imported_og_gamecoin_add_time',
-                 'last_imported_promotion_history_id']
+                 'last_imported_promotion_history_id',
+                 'last_imported_user_geo_data_user_id']
 
     for v in variables:
         db.session.query(BIImportConfig).filter_by(var=v).delete()
