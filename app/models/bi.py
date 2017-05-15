@@ -121,6 +121,10 @@ class BIUser(db.Model):
     reg_campaign = db.Column(db.String(255))
     reg_campaign_orig = db.Column(db.Integer)
 
+    reg_country = db.Column(db.String(255))
+    reg_state = db.Column(db.String(255))
+    reg_city = db.Column(db.String(255))
+
     first_name = db.Column(db.String(255))
     middle_name = db.Column(db.String(255))
     last_name = db.Column(db.String(255))

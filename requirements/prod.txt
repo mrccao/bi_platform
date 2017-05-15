@@ -8,6 +8,7 @@ gunicorn==19.6.0
 arrow==0.10.0
 SQLAlchemy-Utils==0.32.12
 requests==2.13.0
+geoip2==2.5.0
 
 # Flask Extensions
 Flask-CeleryExt

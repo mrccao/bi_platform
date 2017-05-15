@@ -218,3 +218,4 @@ packages
 bin
 include
 lib
+app/data/GeoIP2-City.mmdb

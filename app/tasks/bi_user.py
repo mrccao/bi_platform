@@ -3,7 +3,7 @@ from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 from flask import current_app as app
 
-from app.extensions import db
+from app.extensions import db, geoip_reader
 from app.models.bi import BIUser
 from app.tasks import celery, get_config_value, set_config_value, with_db_context
 
@@ -2310,6 +2310,71 @@ def process_user_promotion_time():
     return
 
 
+def process_user_geo_data():
+    config_value = get_config_value(db, 'last_imported_user_geo_data_user_id')
+
+    def collection(connection, transaction):
+        """ Get newly added. """
+        if config_value is None:
+            return connection.execute(text("""
+                                           SELECT user_id, reg_ip
+                                           FROM   bi_user
+                                           ORDER  BY user_id ASC
+                                           """))
+        return connection.execute(text("""
+                                       SELECT user_id, reg_ip
+                                       FROM   bi_user
+                                       WHERE  user_id > :user_id
+                                       ORDER  BY user_id ASC
+                                       """), user_id=config_value)
+
+    result_proxy = with_db_context(db, collection)
+
+    rows = []
+    for row in result_proxy:
+        if row['reg_ip'] is None or len(row['reg_ip']) == 0:
+            continue
+
+        try:
+            resp = geoip_reader.city(row['reg_ip'])
+            rows.append({
+                '_user_id': row['user_id'],
+                'reg_country': resp.country.name,
+                'reg_state': resp.subdivisions.most_specific.name,
+                'reg_city': resp.city.name
+            })
+        except:
+            continue
+
+    if rows:
+        new_config_value = rows[-1]['_user_id']
+
+        def sync_collection(connection, transaction):
+            """ Sync newly added. """
+            where = BIUser.__table__.c.user_id == bindparam('_user_id')
+            values = {
+                'reg_country': bindparam('reg_country'),
+                'reg_state': bindparam('reg_state'),
+                'reg_city': bindparam('reg_city')
+                }
+
+            try:
+                connection.execute(BIUser.__table__.update().where(where).values(values), rows)
+                set_config_value(connection, 'last_imported_user_geo_data_user_id', new_config_value)
+            except:
+                print('process_user_geo_data transaction.rollback()')
+                transaction.rollback()
+                raise
+            else:
+                print('process_user_geo_data transaction.commit()')
+                transaction.commit()
+            return
+
+        with_db_context(db, sync_collection)
+
+    return
+
+
 @celery.task
 def process_bi_user():
 
@@ -2364,3 +2429,6 @@ def process_bi_user():
 
     # process_user_promotion_time()
     # print('process_user_promotion_time() done.')
+
+    process_user_geo_data()
+    print('process_user_geo_data() done.')
