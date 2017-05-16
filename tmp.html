@@ -1,0 +1,75 @@
+<script>
+    options: [
+        {
+
+            yAxis: {
+                type: 'category',
+                data: [1, 2, 3, 4]
+
+            },
+
+            title: {text: '2002-01-01   World Users Map', left: 420},
+            visualMap: {
+                type: 'continuous',
+                min: 0,
+                max: 10000000,
+                text: ['High', 'Low'],
+                left: 'right',
+                top: 'center',
+                realtime: false,
+                calculable: true,
+                inRange: {
+                    color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                }
+
+            },
+
+            series: [
+                {
+
+                    data: [
+                        {'name': 'Alabama', 'value': 4822023},
+                        {'name': 'Alaska', 'value': 731449},
+                    ]
+                }, {data: [20, 62, 300, 134, 290, 230, 220]}]
+        },
+        {
+            title: {text: '2002-01-02   World Users Map', left: 420},
+            series: [
+                {
+                    data: [
+                        {'name': 'Alabama', 'value': 4822023},
+                        {'name': 'Alaska', 'value': 731449},
+                    ]
+
+                },
+                {data: [10, 52, 200, 334, 390, 330, 220]}]
+        },
+        {
+            visualMap: {
+                type: 'continuous',
+                min: 0,
+                max: 10,
+                text: ['High', 'Low'],
+                left: 'right',
+                top: 'center',
+                realtime: false,
+                calculable: true,
+                inRange: {
+                    color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+                }
+
+            },
+            title: {text: '2002-01-03   World Users Map', left: 420},
+            series: [
+                {
+                    data: [
+                        {'name': 'Alabama', 'value': 4822023},
+                        {'name': 'Alaska', 'value': 731449},
+                    ]
+
+                },
+                {data: [5, 12, 220, 734, 190, 320, 820]}]
+        }]
+
+</script>

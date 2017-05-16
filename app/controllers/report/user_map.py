@@ -117,15 +117,20 @@ def get_reg_user_state_data():
             bar_result.append({time: {'location': location, 'reg_count': reg_count}})
 
     # map
-    query_result_row_dict_for_map =[]
-    for row in query_result:
-        row_dict = dict(row)
-        del row_dict['time']
-        query_result_row_dict_for_map.append(row_dict)
+    # map
 
-    map_result = query_result_row_dict_for_map
+    map_result = []
+    query_result_row_dict.sort(key=itemgetter('time'))
+    reg_user_state_group_by_time = groupby(query_result_row_dict, itemgetter('time'))
+
+    for time, group in reg_user_state_group_by_time:
+        group = list(group)
+        for row in group:
+            del row['time']
+        map_result.append({time: group})
 
     return jsonify(time_range=time_range, bar_result=bar_result, map_result=map_result)
+
 
 #
 # @report.route("/report/reg_user_country", methods=["GET"])
