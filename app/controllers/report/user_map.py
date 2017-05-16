@@ -24,7 +24,7 @@ def get_reg_user_state_data():
     now = current_time(app.config['APP_TIMEZONE'])
     timezone_offset = app.config['APP_TIMEZONE']
 
-    if group == 'lifetime':
+    if group == 'Lifetime':
 
         query_result = db.engine.execute(text("""
                                                 SELECT    reg_state  AS name,  count(user_id)                                     AS value
