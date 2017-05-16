@@ -1,48 +1,53 @@
 {% extends "layout/app.html" %}
 {% block page_title %}New User{% endblock %}
+{% block head_tail %}
+
+
+    <style>
+
+
+    </style>
+
+{% endblock %}
+
 {% block main_content %}
     <section class="content-header">
-        <h1>Users Map</h1>
+        <h1>User Region</h1>
     </section>
 
     <section class="content">
         <div class="row">
             <div class="col-md-12">
+
                 <div class="box box-primary">
-                    <div class="box-body" style="height:790px">
-                        <div class="col-md-2" style="float:right">
-                            <div class="form-group">
-                                <select class="form-control select2" style="width: 100%;" id="executive-group-type">
-                                    <option selected="selected">Daily</option>
-                                    <option>Monthly</option>
-                                </select>
+                    <div class="box-header with-border">
+                        <h3 class="box-title"> User Region by State</h3>
+
+                        <div class="fc-right" style="float: right">
+                            <div class="fc-button-group">
+                                <button type="button"
+                                        class="fc-button fc-state-default fc-corner-left fc-state-active">
+                                    Daily
+                                </button>
+                                <button type="button" class="fc-agendaWeek-button fc-button fc-state-default">Monthly
+                                </button>
+                                <button type="button"
+                                        class="fc-agendaDay-button fc-button fc-state-default fc-corner-right">
+                                    Lifetime
+                                </button>
                             </div>
                         </div>
-                        <div id="container-America" style="height: 690px; width: 100%;">
-                        </div>
+
+
+                    </div>
+                    <div class="box-body">
+
+                        <div id="container-America" style="height: 690px; width: 100%;"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-body" style="height:690px">
-                        <div class="col-md-2" style="float:right">
-                            <div class="form-group">
-                                <select class="form-control select2" style="width: 100%;" id="executive-group-type">
-                                    <option selected="selected">Daily</option>
-                                    <option>Monthly</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="container-world" style="height: 600px; width: 100%;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
     </section>
 {% endblock %}
@@ -57,10 +62,10 @@
     {% assets "flask_AmericaGeojson_js" %}
         <script src="{{ ASSET_URL }}" type="text/javascript"></script>
     {% endassets %}
-
-    {% assets "flask_WorldGeojson_js" %}
-        <script src="{{ ASSET_URL }}" type="text/javascript"></script>
-    {% endassets %}
+    {##}
+    {#    {% assets "flask_WorldGeojson_js" %}#}
+    {#        <script src="{{ ASSET_URL }}" type="text/javascript"></script>#}
+    {#    {% endassets %}#}
 
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
@@ -68,11 +73,9 @@
     <script>
 
 
-        {#        var dom1 = document.getElementById("container-world");#}
-        var dom2 = document.getElementById("container-America");
+        var dom1 = document.getElementById("container-America");
 
-        {#        var myChart_world = echarts.init(dom1);#}
-        var myChart_America = echarts.init(dom2);
+        var myChart_America = echarts.init(dom1);
 
 
         var option_America = {
@@ -84,8 +87,7 @@
                     data: []
                 },
                 title: {
-                    text: 'World Users Map',
-                    left: 'right'
+                    left: 'middle'
                 },
                 tooltip: {
                     trigger: 'item',
@@ -108,7 +110,7 @@
                     }
                 },
                 grid: {
-                    left: '4%',
+                    left: '5%',
                     right: '75%',
                     bottom: '35%',
                     top: '85%'
@@ -125,13 +127,13 @@
                     },
                     axisTick: {
                         show: false
-                    },
+                    }
                 }],
 
                 yAxis: {},
 
                 series: [{
-                    name: 'America User Map', type: 'map', mapType: 'USA',
+                    name: 'User Region by State', type: 'map', mapType: 'USA',
                     roam: true,
                     itemStyle: {
                         emphasis: {label: {show: true}}
@@ -142,7 +144,6 @@
                 },
 
                     {
-
                         z: 2,
                         type: 'bar', label: {
                         normal: {show: true},
@@ -151,9 +152,7 @@
                         }
                     },
                         itemStyle: {
-                            emphasis: {
-                                color: "rgb(254,153,78)"
-                            }
+                            emphasis: {}
                         },
 
                         data: []
@@ -172,47 +171,26 @@
                 type: 'GET',
                 url: '/report/reg_user_state',
                 data: {
-                    group: 'Daily'
+                    group: 'lifetime'
                 },
                 dataType: "json",
                 success: function (result) {
 
-                    var time_range = result.time_range;
 
-                    option_America.baseOption.timeline.data = time_range;
+                    if (result.type == 'lifetime') {
 
-                    for (var index in time_range) {
-
-                        var time = time_range[index];
-                        var bar_result = result.bar_result[index]
-                        var max = bar_result[time].reg_count[0];
-                        var location = bar_result[time].location;
-
-
-                        var reg_count = bar_result[time].reg_count;
-                        var map_result = result.map_result[index][time]
-
-
-                        console.log(map_result)
-
-                        console.log(time)
-                        console.log(bar_result)
-                        console.log(location)
-                        console.log(reg_count)
-                        console.log(max)
-
+                        option_America.baseOption.timeline.data = '';
                         option_America.options.push(
                             {
                                 yAxis: {
                                     type: 'category',
-                                    data: location
+                                    data: result.bar_result.location
 
                                 },
-                                title: {text: time + '  World Users Map'},
                                 visualMap: {
                                     type: 'continuous',
                                     min: 0,
-                                    max: max,
+                                    max: 50000,
                                     text: ['High', 'Low'],
                                     left: 'right',
                                     top: 'center',
@@ -220,8 +198,45 @@
                                     calculable: true,
                                     inRange: {color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']}
                                 },
-                                series: [{data: map_result}, {data: reg_count}]
+                                series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
                             })
+                    }
+
+
+                    else {
+                        var time_range = result.time_range;
+
+                        for (var index in time_range) {
+
+                            var time = time_range[index];
+                            var bar_result = result.bar_result[index];
+                            var max = bar_result[time].reg_count[0];
+                            var location = bar_result[time].location;
+                            var reg_count = bar_result[time].reg_count;
+                            var map_result = result.map_result[index][time];
+
+                            option_America.baseOption.timeline.data = time_range;
+                            option_America.options.push(
+                                {
+                                    yAxis: {
+                                        type: 'category',
+                                        data: location
+
+                                    },
+                                    visualMap: {
+                                        type: 'continuous',
+                                        min: 0,
+                                        max: max,
+                                        text: ['High', 'Low'],
+                                        left: 'right',
+                                        top: 'center',
+                                        realtime: false,
+                                        calculable: true,
+                                        inRange: {color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']}
+                                    },
+                                    series: [{data: map_result}, {data: reg_count}]
+                                })
+                        }
                     }
 
                     myChart_America.setOption(option_America, true);
@@ -229,9 +244,6 @@
             })
 
         });
-
-
-        {#        myChart_world.setOption(option_world, true);#}
 
 
     </script>
