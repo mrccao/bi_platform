@@ -72,7 +72,7 @@
                 timeline: {
                     axisType: 'category',
                     bottom: -5,
-                    playInterval: 1000,
+                    playInterval: 5000,
                     data: []
                 },
                 title: {
@@ -99,10 +99,12 @@
                     }
                 },
                 grid: {
-                    left: '5%',
-                    right: '75%',
+                    left: '0%',
+                    right: '83%',
                     bottom: '35%',
-                    top: '85%'
+                    top: '91%',
+                    containLabel: true,
+
                 },
                 xAxis: [{
                     position: 'top',
@@ -119,7 +121,13 @@
                     }
                 }],
 
-                yAxis: {},
+                yAxis: {
+
+                    axisLabel: {
+                        interval: 0,
+                    },
+                    max: 'dataMax'
+                },
 
                 series: [{
                     name: 'User Region by State', type: 'map', mapType: 'USA',
@@ -179,7 +187,7 @@
                                     visualMap: {
                                         type: 'continuous',
                                         min: 0,
-                                        max: 50000,
+                                        max: 25000,
                                         text: ['High', 'Low'],
                                         left: 'right',
                                         top: 'center',
@@ -199,9 +207,12 @@
 
                                 var time = time_range[index];
                                 var bar_result = result.bar_result[index];
-                                var max = bar_result[time].reg_count[0];
+
+
+
                                 var location = bar_result[time].location;
                                 var reg_count = bar_result[time].reg_count;
+                                var max = bar_result[time].reg_count[reg_count.length-1];
                                 var map_result = result.map_result[index][time];
 
                                 options.push(

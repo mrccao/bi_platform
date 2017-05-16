@@ -31,7 +31,7 @@ def get_reg_user_state_data():
                                                 FROM      bi_user
                                                 WHERE     reg_country ='United States'
                                                 GROUP BY reg_state
-                                                ORDER BY value DESC  LIMIT 10
+                                                ORDER BY value  LIMIT 10
                                                   """))
 
         query_result = list(query_result)
@@ -104,7 +104,7 @@ def get_reg_user_state_data():
     for time, group in reg_user_state_group_by_time:
 
         group = list(group)
-        group.sort(key=itemgetter('value'), reverse=True)
+        group.sort(key=itemgetter('value'))
         ten_top_reg_countries = group[:11]
         location = []
         reg_count = []
