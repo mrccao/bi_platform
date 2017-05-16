@@ -35,6 +35,7 @@ def get_reg_user_state_data():
                                                 ORDER BY value DESC  LIMIT 10
                                                   """))
 
+        query_result =list(query_result)
         transpose_query_result = list(map(list, zip(*query_result)))
 
         query_result_row_dict = []
@@ -101,22 +102,21 @@ def get_reg_user_state_data():
     query_result_row_dict.sort(key=itemgetter('time'))
     reg_user_state_group_by_time =groupby(query_result_row_dict, itemgetter('time'))
 
-    location = []
-    reg_count = []
 
     for time, group in reg_user_state_group_by_time:
 
 
         group=list(group)
-        group.sort(key=itemgetter('value'))
+        group.sort(key=itemgetter('value'),reverse=True)
         ten_top_reg_countries = group[:11]
+        location = []
+        reg_count = []
 
         for row in ten_top_reg_countries:
             location.append(row['name'])
             reg_count.append(row['value'])
-            bar_result.append({time: {'location': location, 'reg_count': reg_count}})
+        bar_result.append({time: {'location': location, 'reg_count': reg_count}})
 
-    # map
     # map
 
     map_result = []

@@ -131,7 +131,7 @@
                 yAxis: {},
 
                 series: [{
-                    name: 'World User Map', type: 'map', mapType: 'USA',
+                    name: 'America User Map', type: 'map', mapType: 'USA',
                     roam: true,
                     itemStyle: {
                         emphasis: {label: {show: true}}
@@ -162,84 +162,7 @@
                     }]
             }, options: []
         };
-        {#        #}
-        {#        var option_world = {#}
-        {#            baseOption: {#}
-        {#                timeline: {#}
-        {#                    axisType: 'category',#}
-        {#                    playInterval: 1250,#}
-        {#                    data: ['1', '2']#}
-        {#                },#}
-        {#                title: {text: 'World Users Map', left: 'right'},#}
-        {#                tooltip: {#}
-        {#                    trigger: 'item', formatter: function (params) {#}
-        {#                        var value = (params.value + '').split('.');#}
-        {#                        value = value[0].replace(/(\d{1,3})(?=(?:\d{3})+(?!\d))/g, '$1,')#}
-        {#                            + '.' + value[1];#}
-        {#                        return params.seriesName + '<br/>' + params.name + ' : ' + value;#}
-        {#                    }#}
-        {#                },#}
-        {#                toolbox: {#}
-        {##}
-        {#                    show: true,#}
-        {#                    orient: 'vertical',#}
-        {#                    left: 'right',#}
-        {#                    top: '68%',#}
-        {#                    feature: {#}
-        {#                        mark: {show: true},#}
-        {#                        restore: {title: 'Reset'}#}
-        {#                    }#}
-        {#                },#}
-        {#                grid: {#}
-        {#                    left: '4%',#}
-        {#                    right: '75%',#}
-        {#                    bottom: '35%',#}
-        {#                    top: '85%'#}
-        {#                },#}
-        {#                xAxis: [{#}
-        {#                    position: 'top',#}
-        {#                    type: 'value',#}
-        {#                    boundaryGap: false,#}
-        {#                    splitLine: {#}
-        {#                        show: false#}
-        {#                    },#}
-        {#                    axisLine: {#}
-        {#                        show: false#}
-        {#                    },#}
-        {#                    axisTick: {#}
-        {#                        show: false#}
-        {#                    }#}
-        {#                }],#}
-        {##}
-        {#                yAxis: {},#}
-        {##}
-        {#                series: [{#}
-        {#                    name: 'World User Map', type: 'map', mapType: 'world',#}
-        {#                    roam: true,#}
-        {#                    itemStyle: {#}
-        {#                        emphasis: {label: {show: true}}#}
-        {#                    },#}
-        {#                    data: []#}
-        {##}
-        {#                },#}
-        {#                    {#}
-        {#                        z: 2,#}
-        {#                        type: 'bar', label: {#}
-        {#                        normal: {show: true},#}
-        {#                        emphasis: {#}
-        {#                            show: true#}
-        {#                        }#}
-        {#                    }, itemStyle: {#}
-        {#                        emphasis: {#}
-        {#                            color: "rgb(254,153,78)"#}
-        {#                        }#}
-        {#                    },#}
-        {#                        data: []#}
-        {#                    }]#}
-        {#            },#}
-        {#            options: []#}
-        {#        };#}
-        {##}
+
 
         $(document).ready(function () {
 
@@ -256,25 +179,40 @@
 
                     var time_range = result.time_range;
 
-                    option_America.baseOption.data = time_range;
-
+                    option_America.baseOption.timeline.data = time_range;
 
                     for (var index in time_range) {
 
                         var time = time_range[index];
+                        var bar_result = result.bar_result[index]
+                        var max = bar_result[time].reg_count[0];
+                        var location = bar_result[time].location;
+
+
+                        var reg_count = bar_result[time].reg_count;
+                        var map_result = result.map_result[index][time]
+
+
+                        console.log(map_result)
+
+                        console.log(time)
+                        console.log(bar_result)
+                        console.log(location)
+                        console.log(reg_count)
+                        console.log(max)
 
                         option_America.options.push(
                             {
                                 yAxis: {
                                     type: 'category',
-                                    data: result.bar_result[index][time].location
+                                    data: location
 
                                 },
                                 title: {text: time + '  World Users Map'},
                                 visualMap: {
                                     type: 'continuous',
                                     min: 0,
-                                    max: result.bar_result[index][time].reg_count[0],
+                                    max: max,
                                     text: ['High', 'Low'],
                                     left: 'right',
                                     top: 'center',
@@ -282,9 +220,11 @@
                                     calculable: true,
                                     inRange: {color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']}
                                 },
-                                series: [{data: result.map_result[index]}, {data: result.bar_result[index][time].reg_count}]
+                                series: [{data: map_result}, {data: reg_count}]
                             })
                     }
+
+                    myChart_America.setOption(option_America, true);
                 }
             })
 
@@ -292,8 +232,6 @@
 
 
         {#        myChart_world.setOption(option_world, true);#}
-
-        myChart_America.setOption(option_America, true);
 
 
     </script>
