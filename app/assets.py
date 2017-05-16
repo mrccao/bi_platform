@@ -25,9 +25,24 @@ flask_admin_js = Bundle(
     output='static/js/flask_admin.js'
 )
 
+flask_AmericaGeojson_js = Bundle(
+    '../assets/js/AmericaGeojson.js',
+    filters='jsmin',
+    output='static/js/flask_AmericaGeojson.js'
+)
+
+
+flask_WorldGeojson_js = Bundle(
+    '../assets/js/WorldGeojson.js',
+    filters='jsmin',
+    output='static/js/flask_WorldGeojson.js'
+)
+
 assets = Environment()
 
 assets.register('common_css', common_css)
 assets.register('common_js', common_js)
 assets.register('flask_admin_css', flask_admin_css)
 assets.register('flask_admin_js', flask_admin_js)
+assets.register('flask_AmericaGeojson_js', flask_AmericaGeojson_js)
+assets.register('flask_WorldGeojson_js', flask_WorldGeojson_js)
