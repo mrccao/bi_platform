@@ -1,43 +1,33 @@
 {% extends "layout/app.html" %}
 
 {% block page_title %}New User{% endblock %}
-
 {% block head_tail %}
-
 {% endblock %}
 
-{% block main_content %}
 
+{% block main_content %}
     <section class="content-header">
         <h1>User Region</h1>
     </section>
     <section class="content">
-
         <div class="row">
-
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-
                         <h3 class="box-title"> User Region by State</h3>
                         <div class="btn-group" style="float: right">
-                            <button id="America-daily" type="button" class="btn btn-default">Daily</button>
-                            <button id="America-monthly" type="button" class="btn btn-default">Monthly</button>
-                            <button id="America-lifetime" type="button" class="btn btn-default">Lifetime</button>
+                            <button id="america-daily" type="button" class="btn btn-default">Daily</button>
+                            <button id="america-monthly" type="button" class="btn btn-default">Monthly</button>
+                            <button id="america-lifetime" type="button" class="btn btn-default">Lifetime</button>
                         </div>
-
                     </div>
-
                     <div class="box-body">
-                        <div id="container-America" style="height: 700px; width: 100%;"></div>
+                        <div id="container-america" style="height: 700px; width: 100%;"></div>
                     </div>
-
                 </div>
             </div>
         </div>
-
         <div class="row">
-
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
@@ -58,17 +48,13 @@
                 </div>
             </div>
         </div>
-        </div>
-
-
     </section>
-
 {% endblock %}
+
 
 {% block body_tail %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/echarts.min.js"></script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
 
     {% assets "flask_AmericaGeojson_js" %}
         <script src="{{ ASSET_URL }}" type="text/javascript"></script>
@@ -78,15 +64,18 @@
         <script src="{{ ASSET_URL }}" type="text/javascript"></script>
     {% endassets %}
 
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
 
     <script>
-        var dom1 = document.getElementById("container-America");
-        var myChart_America = echarts.init(dom1);
-        var option_America = {
+
+
+        var currentStateType = null;
+        var colors = ['#3c8dbc', '#4596c4', '#549ec9', '#64a7ce', '#73b0d3', '#83b9d8', '#92c2dd', '#a2cae2', '#b1d3e7', '#c1dceb', '#d0e5f0', '#e0edf5', '#eff6fa'];
+
+        var domAmerica = document.getElementById("container-america");
+        var AmericaChart = echarts.init(domAmerica);
+        var optionAmerica = {
             baseOption: {
-                {#                backgroundColor: '#b0e4fc',#}
                 timeline: {
                     axisType: 'category',
                     bottom: -5,
@@ -99,196 +88,6 @@
                 tooltip: {
                     trigger: 'item',
                     formatter: '{b} : {c}'
-
-                },
-                toolbox: {
-
-                    show: true,
-                    orient: 'vertical',
-                    left: 'right',
-                    top: '68%',
-                    feature: {
-                        mark: {show: true},
-                        restore: {title: 'Reset'}
-                    }
-                },
-                grid: {
-                    left: '0%',
-                    right: '83%',
-                    bottom: '35%',
-                    top: '91%',
-                    containLabel: true,
-
-                },
-                xAxis: [{
-                    position: 'top',
-                    type: 'value',
-                    boundaryGap: false,
-                    splitLine: {
-                        show: false
-                    },
-                    axisLine: {
-                        show: false
-                    },
-                    axisTick: {
-                        show: false
-                    }
-                }],
-
-                yAxis: {
-
-                    axisLabel: {
-                        interval: 0,
-                    },
-                    max: 'dataMax'
-                },
-
-                series: [{
-                    name: 'User Region by State', type: 'map', mapType: 'USA',
-                    roam: true,
-                    itemStyle: {
-                        emphasis: {label: {show: true}}
-                    },
-
-                    data: []
-
-                },
-
-                    {
-                        z: 2,
-                        type: 'bar',
-                        label: {
-                            normal: {
-                                position: 'right',
-                                show: true
-                            }
-                        },
-
-                        data: []
-
-
-                    }]
-            }, options: []
-        };
-        $(document).ready(function () {
-
-
-            function getUserRegionData(group) {
-                $.ajax({
-                    type: 'GET',
-                    url: '/report/reg_user_state',
-                    data: {
-                        group: group
-                    },
-                    dataType: "json",
-                    success: function (result) {
-                        if (result.type === 'lifetime') {
-
-                            option_America.baseOption.timeline.data = '';
-                            option_America.options = [
-                                {
-                                    yAxis: {
-                                        type: 'category',
-                                        data: result.bar_result.location
-
-                                    },
-                                    visualMap: {
-                                        type: 'continuous',
-                                        min: 0,
-                                        max: 25000,
-                                        text: ['High', 'Low'],
-                                        left: 'right',
-                                        top: 'center',
-                                        realtime: false,
-                                        calculable: true,
-                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
-                                        {#                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
-                                    },
-                                    series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
-                                }]
-                        }
-                        else {
-                            var time_range = result.time_range;
-                            option_America.baseOption.timeline.data = time_range;
-                            var options = [];
-
-                            for (var index in time_range) {
-
-                                var time = time_range[index];
-                                var bar_result = result.bar_result[index];
-
-
-                                var location = bar_result[time].location;
-                                var reg_count = bar_result[time].reg_count;
-                                var max = bar_result[time].reg_count[reg_count.length - 1];
-                                var map_result = result.map_result[index][time];
-
-                                options.push(
-                                    {
-                                        yAxis: {
-                                            type: 'category',
-                                            data: location
-                                        },
-                                        visualMap: {
-                                            type: 'continuous',
-                                            min: 0,
-                                            max: 500,
-                                            text: ['High', 'Low'],
-                                            left: 'right',
-                                            top: 'center',
-                                            realtime: false,
-                                            calculable: true,
-                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
-                                            {#                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
-
-                                        },
-                                        series: [{data: map_result}, {data: reg_count}]
-                                    })
-                            }
-
-                            option_America.options = options;
-                        }
-
-                        myChart_America.setOption(option_America, true);
-                    }
-                })
-            }
-
-            $('#America-daily').click(function () {
-                getUserRegionData($(this).text())
-            });
-
-            $('#America-monthly').click(function () {
-                getUserRegionData($(this).text())
-            });
-
-            $('#America-lifetime').click(function () {
-                getUserRegionData($(this).text())
-            });
-
-            $('#America-daily').trigger('click');
-        });
-
-
-        var dom2 = document.getElementById("container-world");
-        var myChart_World = echarts.init(dom2);
-        var option_World = {
-            baseOption: {
-                {#                backgroundColor: '#b0e4fc',#}
-                timeline: {
-                    axisType: 'category',
-                    bottom: -5,
-                    playInterval: 900,
-                    data: []
-                },
-                title: {
-                    left: 'middle'
-                },
-                tooltip: {
-                    trigger: 'item',
-
-                    formatter: '{b} : {c}'
-
                 },
                 toolbox: {
                     show: true,
@@ -304,10 +103,11 @@
                     left: '0%',
                     right: '83%',
                     bottom: '35%',
-                    top: '91%',
+                    top: '95%',
                     containLabel: true
                 },
                 xAxis: [{
+                    show: false,
                     position: 'top',
                     type: 'value',
                     boundaryGap: false,
@@ -328,40 +128,54 @@
                     max: 'dataMax'
                 },
                 series: [{
-                    name: 'User Region by Country', type: 'map', mapType: 'world',
+                    name: 'User Region by State', type: 'map', mapType: 'USA',
                     roam: true,
                     itemStyle: {
                         emphasis: {label: {show: true}}
                     },
                     data: []
+
                 },
-                    {
-                        z: 2,
-                        type: 'bar',
+                    { type: 'bar',
                         label: {
                             normal: {
-                                position: 'right',
-                                show: true
+                                show: true,
+                                position: 'right'
                             }
                         },
                         data: []
                     }]
             }, options: []
         };
+
         $(document).ready(function () {
+
             function getUserRegionData(group) {
+
+                currentStateType = group;
+
                 $.ajax({
                     type: 'GET',
-                    url: '/report/reg_user_country',
+                    url: '/report/reg_user_state',
                     data: {
                         group: group
                     },
                     dataType: "json",
                     success: function (result) {
-                        if (result.type === 'lifetime') {
 
-                            option_World.baseOption.timeline.data = '';
-                            option_World.options = [
+                        if (currentStateType === 'Lifetime') {
+
+                            var reg_count = result.bar_result.reg_count;
+                            max = reg_count[reg_count.length - 1];
+                            min = reg_count[0];
+
+                            optionAmerica.baseOption.timeline =
+                                {
+                                    show: false,
+                                    data: ''
+                                };
+
+                            options = [
                                 {
                                     yAxis: {
                                         type: 'category',
@@ -370,35 +184,52 @@
                                     },
                                     visualMap: {
                                         type: 'continuous',
-                                        min: 0,
-                                        max: 25000,
+                                        min: min,
+                                        max: max,
                                         text: ['High', 'Low'],
                                         left: 'right',
                                         top: 'center',
                                         realtime: false,
                                         calculable: true,
-                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7'],
-
-                                        {#                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
-                                    }
-                                    ,
+                                        color: colors
+                                    },
                                     series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
-                                }]
+                                }];
+
+                            optionAmerica.options = options;
                         }
+
                         else {
+
+                            optionAmerica.baseOption.timeline =
+
+                                {
+                                    axisType: 'category',
+                                    bottom: -5,
+                                    playInterval: 900,
+                                    data: []
+                                };
+
                             var time_range = result.time_range;
-                            option_World.baseOption.timeline.data = time_range;
+
+                            optionAmerica.baseOption.timeline.data = time_range;
+
                             var options = [];
 
                             for (var index in time_range) {
 
                                 var time = time_range[index];
+
                                 var bar_result = result.bar_result[index];
 
-
                                 var location = bar_result[time].location;
+
                                 var reg_count = bar_result[time].reg_count;
-                                {#                                var max = bar_result[time].reg_count[reg_count.length - 1];#}
+
+                                min = reg_count[0];
+
+                                max = reg_count[reg_count.length - 1];
+
                                 var map_result = result.map_result[index][time];
 
                                 options.push(
@@ -406,42 +237,271 @@
                                         yAxis: {
                                             type: 'category',
                                             data: location
-
                                         },
                                         visualMap: {
                                             type: 'continuous',
-                                            min: 0,
-                                            max: 2000,
+                                            min: min,
+                                            max: max,
                                             text: ['High', 'Low'],
                                             left: 'right',
                                             top: 'center',
                                             realtime: false,
                                             calculable: true,
-                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
-                                            {#                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
+                                            color: colors
                                         },
                                         series: [{data: map_result}, {data: reg_count}]
                                     })
                             }
 
-                            option_World.options = options;
+                            optionAmerica.baseOption.timeline.currentIndex = time_range.length - 1;
+
+                            optionAmerica.options = options;
                         }
 
-                        myChart_World.setOption(option_World, true);
+                        AmericaChart.setOption(optionAmerica, true);
+                    }
+                })
+            }
+
+            $('#america-daily').click(function () {
+
+                if (currentStateType !== 'Daily') {
+
+                    getUserRegionData($(this).text())
+                }
+            });
+
+            $('#america-monthly').click(function () {
+
+                if (currentStateType !== 'Monthly') {
+
+                    getUserRegionData($(this).text())
+                }
+
+            });
+
+            $('#america-lifetime').click(function () {
+
+                if (currentStateType !== 'Lifetime') {
+
+                    getUserRegionData($(this).text())
+                }
+
+            });
+
+            $('#america-daily').trigger('click');
+        });
+
+
+        var currentCountryType = null;
+        var domWorld = document.getElementById("container-world");
+        var worldChart = echarts.init(domWorld);
+        var optionWorld = {
+            baseOption: {
+                timeline: {
+                    axisType: 'category',
+                    bottom: -5,
+                    playInterval: 900,
+                    data: []
+                },
+                title: {
+                    left: 'middle'
+                },
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{b} : {c}'
+
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: '68%',
+                    feature: {
+                        mark: {show: true},
+                        restore: {title: 'Reset'}
+                    }
+                },
+                grid: {
+                    left: '0%',
+                    right: '83%',
+                    bottom: '35%',
+                    top: '95%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    show: false,
+                    position: 'top',
+                    type: 'value',
+                    boundaryGap: false,
+                    splitLine: {
+                        show: false
+                    },
+                    axisLine: {
+                        show: false
+                    },
+                    axisTick: {
+                        show: false
+                    }
+                }],
+                yAxis: {
+                    axisLabel: {
+                        interval: 0
+                    },
+                    max: 'dataMax'
+                },
+                series: [{
+                    name: 'User Region by country', type: 'map', mapType: 'world',
+                    roam: true,
+                    itemStyle: {
+                        emphasis: {label: {show: true}}
+                    },
+                    data: []
+                },
+                    {
+                        type: 'bar',
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'right'
+                            }
+                        },
+                        data: []
+                    }]
+            }, options: []
+        };
+
+        $(document).ready(function () {
+
+            function getUserRegionData(group) {
+
+                currentCountryType = group;
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/report/reg_user_country',
+                    data: {
+                        group: group
+                    },
+                    dataType: "json",
+                    success: function (result) {
+
+                        if (currentCountryType === 'Lifetime') {
+
+                            var reg_count = result.bar_result.reg_count;
+
+                            min = reg_count[0];
+                            max = reg_count[reg_count.length - 1];
+
+                            optionWorld.baseOption.timeline =
+                                {
+                                    show: false,
+                                    data: ''
+                                };
+                            options = [
+                                {
+                                    yAxis: {
+                                        type: 'category',
+                                        data: result.bar_result.location
+                                    },
+                                    visualMap: {
+                                        type: 'continuous',
+                                        min: min,
+                                        max: max,
+                                        text: ['High', 'Low'],
+                                        left: 'right',
+                                        top: 'center',
+                                        realtime: false,
+                                        calculable: true,
+                                        color: colors
+                                    },
+                                    series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
+                                }];
+
+                            optionWorld.options = options;
+                        }
+
+                        else {
+
+                            optionWorld.baseOption.timeline =
+
+                                {
+                                    axisType: 'category',
+                                    bottom: -5,
+                                    playInterval: 900,
+                                    data: []
+                                };
+
+                            var time_range = result.time_range;
+
+                            optionWorld.baseOption.timeline.data = time_range;
+
+                            var options = [];
+
+                            for (var index in time_range) {
+
+                                var time = time_range[index];
+                                var bar_result = result.bar_result[index];
+                                var location = bar_result[time].location;
+                                var reg_count = bar_result[time].reg_count;
+
+                                min = reg_count[0];
+                                max = reg_count[reg_count.length - 1];
+
+                                var map_result = result.map_result[index][time];
+
+                                options.push(
+                                    {
+                                        yAxis: {
+                                            type: 'category',
+                                            data: location
+                                        },
+                                        visualMap: {
+                                            type: 'continuous',
+                                            min: min,
+                                            max: max,
+                                            text: ['High', 'Low'],
+                                            left: 'right',
+                                            top: 'center',
+                                            realtime: false,
+                                            calculable: true,
+                                            color: colors
+                                        },
+                                        series: [{data: map_result}, {data: reg_count}]
+                                    })
+                            }
+
+                            optionWorld.baseOption.timeline.currentIndex = time_range.length - 1;
+                            optionWorld.options = options;
+                        }
+
+                        worldChart.setOption(optionWorld, true);
                     }
                 })
             }
 
             $('#world-daily').click(function () {
-                getUserRegionData($(this).text())
+
+                if (currentCountryType !== 'Daily') {
+                    getUserRegionData($(this).text())
+                }
             });
 
             $('#world-monthly').click(function () {
-                getUserRegionData($(this).text())
+
+                if (currentCountryType !== 'Monthly') {
+                    getUserRegionData($(this).text())
+                }
+
             });
 
             $('#world-lifetime').click(function () {
-                getUserRegionData($(this).text())
+
+                if (currentCountryType !== 'Lifetime') {
+
+                    getUserRegionData($(this).text())
+                }
+
             });
 
             $('#world-daily').trigger('click');

@@ -38,13 +38,15 @@ def get_reg_user_state_data():
         query_result = list(query_result)
         transpose_query_result = list(map(list, zip(*query_result)))
 
-        location = transpose_query_result[0][:11]
-        reg_count = transpose_query_result[1][:11]
+        location = transpose_query_result[0][:10]
+        location.reverse()
+        reg_count = transpose_query_result[1][:10]
+        reg_count.reverse()
 
         bar_result = {'location': location, 'reg_count': reg_count}
         map_result = [dict(row) for row in query_result]
 
-        return jsonify(map_result=map_result, bar_result=bar_result, type='lifetime')
+        return jsonify(map_result=map_result, bar_result=bar_result, type=group)
 
 
     elif group == 'Monthly':
@@ -103,14 +105,17 @@ def get_reg_user_state_data():
     for time, group in reg_user_state_group_by_time:
 
         group = list(group)
-        group.sort(key=itemgetter('value'))
-        ten_top_reg_countries = group[:11]
+        group.sort(key=itemgetter('value'), reverse=True)
+        ten_top_reg_countries = group[:10]
         location = []
         reg_count = []
 
         for row in ten_top_reg_countries:
             location.append(row['name'])
             reg_count.append(row['value'])
+
+        location.reverse()
+        reg_count.reverse()
 
         bar_result.append({time: {'location': location, 'reg_count': reg_count}})
 
@@ -149,13 +154,16 @@ def get_reg_user_country_data():
         query_result = list(query_result)
         transpose_query_result = list(map(list, zip(*query_result)))
 
-        location = transpose_query_result[0][:11]
-        reg_count = transpose_query_result[1][:11]
+        location = transpose_query_result[0][:10]
+        reg_count = transpose_query_result[1][:10]
+
+        location.reverse()
+        reg_count.reverse()
         bar_result = {'location': location, 'reg_count': reg_count}
 
         map_result = [dict(row) for row in query_result]
 
-        return jsonify(map_result=map_result, bar_result=bar_result, type='lifetime')
+        return jsonify(map_result=map_result, bar_result=bar_result, type=group)
 
 
     elif group == 'Monthly':
@@ -177,6 +185,7 @@ def get_reg_user_country_data():
                                                           reg_country 
                                              """), timezone_offset=timezone_offset, start_time=start_time,
                                          end_time=end_time)
+
 
     else:
 
@@ -211,14 +220,17 @@ def get_reg_user_country_data():
     for time, group in reg_user_country_group_by_time:
 
         group = list(group)
-        group.sort(key=itemgetter('value'))
-        ten_top_reg_countries = group[:11]
+        group.sort(key=itemgetter('value'), reverse=True)
+        ten_top_reg_countries = group[:10]
         location = []
         reg_count = []
 
         for row in ten_top_reg_countries:
             location.append(row['name'])
             reg_count.append(row['value'])
+
+        location.reverse()
+        reg_count.reverse()
 
         bar_result.append({time: {'location': location, 'reg_count': reg_count}})
 
@@ -234,4 +246,4 @@ def get_reg_user_country_data():
             del row['time']
         map_result.append({time: group})
 
-    return jsonify(time_range=time_range, bar_result=bar_result, map_result=map_result)
+    return jsonify(time_range=time_range, bar_result=bar_result, map_result=map_result, type=group)
