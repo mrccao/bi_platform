@@ -67,15 +67,19 @@
 
 {% block body_tail %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/echarts.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
 
-    {% assets "flask_AmericaGeojson_js" %} <script src="{{ ASSET_URL }}" type="text/javascript"></script>
+    {% assets "flask_AmericaGeojson_js" %}
+        <script src="{{ ASSET_URL }}" type="text/javascript"></script>
     {% endassets %}
 
-    {% assets "flask_WorldGeojson_js" %} <script src="{{ ASSET_URL }}" type="text/javascript"></script>
+    {% assets "flask_WorldGeojson_js" %}
+        <script src="{{ ASSET_URL }}" type="text/javascript"></script>
     {% endassets %}
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
 
     <script>
         var dom1 = document.getElementById("container-America");
@@ -168,8 +172,6 @@
         };
         $(document).ready(function () {
 
-            $(".select2").select2();
-
 
             function getUserRegionData(group) {
                 $.ajax({
@@ -199,8 +201,8 @@
                                         top: 'center',
                                         realtime: false,
                                         calculable: true,
-                                        {#                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']#}
-                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']
+                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
+                                        {#                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
                                     },
                                     series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
                                 }]
@@ -230,14 +232,14 @@
                                         visualMap: {
                                             type: 'continuous',
                                             min: 0,
-                                            max: max,
+                                            max: 500,
                                             text: ['High', 'Low'],
                                             left: 'right',
                                             top: 'center',
                                             realtime: false,
                                             calculable: true,
-                                            {#                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']#}
-                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']
+                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
+                                            {#                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
 
                                         },
                                         series: [{data: map_result}, {data: reg_count}]
@@ -303,7 +305,7 @@
                     right: '83%',
                     bottom: '35%',
                     top: '91%',
-                    containLabel: true,
+                    containLabel: true
                 },
                 xAxis: [{
                     position: 'top',
@@ -375,9 +377,9 @@
                                         top: 'center',
                                         realtime: false,
                                         calculable: true,
-                                        {#                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7'],#}
+                                        color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7'],
 
-                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']
+                                        {#                                        color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
                                     }
                                     ,
                                     series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
@@ -396,7 +398,7 @@
 
                                 var location = bar_result[time].location;
                                 var reg_count = bar_result[time].reg_count;
-                                var max = bar_result[time].reg_count[reg_count.length - 1];
+                                {#                                var max = bar_result[time].reg_count[reg_count.length - 1];#}
                                 var map_result = result.map_result[index][time];
 
                                 options.push(
@@ -409,14 +411,14 @@
                                         visualMap: {
                                             type: 'continuous',
                                             min: 0,
-                                            max: max,
+                                            max: 2000,
                                             text: ['High', 'Low'],
                                             left: 'right',
                                             top: 'center',
                                             realtime: false,
                                             calculable: true,
-                                            {#                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']#}
-                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']
+                                            color: ['#223195', '#2b7cb6', '#3ab5c9', '#a1d9b4', '#fdfdc7']
+                                            {#                                            color: ['#0a652a', '#37a157', '#79c378', '#b9e3b3', '#ebf7e9']#}
                                         },
                                         series: [{data: map_result}, {data: reg_count}]
                                     })

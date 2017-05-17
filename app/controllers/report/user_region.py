@@ -32,15 +32,14 @@ def get_reg_user_state_data():
                                                 FROM   bi_user
                                                 WHERE  reg_country = 'United States'
                                                 GROUP  BY reg_state
-                                                ORDER  BY value
-                                                LIMIT  10 
+                                                ORDER  BY value DESC 
                                               """))
 
         query_result = list(query_result)
         transpose_query_result = list(map(list, zip(*query_result)))
 
-        location = transpose_query_result[0]
-        reg_count = transpose_query_result[1]
+        location = transpose_query_result[0][:11]
+        reg_count = transpose_query_result[1][:11]
 
         bar_result = {'location': location, 'reg_count': reg_count}
         map_result = [dict(row) for row in query_result]
@@ -144,15 +143,14 @@ def get_reg_user_country_data():
                                                        COUNT(*)    AS value
                                                 FROM   bi_user
                                                 GROUP  BY reg_country
-                                                ORDER  BY value
-                                                LIMIT  10 
+                                                ORDER  BY value DESC 
                                               """))
 
         query_result = list(query_result)
         transpose_query_result = list(map(list, zip(*query_result)))
 
-        location = transpose_query_result[0]
-        reg_count = transpose_query_result[1]
+        location = transpose_query_result[0][:11]
+        reg_count = transpose_query_result[1][:11]
         bar_result = {'location': location, 'reg_count': reg_count}
 
         map_result = [dict(row) for row in query_result]
