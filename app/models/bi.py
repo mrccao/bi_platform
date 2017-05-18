@@ -1,6 +1,6 @@
+from flask import current_app as app
 from sqlalchemy import text
 from sqlalchemy.schema import UniqueConstraint, Index
-from flask import  current_app as app
 
 from app.constants import TRANSACTION_TYPES, GOLD_FREE_TRANSACTION_TYPES, SILVER_FREE_TRANSACTION_TYPES
 from app.extensions import db
@@ -319,8 +319,12 @@ class BIUserStatistic(object):
 
     @staticmethod
     def model(stats_date):
+
+        from app.tasks import with_db_context
+
         table_index = stats_date
         class_name = 'BIUserStatistic_{}'.format(table_index)
+        now = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
         ModelClass = BIUserStatistic._mapper.get(class_name, None)
         if ModelClass is None:
@@ -362,9 +366,29 @@ class BIUserStatistic(object):
             })
             BIUserStatistic._mapper[class_name] = ModelClass
 
-        with app.app_context():
-            cls = ModelClass()
-            cls.__table__.create(db.engine, checkfirst=True)
+            with app.app_context():
+                cls = ModelClass()
+                cls.__table__.create(db.engine, checkfirst=True)
+
+            def sync_all_users(connection, transaction):
+                users = [dict(zip(('user_id', 'user_name', 'og_account'), u)) for u in
+                         db.session.query(BIUser.user_id, BIUser.username, BIUser.og_account).all()]
+                try:
+                    connection.execute(ModelClass.__table__.insert(), users)
+
+                except:
+
+                    print(now, 'users transaction.rollback()')
+
+                    transaction.rollback()
+                    raise
+                else:
+                    transaction.commit()
+
+                print(now, 'users transaction.commit()')
+
+            with_db_context(db, sync_all_users)
+            return ModelClass
 
         return ModelClass
 
@@ -386,5 +410,3 @@ class BIClubWPTUser(db.Model):
 
     exchanged_at = db.Column(OGInsertableAwareDateTime, index=True)
     exchanged_user_id = db.Column(db.BIGINT, index=True)
-
-

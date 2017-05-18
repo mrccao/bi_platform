@@ -1,15 +1,15 @@
 import os
-from random import randrange
-
 import pandas as pd
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
 from flask_script.commands import ShowUrls, Clean
+from random import randrange
 from sqlalchemy import and_
 
 from app import create_app
 from app.extensions import db
-from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser
+from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
+    BIUserStatistic
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
@@ -38,7 +38,7 @@ def make_shell_context():
         in the context of the app
     """
 
-    return dict(app=app, db=db, AdminUser=AdminUser, and_=and_)
+    return dict(app=app, db=db, AdminUser=AdminUser, BIUserStatistic=BIUserStatistic, and_=and_, BIUser=BIUser)
 
 
 def init_bi_user_import_config():
