@@ -168,6 +168,13 @@
 
                 currentStateType = group;
 
+                americaChart.showLoading(
+                    { text: 'loading',
+                        color: '#3c8dbc',
+                        textColor: '#3c8dbc' }
+                );
+
+
                 $.ajax({
                     type: 'GET',
                     url: '/report/reg_user_state',
@@ -274,6 +281,8 @@
                         }
 
                         americaChart.setOption(optionAmerica, true);
+                        americaChart.hideLoading();
+
                     }
                 })
             }
@@ -403,7 +412,14 @@
 
             function getUserRegionData(group) {
 
+
                 currentCountryType = group;
+
+                worldChart.showLoading(
+                    { text: 'loading',
+                        color: '#3c8dbc',
+                        textColor: '#3c8dbc' }
+                );
 
                 $.ajax({
                     type: 'GET',
@@ -509,6 +525,7 @@
                         }
 
                         worldChart.setOption(optionWorld, true);
+                        worldChart.hideLoading();
                     }
                 })
             }
@@ -539,7 +556,7 @@
 
             $('#world-daily').trigger('click');
         });
-    
+
 
     </script>
 
