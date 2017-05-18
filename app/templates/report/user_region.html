@@ -54,7 +54,8 @@
 
 {% block body_tail %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/echarts.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.2/extension/dataTool.min.js"></script>
 
     {% assets "flask_AmericaGeojson_js" %}
         <script src="{{ ASSET_URL }}" type="text/javascript"></script>
@@ -64,16 +65,16 @@
         <script src="{{ ASSET_URL }}" type="text/javascript"></script>
     {% endassets %}
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/echarts/3.5.4/extension/bmap.min.js"></script>
 
     <script>
+        var colors = ['#3c8dbc', '#4596c4', '#549ec9', '#64a7ce', '#73b0d3', '#83b9d8', '#92c2dd', '#a2cae2', '#b1d3e7', '#c1dceb', '#d0e5f0', '#e0edf5', '#eff6fa'];
 
 
         var currentStateType = null;
-        var colors = ['#3c8dbc', '#4596c4', '#549ec9', '#64a7ce', '#73b0d3', '#83b9d8', '#92c2dd', '#a2cae2', '#b1d3e7', '#c1dceb', '#d0e5f0', '#e0edf5', '#eff6fa'];
-
         var domAmerica = document.getElementById("container-america");
-        var AmericaChart = echarts.init(domAmerica);
+        var americaChart = echarts.init(domAmerica);
         var optionAmerica = {
             baseOption: {
                 timeline: {
@@ -95,8 +96,12 @@
                     left: 'right',
                     top: '68%',
                     feature: {
-                        mark: {show: true},
-                        restore: {title: 'Reset'}
+                        mark: {
+                            show: true
+                        },
+                        restore: {
+                            title: 'Reset'
+                        }
                     }
                 },
                 grid: {
@@ -128,15 +133,22 @@
                     max: 'dataMax'
                 },
                 series: [{
-                    name: 'User Region by State', type: 'map', mapType: 'USA',
+                    name: 'User Region by State',
+                    type: 'map',
+                    mapType: 'USA',
                     roam: true,
                     itemStyle: {
-                        emphasis: {label: {show: true}}
+                        emphasis: {
+                            label: {
+                                show: true
+                            }
+                        }
                     },
                     data: []
 
                 },
-                    { type: 'bar',
+                    {
+                        type: 'bar',
                         label: {
                             normal: {
                                 show: true,
@@ -144,8 +156,10 @@
                             }
                         },
                         data: []
-                    }]
-            }, options: []
+                    }
+                ]
+            },
+            options: []
         };
 
         $(document).ready(function () {
@@ -165,41 +179,44 @@
 
                         if (currentStateType === 'Lifetime') {
 
+                            var map_result = result.map_result;
+                            var location = result.bar_result.location
                             var reg_count = result.bar_result.reg_count;
-                            max = reg_count[reg_count.length - 1];
-                            min = reg_count[0];
+                            var max = reg_count[reg_count.length - 1];
+                            var min = reg_count[0];
 
-                            optionAmerica.baseOption.timeline =
-                                {
-                                    show: false,
-                                    data: ''
-                                };
+                            optionAmerica.baseOption.timeline = {
+                                show: false,
+                                data: ''
+                            };
 
-                            options = [
-                                {
-                                    yAxis: {
-                                        type: 'category',
-                                        data: result.bar_result.location
+                            options = [{
+                                yAxis: {
+                                    type: 'category',
+                                    data: location
 
-                                    },
-                                    visualMap: {
-                                        type: 'continuous',
-                                        min: min,
-                                        max: max,
-                                        text: ['High', 'Low'],
-                                        left: 'right',
-                                        top: 'center',
-                                        realtime: false,
-                                        calculable: true,
-                                        color: colors
-                                    },
-                                    series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
-                                }];
+                                },
+                                visualMap: {
+                                    type: 'continuous',
+                                    dimension: 0,
+                                    min: min,
+                                    max: max,
+                                    text: ['High', 'Low'],
+                                    left: 'right',
+                                    top: 'center',
+                                    realtime: true,
+                                    calculable: true,
+                                    color: colors
+                                },
+                                series: [{
+                                    data: map_result
+                                }, {
+                                    data: reg_count
+                                }]
+                            }];
 
                             optionAmerica.options = options;
-                        }
-
-                        else {
+                        } else {
 
                             optionAmerica.baseOption.timeline =
 
@@ -219,38 +236,36 @@
                             for (var index in time_range) {
 
                                 var time = time_range[index];
-
                                 var bar_result = result.bar_result[index];
-
                                 var location = bar_result[time].location;
-
                                 var reg_count = bar_result[time].reg_count;
-
-                                min = reg_count[0];
-
-                                max = reg_count[reg_count.length - 1];
-
+                                var min = reg_count[0];
+                                var max = reg_count[reg_count.length - 1];
                                 var map_result = result.map_result[index][time];
 
-                                options.push(
-                                    {
-                                        yAxis: {
-                                            type: 'category',
-                                            data: location
-                                        },
-                                        visualMap: {
-                                            type: 'continuous',
-                                            min: min,
-                                            max: max,
-                                            text: ['High', 'Low'],
-                                            left: 'right',
-                                            top: 'center',
-                                            realtime: false,
-                                            calculable: true,
-                                            color: colors
-                                        },
-                                        series: [{data: map_result}, {data: reg_count}]
-                                    })
+                                options.push({
+                                    yAxis: {
+                                        type: 'category',
+                                        data: location
+                                    },
+                                    visualMap: {
+                                        type: 'continuous',
+                                        dimension: 0,
+                                        min: min,
+                                        max: max,
+                                        text: ['High', 'Low'],
+                                        left: 'right',
+                                        top: 'center',
+                                        realtime: true,
+                                        calculable: true,
+                                        color: colors
+                                    },
+                                    series: [{
+                                        data: map_result
+                                    }, {
+                                        data: reg_count
+                                    }]
+                                })
                             }
 
                             optionAmerica.baseOption.timeline.currentIndex = time_range.length - 1;
@@ -258,7 +273,7 @@
                             optionAmerica.options = options;
                         }
 
-                        AmericaChart.setOption(optionAmerica, true);
+                        americaChart.setOption(optionAmerica, true);
                     }
                 })
             }
@@ -318,8 +333,12 @@
                     left: 'right',
                     top: '68%',
                     feature: {
-                        mark: {show: true},
-                        restore: {title: 'Reset'}
+                        mark: {
+                            show: true
+                        },
+                        restore: {
+                            title: 'Reset'
+                        }
                     }
                 },
                 grid: {
@@ -351,10 +370,16 @@
                     max: 'dataMax'
                 },
                 series: [{
-                    name: 'User Region by country', type: 'map', mapType: 'world',
+                    name: 'User Region by country',
+                    type: 'map',
+                    mapType: 'world',
                     roam: true,
                     itemStyle: {
-                        emphasis: {label: {show: true}}
+                        emphasis: {
+                            label: {
+                                show: true
+                            }
+                        }
                     },
                     data: []
                 },
@@ -367,9 +392,12 @@
                             }
                         },
                         data: []
-                    }]
-            }, options: []
+                    }
+                ]
+            },
+            options: []
         };
+
 
         $(document).ready(function () {
 
@@ -388,40 +416,42 @@
 
                         if (currentCountryType === 'Lifetime') {
 
+                            var map_result = result.map_result
                             var reg_count = result.bar_result.reg_count;
+                            var location = result.bar_result.location;
+                            var min = reg_count[0];
+                            var max = reg_count[reg_count.length - 1];
 
-                            min = reg_count[0];
-                            max = reg_count[reg_count.length - 1];
-
-                            optionWorld.baseOption.timeline =
-                                {
-                                    show: false,
-                                    data: ''
-                                };
-                            options = [
-                                {
-                                    yAxis: {
-                                        type: 'category',
-                                        data: result.bar_result.location
-                                    },
-                                    visualMap: {
-                                        type: 'continuous',
-                                        min: min,
-                                        max: max,
-                                        text: ['High', 'Low'],
-                                        left: 'right',
-                                        top: 'center',
-                                        realtime: false,
-                                        calculable: true,
-                                        color: colors
-                                    },
-                                    series: [{data: result.map_result}, {data: result.bar_result.reg_count}]
-                                }];
+                            optionWorld.baseOption.timeline = {
+                                show: false,
+                                data: ''
+                            };
+                            options = [{
+                                yAxis: {
+                                    type: 'category',
+                                    data: location
+                                },
+                                visualMap: {
+                                    type: 'continuous',
+                                    dimension: 0,
+                                    min: min,
+                                    max: max,
+                                    text: ['High', 'Low'],
+                                    left: 'right',
+                                    top: 'center',
+                                    realtime: true,
+                                    calculable: true,
+                                    color: colors
+                                },
+                                series: [{
+                                    data: map_result
+                                }, {
+                                    data: reg_count
+                                }]
+                            }];
 
                             optionWorld.options = options;
-                        }
-
-                        else {
+                        } else {
 
                             optionWorld.baseOption.timeline =
 
@@ -441,34 +471,37 @@
                             for (var index in time_range) {
 
                                 var time = time_range[index];
+                                var map_result = result.map_result[index][time];
                                 var bar_result = result.bar_result[index];
                                 var location = bar_result[time].location;
                                 var reg_count = bar_result[time].reg_count;
+                                var min = reg_count[0];
+                                var max = reg_count[reg_count.length - 1];
 
-                                min = reg_count[0];
-                                max = reg_count[reg_count.length - 1];
 
-                                var map_result = result.map_result[index][time];
-
-                                options.push(
-                                    {
-                                        yAxis: {
-                                            type: 'category',
-                                            data: location
-                                        },
-                                        visualMap: {
-                                            type: 'continuous',
-                                            min: min,
-                                            max: max,
-                                            text: ['High', 'Low'],
-                                            left: 'right',
-                                            top: 'center',
-                                            realtime: false,
-                                            calculable: true,
-                                            color: colors
-                                        },
-                                        series: [{data: map_result}, {data: reg_count}]
-                                    })
+                                options.push({
+                                    yAxis: {
+                                        type: 'category',
+                                        data: location
+                                    },
+                                    visualMap: {
+                                        type: 'continuous',
+                                        dimension: 0,
+                                        min: min,
+                                        max: max,
+                                        text: ['High', 'Low'],
+                                        left: 'right',
+                                        top: 'center',
+                                        realtime: true,
+                                        calculable: true,
+                                        color: colors
+                                    },
+                                    series: [{
+                                        data: map_result
+                                    }, {
+                                        data: reg_count
+                                    }]
+                                })
                             }
 
                             optionWorld.baseOption.timeline.currentIndex = time_range.length - 1;
@@ -506,6 +539,7 @@
 
             $('#world-daily').trigger('click');
         });
+    
 
     </script>
 
