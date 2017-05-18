@@ -1,3 +1,6 @@
+from itertools import groupby
+
+from operator import itemgetter
 from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
@@ -301,9 +304,13 @@ def process_bi_user_statistic_dau(target):
 
         def sync_collection_user_slots_dau(connection, transaction):
 
-            for row in rows:
-                table_index = row['_stats_date']
-                someday_BIUserStatistic = BIUserStatistic.model(table_index)
+
+            rows_group_by_states = groupby(sorted(rows, key=itemgetter('_stats_date')), itemgetter('_stats_date'))
+
+            for key, group_rows in rows_group_by_states:
+
+                someday_BIUserStatistic = BIUserStatistic.model(key)
+                group_rows =list(group_rows)
 
                 where = and_(someday_BIUserStatistic.c.stats_date == bindparam('_stats_date'),
                              someday_BIUserStatistic.c.username == bindparam('_username'))
@@ -311,8 +318,8 @@ def process_bi_user_statistic_dau(target):
                 values = {'slots_dau': 1}
 
                 try:
-                    connection.execute(someday_BIUserStatistic.__table__.update().where(where).values(values), row)
-
+                    connection.execute(someday_BIUserStatistic.__table__.update().where(where).values(values),
+                                       group_rows)
                 except:
 
                     print(target + ' slots dau transaction.rollback()')

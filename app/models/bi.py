@@ -324,7 +324,6 @@ class BIUserStatistic(object):
 
         table_index = stats_date
         class_name = 'BIUserStatistic_{}'.format(table_index)
-        now = current_time(app.config['APP_TIMEZONE']).format('YYYY-MM-DD')
 
         ModelClass = BIUserStatistic._mapper.get(class_name, None)
         if ModelClass is None:
@@ -374,20 +373,25 @@ class BIUserStatistic(object):
                 users = [dict(zip(('user_id', 'user_name', 'og_account'), u)) for u in
                          db.session.query(BIUser.user_id, BIUser.username, BIUser.og_account).all()]
                 try:
+
                     connection.execute(ModelClass.__table__.insert(), users)
 
                 except:
 
-                    print(now, 'users transaction.rollback()')
+                    print(stats_date, 'users transaction.rollback()')
 
                     transaction.rollback()
+
                     raise
+
                 else:
+
                     transaction.commit()
 
-                print(now, 'users transaction.commit()')
+                print(stats_date, 'users transaction.commit()')
 
             with_db_context(db, sync_all_users)
+
             return ModelClass
 
         return ModelClass
