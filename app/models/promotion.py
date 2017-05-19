@@ -44,11 +44,20 @@ class PromotionPush(db.Model):
 
     def to_dict(self):
         if self.status == PROMOTION_PUSH_STATUSES.SCHEDULED.value:
-            total_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id"), push_id=self.id).scalar()
-            running_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='running'"), push_id=self.id).scalar()
-            successed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"), push_id=self.id).scalar()
-            request_failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='request_failed'"), push_id=self.id).scalar()
-            failed_count = db.engine.execute(text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='failed'"), push_id=self.id).scalar()
+            total_count = db.engine.execute(
+                text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id"), push_id=self.id).scalar()
+            running_count = db.engine.execute(
+                text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='running'"),
+                push_id=self.id).scalar()
+            successed_count = db.engine.execute(
+                text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"),
+                push_id=self.id).scalar()
+            request_failed_count = db.engine.execute(text(
+                "SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='request_failed'"),
+                push_id=self.id).scalar()
+            failed_count = db.engine.execute(
+                text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='failed'"),
+                push_id=self.id).scalar()
 
         return {
             'id': self.id,
@@ -63,7 +72,7 @@ class PromotionPush(db.Model):
                 'successed_count': successed_count,
                 'request_failed_count': request_failed_count,
                 'failed_count': failed_count
-                },
+            },
             'message': self.message,
             'created_at': self.created_at
         }
@@ -82,3 +91,52 @@ class PromotionPushHistory(db.Model):
 
     __table_args__ = (Index('ix_push_id_and_status', 'push_id', 'status'),
                       Index('ix_push_type_and_status', 'push_type', 'status'))
+
+
+
+
+
+class UsersProperty(object):
+    @staticmethod
+    def gold_balance():
+        pass
+
+
+    @staticmethod
+    def count_of_charms():
+        pass
+
+
+    @staticmethod
+    def reward_level():
+        pass
+
+
+    @staticmethod
+    def total_purchase():
+        pass
+
+class Players(UsersProperty):
+
+    @staticmethod
+    def last_purchase_gold():
+        pass
+
+
+    @staticmethod
+    def last_free_spin():
+        pass
+
+    @staticmethod
+    def last_purchase_avatar():
+        pass
+
+    @staticmethod
+    def count_of_avatar_purchase():
+        pass
+
+    @staticmethod
+    def last_purchase_charms():
+        pass
+
+
