@@ -544,7 +544,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end                                                    AS platform,
+                                                   END                                                    AS platform,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 0
@@ -562,7 +562,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end      AS platform
+                                                   END      AS platform
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 0
                                                    AND email IS NOT NULL
@@ -784,20 +784,22 @@ def process_bi_statistic_new_reg(target):
                                                    CASE
                                                      WHEN reg_device = 5 THEN 'iOS'
                                                      WHEN reg_device = 6 THEN 'Android'
-                                                   end                                                    AS platform
+                                                   END                                                   AS platform
                                             FROM   tb_app_guest
-                                            GROUP  BY on_day 
+                                            GROUP  BY on_day,
+                                                      platform
                                            """), timezone_offset=timezone_offset)
         else:
 
             return connection.execute(text("""
-                                            SELECT COUNT(DISTINCT u_id) AS sum,
+                                            SELECT Count(DISTINCT u_id) AS sum,
                                                    CASE
                                                      WHEN reg_device = 5 THEN 'iOS'
                                                      WHEN reg_device = 6 THEN 'Android'
-                                                   end                  AS platform
+                                                   END                  AS platform
                                             FROM   tb_app_guest
-                                            WHERE  DATE(CONVERT_TZ(add_time, '+08:00', :timezone_offset)) = :on_day 
+                                            WHERE  Date(Convert_tz(add_time, '+08:00', :timezone_offset)) = :on_day
+                                            GROUP  BY platform 
                                            """), on_day=someday, timezone_offset=timezone_offset)
 
     result_proxy = with_db_context(db, collection_guest_reg, bind='orig_wpt')
