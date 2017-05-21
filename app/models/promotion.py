@@ -89,54 +89,151 @@ class PromotionPushHistory(db.Model):
     scheduled_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
     created_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
 
-    __table_args__ = (Index('ix_push_id_and_status', 'push_id', 'status'),
-                      Index('ix_push_type_and_status', 'push_type', 'status'))
+    __table_args__ = (
+        Index('ix_push_id_and_status', 'push_id', 'status'), Index('ix_push_type_and_status', 'push_type', 'status'))
 
 
-
-
-
-class UsersProperty(object):
+class BasicProperty(object):
     @staticmethod
-    def gold_balance():
-        pass
+    def reg_time(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
 
-
-    @staticmethod
-    def count_of_charms():
-        pass
-
+        return set(user_id)
 
     @staticmethod
-    def reward_level():
-        pass
+    def reg_state(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
 
-
-    @staticmethod
-    def total_purchase():
-        pass
-
-class Players(UsersProperty):
+        return set(user_id)
 
     @staticmethod
-    def last_purchase_gold():
-        pass
+    def reg_source(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
 
-
-    @staticmethod
-    def last_free_spin():
-        pass
-
-    @staticmethod
-    def last_purchase_avatar():
-        pass
+        return set(user_id)
 
     @staticmethod
-    def count_of_avatar_purchase():
-        pass
+    def reg_source(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
 
     @staticmethod
-    def last_purchase_charms():
-        pass
+    def current_gold_balance(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
 
 
+class GeneralUsers(object):
+    @staticmethod
+    def last_login(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def game_frequency(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+
+class PaidUsers(object):
+    @staticmethod
+    def total_purchase(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def count_of_purchase(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def last_purchase(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def last_purchase_gold(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def last_purchase_avatar(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def count_of_avatar_purchase(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def last_purchase_charms(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def count_of_charms_purchase(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def reward_level(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+    @staticmethod
+    def last_free_spin(start_time, end_time):
+        user_id = db.engine.execute(text("""
+        
+                                        """), start_time=start_time, end_time=end_time)
+
+        return set(user_id)
+
+
+class UsersGrouping(BasicProperty, GeneralUsers, PaidUsers):
+    pass

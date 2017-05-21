@@ -15,7 +15,7 @@ from . import report
 @report.route("/report/new_users", methods=["GET"])
 @login_required
 def new_users():
-    return render_template('report/new_users.html')
+    return render_template('report/user group.html')
 
 
 @report.route("/report/reg_platform_data", methods=["GET"])
