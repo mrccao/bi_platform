@@ -34,7 +34,7 @@
 
                         <h3 class="box-title"> User Region by Country</h3>
                         <div class="btn-group" style="float: right">
-                            <button id="world-daily" type="button" class="btn btn-default">Daily</button>
+                            <button id="world-daily" type="button" class="btn  btn-default">Daily</button>
                             <button id="world-monthly" type="button" class="btn btn-default">Monthly</button>
                             <button id="world-lifetime" type="button" class="btn btn-default">Lifetime</button>
                         </div>
@@ -169,9 +169,11 @@
                 currentStateType = group;
 
                 americaChart.showLoading(
-                    { text: 'loading',
+                    {
+                        text: 'loading',
                         color: '#3c8dbc',
-                        textColor: '#3c8dbc' }
+                        textColor: '#3c8dbc'
+                    }
                 );
 
 
@@ -292,7 +294,12 @@
                 if (currentStateType !== 'Daily') {
 
                     getUserRegionData($(this).text())
-                }
+                };
+
+                $(this).addClass("btn-primary");
+                $('#america-monthly').removeClass("btn-primary");
+                $('#america-lifetime').removeClass("btn-primary");
+
             });
 
             $('#america-monthly').click(function () {
@@ -301,6 +308,10 @@
 
                     getUserRegionData($(this).text())
                 }
+                 $(this).addClass("btn-primary");
+                $('#america-daily').removeClass("btn-primary");
+                $('#america-lifetime').removeClass("btn-primary");
+
 
             });
 
@@ -310,6 +321,10 @@
 
                     getUserRegionData($(this).text())
                 }
+                 $(this).addClass("btn-primary");
+                $('#america-daily').removeClass("btn-primary");
+                $('#america-monthly').removeClass("btn-primary");
+
 
             });
 
@@ -416,9 +431,11 @@
                 currentCountryType = group;
 
                 worldChart.showLoading(
-                    { text: 'loading',
+                    {
+                        text: 'loading',
                         color: '#3c8dbc',
-                        textColor: '#3c8dbc' }
+                        textColor: '#3c8dbc'
+                    }
                 );
 
                 $.ajax({
@@ -535,6 +552,11 @@
                 if (currentCountryType !== 'Daily') {
                     getUserRegionData($(this).text())
                 }
+
+                $(this).addClass("btn-primary");
+                $('#world-monthly').removeClass("btn-primary");
+                $('#world-lifetime').removeClass("btn-primary");
+
             });
 
             $('#world-monthly').click(function () {
@@ -542,6 +564,11 @@
                 if (currentCountryType !== 'Monthly') {
                     getUserRegionData($(this).text())
                 }
+
+                $(this).addClass("btn-primary");
+                $('#world-daily').removeClass("btn-primary");
+                $('#world-lifetime').removeClass("btn-primary");
+
 
             });
 
@@ -551,6 +578,11 @@
 
                     getUserRegionData($(this).text())
                 }
+
+                $(this).addClass("btn-primary");
+                $('#world-monthly').removeClass("btn-primary");
+                $('#world-daily').removeClass("btn-primary");
+
 
             });
 

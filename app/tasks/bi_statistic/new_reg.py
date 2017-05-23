@@ -429,7 +429,7 @@ def process_bi_statistic_new_reg(target):
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 1
                                                    AND reg_source != 'Facebook Game'
-                                            GROUP  BY on_day;  
+                                            GROUP  BY on_day,platform;  
                                              """), timezone_offset=timezone_offset)
 
         else:
