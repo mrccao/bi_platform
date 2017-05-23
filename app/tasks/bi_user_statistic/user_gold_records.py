@@ -24,7 +24,7 @@ def process_bi_user_statistic_consumption_records(target):
                                             SELECT user_id, sum(currency_amount) AS consumption_amount
                                             FROM bi_user_bill
                                             WHERE currency_type = 'gold'
-                                                  AND category_orig = :category
+                                                  AND category = :category
                                                   AND DATE(CONVERT_TZ(created_at, '+00:00', :timezone_offset)) = :stats_date
                                             GROUP BY  user_id
                                            """), stats_date=day, timezone_offset=timezone_offset, category=category)

@@ -154,9 +154,11 @@ class GeneralUsers(object):
 
 
 class PaidUsers(object):
+
     @staticmethod
     def total_purchase(start_time, end_time):
         user_id = db.engine.execute(text("""
+                                                
         
                                         """), start_time=start_time, end_time=end_time)
 

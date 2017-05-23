@@ -2,33 +2,588 @@
 {% block page_title %}User Clustering{% endblock %}
 {% block head_tail %}
 
-    <link href="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css"
-          rel="stylesheet">
+
     <link href="http://querybuilder.js.org/dist/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css"
           rel="stylesheet">
     <link href="http://querybuilder.js.org/dist/selectize/dist/css/selectize.bootstrap3.css" rel="stylesheet">
-    <link href="http://querybuilder.js.org/dist/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+
+
     <link href="http://querybuilder.js.org/dist/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css"
           rel="stylesheet">
+
     <link href="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/css/query-builder.default.min.css"
           rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
 
     <style>
+
+        .ibox.collapsed .ibox-content {
+            display: none;
+        }
+        .ibox.collapsed .fa.fa-chevron-up:before {
+            content: "\f078";
+        }
+        .ibox.collapsed .fa.fa-chevron-down:before {
+            content: "\f077";
+        }
+        .ibox:after,
+        .ibox:before {
+            display: table;
+        }
+        .ibox-title {
+            -moz-border-bottom-colors: none;
+            -moz-border-left-colors: none;
+            -moz-border-right-colors: none;
+            -moz-border-top-colors: none;
+            background-color: #ffffff;
+            border-color: #e7eaec;
+            border-image: none;
+            border-style: solid solid none;
+            border-width: 2px 0 0;
+            color: inherit;
+            margin-bottom: 0;
+            padding: 15px 15px 7px;
+            min-height: 48px;
+        }
+        .ibox-content {
+            background-color: #ffffff;
+            color: inherit;
+            padding: 15px 20px 20px 20px;
+            border-color: #e7eaec;
+            border-image: none;
+            border-style: solid solid none;
+            border-width: 1px 0;
+        }
+        .ibox-footer {
+            color: inherit;
+            border-top: 1px solid #e7eaec;
+            font-size: 90%;
+            background: #ffffff;
+            padding: 10px 15px;
+        }
+        table.table-mail tr td {
+            padding: 12px;
+        }
+        .table-mail .check-mail {
+            padding-left: 20px;
+        }
+        .table-mail .mail-date {
+            padding-right: 20px;
+        }
+        .star-mail,
+        .check-mail {
+            width: 40px;
+        }
+        .unread td a,
+        .unread td {
+            font-weight: 600;
+            color: inherit;
+        }
+        .read td a,
+        .read td {
+            font-weight: normal;
+            color: inherit;
+        }
+        .unread td {
+            background-color: #f9f8f8;
+        }
+        .ibox-content {
+            clear: both;
+        }
+        .ibox-heading {
+            background-color: #f3f6fb;
+            border-bottom: none;
+        }
+        .ibox-heading h3 {
+            font-weight: 200;
+            font-size: 24px;
+        }
+        .ibox-title h5 {
+            display: inline-block;
+            font-size: 14px;
+            margin: 0 0 7px;
+            padding: 0;
+            text-overflow: ellipsis;
+            float: left;
+        }
+        .ibox-title .label {
+            float: left;
+            margin-left: 4px;
+        }
+        .ibox-tools {
+            display: block;
+            float: none;
+            margin-top: 0;
+            position: relative;
+            padding: 0;
+            text-align: right;
+        }
+        .ibox-tools a {
+            cursor: pointer;
+            margin-left: 5px;
+            color: #c4c4c4;
+        }
+        .ibox-tools a.btn-primary {
+            color: #fff;
+        }
+        .ibox-tools .dropdown-menu > li > a {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        .ibox .ibox-tools.open > .dropdown-menu {
+            left: auto;
+            right: 0;
+        }
+        btn-w-m {
+            min-width: 120px;
+        }
+        .btn-primary.btn-outline {
+            color: #1ab394;
+        }
+        .btn-success.btn-outline {
+            color: #1c84c6;
+        }
+        .btn-info.btn-outline {
+            color: #23c6c8;
+        }
+        .btn-warning.btn-outline {
+            color: #f8ac59;
+        }
+        .btn-danger.btn-outline {
+            color: #ed5565;
+        }
+        .btn-primary.btn-outline:hover,
+        .btn-success.btn-outline:hover,
+        .btn-info.btn-outline:hover,
+        .btn-warning.btn-outline:hover,
+        .btn-danger.btn-outline:hover {
+            color: #fff;
+        }
+        .btn-primary {
+            background-color: #1ab394;
+            border-color: #1ab394;
+            color: #FFFFFF;
+        }
+        .btn-primary:hover,
+        .btn-primary:focus,
+        .btn-primary:active,
+        .btn-primary.active,
+        .open .dropdown-toggle.btn-primary,
+        .btn-primary:active:focus,
+        .btn-primary:active:hover,
+        .btn-primary.active:hover,
+        .btn-primary.active:focus {
+            background-color: #18a689;
+            border-color: #18a689;
+            color: #FFFFFF;
+        }
+        .btn-primary:active,
+        .btn-primary.active,
+        .open .dropdown-toggle.btn-primary {
+            background-image: none;
+        }
+        .btn-primary.disabled,
+        .btn-primary.disabled:hover,
+        .btn-primary.disabled:focus,
+        .btn-primary.disabled:active,
+        .btn-primary.disabled.active,
+        .btn-primary[disabled],
+        .btn-primary[disabled]:hover,
+        .btn-primary[disabled]:focus,
+        .btn-primary[disabled]:active,
+        .btn-primary.active[disabled],
+        fieldset[disabled] .btn-primary,
+        fieldset[disabled] .btn-primary:hover,
+        fieldset[disabled] .btn-primary:focus,
+        fieldset[disabled] .btn-primary:active,
+        fieldset[disabled] .btn-primary.active {
+            background-color: #1dc5a3;
+            border-color: #1dc5a3;
+        }
+        .btn-success {
+            background-color: #1c84c6;
+            border-color: #1c84c6;
+            color: #FFFFFF;
+        }
+        .btn-success:hover,
+        .btn-success:focus,
+        .btn-success:active,
+        .btn-success.active,
+        .open .dropdown-toggle.btn-success,
+        .btn-success:active:focus,
+        .btn-success:active:hover,
+        .btn-success.active:hover,
+        .btn-success.active:focus {
+            background-color: #1a7bb9;
+            border-color: #1a7bb9;
+            color: #FFFFFF;
+        }
+        .btn-success:active,
+        .btn-success.active,
+        .open .dropdown-toggle.btn-success {
+            background-image: none;
+        }
+        .btn-success.disabled,
+        .btn-success.disabled:hover,
+        .btn-success.disabled:focus,
+        .btn-success.disabled:active,
+        .btn-success.disabled.active,
+        .btn-success[disabled],
+        .btn-success[disabled]:hover,
+        .btn-success[disabled]:focus,
+        .btn-success[disabled]:active,
+        .btn-success.active[disabled],
+        fieldset[disabled] .btn-success,
+        fieldset[disabled] .btn-success:hover,
+        fieldset[disabled] .btn-success:focus,
+        fieldset[disabled] .btn-success:active,
+        fieldset[disabled] .btn-success.active {
+            background-color: #1f90d8;
+            border-color: #1f90d8;
+        }
+        .btn-info {
+            background-color: #23c6c8;
+            border-color: #23c6c8;
+            color: #FFFFFF;
+        }
+        .btn-info:hover,
+        .btn-info:focus,
+        .btn-info:active,
+        .btn-info.active,
+        .open .dropdown-toggle.btn-info,
+        .btn-info:active:focus,
+        .btn-info:active:hover,
+        .btn-info.active:hover,
+        .btn-info.active:focus {
+            background-color: #21b9bb;
+            border-color: #21b9bb;
+            color: #FFFFFF;
+        }
+        .btn-info:active,
+        .btn-info.active,
+        .open .dropdown-toggle.btn-info {
+            background-image: none;
+        }
+        .btn-info.disabled,
+        .btn-info.disabled:hover,
+        .btn-info.disabled:focus,
+        .btn-info.disabled:active,
+        .btn-info.disabled.active,
+        .btn-info[disabled],
+        .btn-info[disabled]:hover,
+        .btn-info[disabled]:focus,
+        .btn-info[disabled]:active,
+        .btn-info.active[disabled],
+        fieldset[disabled] .btn-info,
+        fieldset[disabled] .btn-info:hover,
+        fieldset[disabled] .btn-info:focus,
+        fieldset[disabled] .btn-info:active,
+        fieldset[disabled] .btn-info.active {
+            background-color: #26d7d9;
+            border-color: #26d7d9;
+        }
+        .btn-default {
+            color: inherit;
+            background: white;
+            border: 1px solid #e7eaec;
+        }
+        .btn-default:hover,
+        .btn-default:focus,
+        .btn-default:active,
+        .btn-default.active,
+        .open .dropdown-toggle.btn-default,
+        .btn-default:active:focus,
+        .btn-default:active:hover,
+        .btn-default.active:hover,
+        .btn-default.active:focus {
+            color: inherit;
+            border: 1px solid #d2d2d2;
+        }
+        .btn-default:active,
+        .btn-default.active,
+        .open .dropdown-toggle.btn-default {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) inset;
+        }
+        .btn-default.disabled,
+        .btn-default.disabled:hover,
+        .btn-default.disabled:focus,
+        .btn-default.disabled:active,
+        .btn-default.disabled.active,
+        .btn-default[disabled],
+        .btn-default[disabled]:hover,
+        .btn-default[disabled]:focus,
+        .btn-default[disabled]:active,
+        .btn-default.active[disabled],
+        fieldset[disabled] .btn-default,
+        fieldset[disabled] .btn-default:hover,
+        fieldset[disabled] .btn-default:focus,
+        fieldset[disabled] .btn-default:active,
+        fieldset[disabled] .btn-default.active {
+            color: #cacaca;
+        }
+        .btn-warning {
+            background-color: #f8ac59;
+            border-color: #f8ac59;
+            color: #FFFFFF;
+        }
+        .btn-warning:hover,
+        .btn-warning:focus,
+        .btn-warning:active,
+        .btn-warning.active,
+        .open .dropdown-toggle.btn-warning,
+        .btn-warning:active:focus,
+        .btn-warning:active:hover,
+        .btn-warning.active:hover,
+        .btn-warning.active:focus {
+            background-color: #f7a54a;
+            border-color: #f7a54a;
+            color: #FFFFFF;
+        }
+        .btn-warning:active,
+        .btn-warning.active,
+        .open .dropdown-toggle.btn-warning {
+            background-image: none;
+        }
+        .btn-warning.disabled,
+        .btn-warning.disabled:hover,
+        .btn-warning.disabled:focus,
+        .btn-warning.disabled:active,
+        .btn-warning.disabled.active,
+        .btn-warning[disabled],
+        .btn-warning[disabled]:hover,
+        .btn-warning[disabled]:focus,
+        .btn-warning[disabled]:active,
+        .btn-warning.active[disabled],
+        fieldset[disabled] .btn-warning,
+        fieldset[disabled] .btn-warning:hover,
+        fieldset[disabled] .btn-warning:focus,
+        fieldset[disabled] .btn-warning:active,
+        fieldset[disabled] .btn-warning.active {
+            background-color: #f9b66d;
+            border-color: #f9b66d;
+        }
+        .btn-danger {
+            background-color: #ed5565;
+            border-color: #ed5565;
+            color: #FFFFFF;
+        }
+        .btn-danger:hover,
+        .btn-danger:focus,
+        .btn-danger:active,
+        .btn-danger.active,
+        .open .dropdown-toggle.btn-danger,
+        .btn-danger:active:focus,
+        .btn-danger:active:hover,
+        .btn-danger.active:hover,
+        .btn-danger.active:focus {
+            background-color: #ec4758;
+            border-color: #ec4758;
+            color: #FFFFFF;
+        }
+        .btn-danger:active,
+        .btn-danger.active,
+        .open .dropdown-toggle.btn-danger {
+            background-image: none;
+        }
+        .btn-danger.disabled,
+        .btn-danger.disabled:hover,
+        .btn-danger.disabled:focus,
+        .btn-danger.disabled:active,
+        .btn-danger.disabled.active,
+        .btn-danger[disabled],
+        .btn-danger[disabled]:hover,
+        .btn-danger[disabled]:focus,
+        .btn-danger[disabled]:active,
+        .btn-danger.active[disabled],
+        fieldset[disabled] .btn-danger,
+        fieldset[disabled] .btn-danger:hover,
+        fieldset[disabled] .btn-danger:focus,
+        fieldset[disabled] .btn-danger:active,
+        fieldset[disabled] .btn-danger.active {
+            background-color: #ef6776;
+            border-color: #ef6776;
+        }
+        .btn-link {
+            color: inherit;
+        }
+        .btn-link:hover,
+        .btn-link:focus,
+        .btn-link:active,
+        .btn-link.active,
+        .open .dropdown-toggle.btn-link {
+            color: #1ab394;
+            text-decoration: none;
+        }
+        .btn-link:active,
+        .btn-link.active,
+        .open .dropdown-toggle.btn-link {
+            background-image: none;
+        }
+        .btn-link.disabled,
+        .btn-link.disabled:hover,
+        .btn-link.disabled:focus,
+        .btn-link.disabled:active,
+        .btn-link.disabled.active,
+        .btn-link[disabled],
+        .btn-link[disabled]:hover,
+        .btn-link[disabled]:focus,
+        .btn-link[disabled]:active,
+        .btn-link.active[disabled],
+        fieldset[disabled] .btn-link,
+        fieldset[disabled] .btn-link:hover,
+        fieldset[disabled] .btn-link:focus,
+        fieldset[disabled] .btn-link:active,
+        fieldset[disabled] .btn-link.active {
+            color: #cacaca;
+        }
+        .btn-white {
+            color: inherit;
+            background: white;
+            border: 1px solid #e7eaec;
+        }
+        .btn-white:hover,
+        .btn-white:focus,
+        .btn-white:active,
+        .btn-white.active,
+        .open .dropdown-toggle.btn-white,
+        .btn-white:active:focus,
+        .btn-white:active:hover,
+        .btn-white.active:hover,
+        .btn-white.active:focus {
+            color: inherit;
+            border: 1px solid #d2d2d2;
+        }
+        .btn-white:active,
+        .btn-white.active {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) inset;
+        }
+        .btn-white:active,
+        .btn-white.active,
+        .open .dropdown-toggle.btn-white {
+            background-image: none;
+        }
+        .btn-white.disabled,
+        .btn-white.disabled:hover,
+        .btn-white.disabled:focus,
+        .btn-white.disabled:active,
+        .btn-white.disabled.active,
+        .btn-white[disabled],
+        .btn-white[disabled]:hover,
+        .btn-white[disabled]:focus,
+        .btn-white[disabled]:active,
+        .btn-white.active[disabled],
+        fieldset[disabled] .btn-white,
+        fieldset[disabled] .btn-white:hover,
+        fieldset[disabled] .btn-white:focus,
+        fieldset[disabled] .btn-white:active,
+        fieldset[disabled] .btn-white.active {
+            color: #cacaca;
+        }
+        .form-control,
+        .form-control:focus,
+        .has-error .form-control:focus,
+        .has-success .form-control:focus,
+        .has-warning .form-control:focus,
+        .navbar-collapse,
+        .navbar-form,
+        .navbar-form-custom .form-control:focus,
+        .navbar-form-custom .form-control:hover,
+        .open .btn.dropdown-toggle,
+        .panel,
+        .popover,
+        .progress,
+        .progress-bar {
+            box-shadow: none;
+        }
+        .btn-outline {
+            color: inherit;
+            background-color: transparent;
+            transition: all .5s;
+        }
+        .btn-rounded {
+            border-radius: 50px;
+        }
+        .btn-large-dim {
+            width: 90px;
+            height: 90px;
+            font-size: 42px;
+        }
+        button.dim {
+            display: inline-block;
+            text-decoration: none;
+            text-transform: uppercase;
+            text-align: center;
+            padding-top: 6px;
+            margin-right: 10px;
+            position: relative;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-bottom: 20px !important;
+        }
+        button.dim:active {
+            top: 3px;
+        }
+        button.btn-primary.dim {
+            box-shadow: inset 0 0 0 #16987e, 0 5px 0 0 #16987e, 0 10px 5px #999999;
+        }
+        button.btn-primary.dim:active {
+            box-shadow: inset 0 0 0 #16987e, 0 2px 0 0 #16987e, 0 5px 3px #999999;
+        }
+        button.btn-default.dim {
+            box-shadow: inset 0 0 0 #b3b3b3, 0 5px 0 0 #b3b3b3, 0 10px 5px #999999;
+        }
+        button.btn-default.dim:active {
+            box-shadow: inset 0 0 0 #b3b3b3, 0 2px 0 0 #b3b3b3, 0 5px 3px #999999;
+        }
+        button.btn-warning.dim {
+            box-shadow: inset 0 0 0 #f79d3c, 0 5px 0 0 #f79d3c, 0 10px 5px #999999;
+        }
+        button.btn-warning.dim:active {
+            box-shadow: inset 0 0 0 #f79d3c, 0 2px 0 0 #f79d3c, 0 5px 3px #999999;
+        }
+        button.btn-info.dim {
+            box-shadow: inset 0 0 0 #1eacae, 0 5px 0 0 #1eacae, 0 10px 5px #999999;
+        }
+        button.btn-info.dim:active {
+            box-shadow: inset 0 0 0 #1eacae, 0 2px 0 0 #1eacae, 0 5px 3px #999999;
+        }
+        button.btn-success.dim {
+            box-shadow: inset 0 0 0 #1872ab, 0 5px 0 0 #1872ab, 0 10px 5px #999999;
+        }
+        button.btn-success.dim:active {
+            box-shadow: inset 0 0 0 #1872ab, 0 2px 0 0 #1872ab, 0 5px 3px #999999;
+        }
+        button.btn-danger.dim {
+            box-shadow: inset 0 0 0 #ea394c, 0 5px 0 0 #ea394c, 0 10px 5px #999999;
+        }
+        button.btn-danger.dim:active {
+            box-shadow: inset 0 0 0 #ea394c, 0 2px 0 0 #ea394c, 0 5px 3px #999999;
+        }
+        button.dim:before {
+            font-size: 50px;
+            line-height: 1em;
+            font-weight: normal;
+            color: #fff;
+            display: block;
+            padding-top: 10px;
+        }
+        button.dim:active:before {
+            top: 7px;
+            font-size: 50px;
+        }
+        .btn:focus {
+            outline: none !important;
+        }
 
         .left {
             align-self: center;
         }
-
         .query-builder .rules-group-container {
             padding: 10px 10px 6px;
             background: rgb(255, 255, 255);
-
             border: 1px solid #d2d4d4;
-
         }
-
         .condition-relation-line {
             background: -webkit-gradient(linear, left bottom, left top, color-stop(100%, #d2d4d4), to(#d2d4d4));
             background: linear-gradient(0, #d2d4d4 100%, #d2d4d4 100%);
@@ -36,10 +591,7 @@
             background-repeat: repeat-y;
             background-position-x: 45px;
         }
-
-
     </style>
-
 {% endblock %}
 
 
@@ -47,6 +599,8 @@
     <section class="content-header">
         <h1>User Clustering</h1>
     </section>
+
+
     <section class="content">
 
 
@@ -65,8 +619,15 @@
                         <div class="row">
                             <div class="col-md-12 col-lg-10 col-lg-offset-1">
                                 <h2 class="box-title" style="font-size: 20px">Basic Property</h2>
-                                <div id="builder-widgets"></div>
 
+                                <div id="builder-basic-property"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-warning  reset" data-target="basic-property">Reset</button>
+                                    <button class="btn btn-success  set-json" data-target="basic-property">Set rules
+                                    </button>
+                                    <button class="btn btn-primary   parse-json" data-target="basic-property">Get rules
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -85,8 +646,19 @@
 
 
                                 <h2 class="box-title" style="font-size: 20px">Game Behaviour </h2>
-                                <div id="builder1"></div>
 
+                                <div id="builder-game-behaviour"></div>
+                                <div class="btn-group">
+
+                                    <button class="btn btn-warning  reset" data-target="game-behaviour">Reset</button>
+
+                                    <button class="btn btn-success  set-json" data-target="game-behaviour">Set rules
+                                    </button>
+                                    <button class="btn btn-primary  parse-json" data-target="game-behaviour">Get rules
+                                    </button>
+
+
+                                </div>
                             </div>
                         </div>
                         <div class="left">
@@ -101,8 +673,18 @@
 
 
                                 <h2 class="box-title" style="font-size: 20px"> Consumer Behaviour </h2>
-                                <div id="builder2"></div>
 
+                                <div id="builder-consumer-behaviour"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-warning  reset" data-target="consumer-behaviour">Reset
+                                    </button>
+                                    <button class="btn btn-success  set-json" data-target="consumer-behaviour">Set
+                                        rules
+                                    </button>
+                                    <button class="btn btn-primary  parse-json" data-target="consumer-behaviour">Get
+                                        rules
+                                    </button>
+                                </div>
                             </div>
 
                         </div>
@@ -126,64 +708,124 @@
 
     </section>
 
-
 {% endblock %}
-
 
 
 
 {% block body_tail %}
 
-    <script src="http://querybuilder.js.org/dist/moment/min/moment.min.js"></script>
+
+
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.3.0/bootbox.min.js"></script>
     <script src="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
     <script src="http://querybuilder.js.org/dist/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
     <script src="http://querybuilder.js.org/dist/selectize/dist/js/standalone/selectize.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
     <script src="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/js/query-builder.standalone.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/sql-parser/browser/sql-parser.js"></script>
     <script src="http://querybuilder.js.org/dist/interact/dist/interact.min.js"></script>
-
+    <script src="http://querybuilder.js.org/assets/demo.js"></script>
 
 
     <script>
 
-        var rules_widgets = {
+
+        var gameBehaviour = {
             condition: 'OR',
             rules: [{
-                id: 'date',
+                id: 'lastLogin',
                 operator: 'equal',
-                value: '1991/11/17'
-            }, {
-                id: 'rate',
+                value: '2016/06/01'
+            }
+            ]
+        };
+        var consumerBehaviour = {
+            condition: 'OR',
+            rules: [{
+                id: 'lastPurchase',
                 operator: 'equal',
-                value: 22
-            }, {
-                id: 'category',
+            }
+            ]
+        };
+        var userProperty = {
+            condition: 'OR',
+            rules: [{
+                id: 'registered',
                 operator: 'equal',
-                value: '38'
-            }, {
-                condition: 'AND',
-                rules: [{
-                    id: 'coord',
-                    operator: 'equal',
-                    value: 'B.3'
-                }]
-            }]
+                value: '2016/06/01'
+            }
+            ]
         };
 
-        // Fix for Selectize
-        $('#builder-widgets').on('afterCreateRuleInput.queryBuilder', function (e, rule) {
-            if (rule.filter.plugin == 'selectize') {
-                rule.$el.find('.rule-value-container').css('min-width', '200px')
-                    .find('.selectize-control').removeClass('form-control');
-            }
-        });
-
-
-        $('#builder-widgets').queryBuilder({
+        $('#builder-basic-property').queryBuilder({
             plugins: ['bt-tooltip-errors'],
 
             filters: [{
-                id: 'date',
-                label: 'Datepicker',
+                id: 'registered',
+                label: 'Registered',
+                type: 'date',
+
+                validation: {
+                    format: 'YYYY/MM/DD'
+                },
+                plugin: 'datepicker',
+                plugin_config: {
+                    format: 'yyyy/mm/dd',
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    autoclose: true
+                },
+
+                operators: ['less', 'equal', 'greater', 'between']
+
+            }
+                , {
+                    id: 'birthday',
+                    label: 'Birthday',
+                    type: 'date',
+
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                }
+                , {
+                    id: 'regCountry',
+                    label: 'Reg Country',
+                    input: 'text',
+                    operators: ['equal']
+                }
+
+                , {
+                    id: 'regState',
+                    label: 'Reg State',
+                    type: 'integer',
+                    input: 'text',
+
+                    operators: ['equal']
+                },
+
+
+            ],
+
+            rules: userProperty
+        });
+
+        $('#builder-game-behaviour').queryBuilder({
+            plugins: ['bt-tooltip-errors'],
+
+            filters: [{
+                id: 'lastLogin',
+                label: 'Last Login',
                 type: 'date',
                 validation: {
                     format: 'YYYY/MM/DD'
@@ -194,135 +836,200 @@
                     todayBtn: 'linked',
                     todayHighlight: true,
                     autoclose: true
+                },
+
+                operators: ['less', 'equal', 'greater', 'between']
+            }
+                , {
+                    id: 'gameFrequency',
+                    label: 'Login days this month',
+                    type: 'integer',
+                    input: 'number',
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'continuousLogin',
+                    label: 'Continuous login days this month',
+                    type: 'integer',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
                 }
-            }, {
-                id: 'rate',
-                label: 'Slider',
-                type: 'integer',
-                validation: {
-                    min: 0,
-                    max: 100
-                },
-                plugin: 'slider',
-                plugin_config: {
-                    min: 0,
-                    max: 100,
-                    value: 0
-                },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs == 1) value = [value];
-                    rule.$el.find('.rule-value-container input').each(function (i) {
-                        $(this).slider('setValue', value[i] || 0);
-                    });
-                },
-                valueGetter: function (rule) {
-                    var value = [];
-                    rule.$el.find('.rule-value-container input').each(function () {
-                        value.push($(this).slider('getValue'));
-                    });
-                    return rule.operator.nb_inputs == 1 ? value[0] : value;
-                }
-            }, {
-                id: 'category',
-                label: 'Selectize',
-                type: 'string',
-                plugin: 'selectize',
-                plugin_config: {
-                    valueField: 'id',
-                    labelField: 'name',
-                    searchField: 'name',
-                    sortField: 'name',
-                    create: true,
-                    maxItems: 1,
-                    plugins: ['remove_button'],
-                    onInitialize: function () {
-                        var that = this;
+            ],
 
-                        if (localStorage.demoData === undefined) {
-                            $.getJSON(baseurl + '/assets/demo-data.json', function (data) {
-                                localStorage.demoData = JSON.stringify(data);
-                                data.forEach(function (item) {
-                                    that.addOption(item);
-                                });
-                            });
-                        }
-                        else {
-                            JSON.parse(localStorage.demoData).forEach(function (item) {
-                                that.addOption(item);
-                            });
-                        }
-                    }
+            rules: gameBehaviour
+        });
+
+        $('#builder-consumer-behaviour').queryBuilder({
+            plugins: ['bt-tooltip-errors'],
+
+
+            filters: [
+
+                {
+                    id: 'lastPurchase',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
                 },
-                valueSetter: function (rule, value) {
-                    rule.$el.find('.rule-value-container input')[0].selectize.setValue(value);
-                }
-            }, {
-                id: 'coord',
-                label: 'Coordinates',
-                type: 'string',
-                validation: {
-                    format: /^[A-C]{1}.[1-6]{1}$/
+                {
+                    id: 'totalPurchase',
+                    label: 'Total Purchase',
+                    input: 'number',
+                    type: 'double',
+                    validation: {
+                        min: 0,
+                        step: 0.1
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
                 },
-                input: function (rule, name) {
-                    var $container = rule.$el.find('.rule-value-container');
 
-                    $container.on('change', '[name=' + name + '_1]', function () {
-                        var h = '';
 
-                        switch ($(this).val()) {
-                            case 'A':
-                                h = '<option value="-1">-</option> <option value="1">1</option> <option value="2">2</option>';
-                                break;
-                            case 'B':
-                                h = '<option value="-1">-</option> <option value="3">3</option> <option value="4">4</option>';
-                                break;
-                            case 'C':
-                                h = '<option value="-1">-</option> <option value="5">5</option> <option value="6">6</option>';
-                                break;
-                        }
-
-                        $container.find('[name$=_2]')
-                            .html(h).toggle(!!h)
-                            .val('-1').trigger('change');
-                    });
-
-                    return '\
-      <select name="' + name + '_1"> \
-        <option value="-1">-</option> \
-        <option value="A">A</option> \
-        <option value="B">B</option> \
-        <option value="C">C</option> \
-      </select> \
-      <select name="' + name + '_2" style="display:none;"></select>';
+                {
+                    id: 'rewardLevel',
+                    label: 'Reward Level',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
                 },
-                valueGetter: function (rule) {
-                    return rule.$el.find('.rule-value-container [name$=_1]').val()
-                        + '.' + rule.$el.find('.rule-value-container [name$=_2]').val();
+
+
+                {
+                    id: 'lastPurchaseGold',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
                 },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs > 0) {
-                        var val = value.split('.');
 
-                        rule.$el.find('.rule-value-container [name$=_1]').val(val[0]).trigger('change');
-                        rule.$el.find('.rule-value-container [name$=_2]').val(val[1]).trigger('change');
-                    }
-                }
-            }],
 
-            rules: rules_widgets
+                {
+                    id: 'lastPurchaseAvatar',
+
+                    label: 'Last Purchase Avatar',
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'lastPurchaseCharm',
+                    label: 'Last Purchase Charm',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+                {
+                    id: 'lastFreeSpin',
+                    label: 'Last Free Spin',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'countOfPurchase',
+                    label: 'Count of Purchase',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'countOfAvatarPurchase',
+                    label: 'Count of Avatar Purchase',
+
+                    input: 'number',
+                },
+
+
+                {
+                    id: 'countOfCharmPurchase',
+                    label: 'Count of Charm Purchase',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+            ],
+            rules: consumerBehaviour
         });
 
 
-        $('#btn-reset').on('click', function () {
-            $('#builder-widgets').queryBuilder('reset');
+        $('#btn-reset-basic-property').on('click', function () {
+            $('#builder-basic').queryBuilder('reset');
         });
 
-        $('#btn-set').on('click', function () {
-            $('#builder-widgets').queryBuilder('setRules', rules_widgets);
+        $('#btn-set-basic-property').on('click', function () {
+            $('#builder-basic').queryBuilder('setRules', rules_basic);
         });
 
-        $('#btn-get').on('click', function () {
-            var result = $('#builder-widgets').queryBuilder('getRules');
+        $('#btn-get-basic-property').on('click', function () {
+            var result = $('#builder-basic').queryBuilder('getRules');
 
             if (!$.isEmptyObject(result)) {
                 alert(JSON.stringify(result, null, 2));
@@ -330,273 +1037,38 @@
         });
 
 
-        $('#builder1').queryBuilder({
-            plugins: ['bt-tooltip-errors'],
+        $('#btn-reset-game-behaviour').on('click', function () {
+            $('#builder-game-behaviour').queryBuilder('reset');
+        });
 
-            filters: [{
-                id: 'date',
-                label: 'Datepicker',
-                type: 'date',
-                validation: {
-                    format: 'YYYY/MM/DD'
-                },
-                plugin: 'datepicker',
-                plugin_config: {
-                    format: 'yyyy/mm/dd',
-                    todayBtn: 'linked',
-                    todayHighlight: true,
-                    autoclose: true
-                }
-            }, {
-                id: 'rate',
-                label: 'Slider',
-                type: 'integer',
-                validation: {
-                    min: 0,
-                    max: 100
-                },
-                plugin: 'slider',
-                plugin_config: {
-                    min: 0,
-                    max: 100,
-                    value: 0
-                },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs == 1) value = [value];
-                    rule.$el.find('.rule-value-container input').each(function (i) {
-                        $(this).slider('setValue', value[i] || 0);
-                    });
-                },
-                valueGetter: function (rule) {
-                    var value = [];
-                    rule.$el.find('.rule-value-container input').each(function () {
-                        value.push($(this).slider('getValue'));
-                    });
-                    return rule.operator.nb_inputs == 1 ? value[0] : value;
-                }
-            }, {
-                id: 'category',
-                label: 'Selectize',
-                type: 'string',
-                plugin: 'selectize',
-                plugin_config: {
-                    valueField: 'id',
-                    labelField: 'name',
-                    searchField: 'name',
-                    sortField: 'name',
-                    create: true,
-                    maxItems: 1,
-                    plugins: ['remove_button'],
-                    onInitialize: function () {
-                        var that = this;
+        $('#btn-set-game-behaviour').on('click', function () {
+            $('#builder-game-behaviour').queryBuilder('setRules', rules_basic);
+        });
 
-                        if (localStorage.demoData === undefined) {
-                            $.getJSON(baseurl + '/assets/demo-data.json', function (data) {
-                                localStorage.demoData = JSON.stringify(data);
-                                data.forEach(function (item) {
-                                    that.addOption(item);
-                                });
-                            });
-                        }
-                        else {
-                            JSON.parse(localStorage.demoData).forEach(function (item) {
-                                that.addOption(item);
-                            });
-                        }
-                    }
-                },
-                valueSetter: function (rule, value) {
-                    rule.$el.find('.rule-value-container input')[0].selectize.setValue(value);
-                }
-            }, {
-                id: 'coord',
-                label: 'Coordinates',
-                type: 'string',
-                validation: {
-                    format: /^[A-C]{1}.[1-6]{1}$/
-                },
-                input: function (rule, name) {
-                    var $container = rule.$el.find('.rule-value-container');
+        $('#btn-get-game-behaviour').on('click', function () {
+            var result = $('#builder-game-behaviour').queryBuilder('getRules');
 
-                    $container.on('change', '[name=' + name + '_1]', function () {
-                        var h = '';
-
-                        switch ($(this).val()) {
-                            case 'A':
-                                h = '<option value="-1">-</option> <option value="1">1</option> <option value="2">2</option>';
-                                break;
-                            case 'B':
-                                h = '<option value="-1">-</option> <option value="3">3</option> <option value="4">4</option>';
-                                break;
-                            case 'C':
-                                h = '<option value="-1">-</option> <option value="5">5</option> <option value="6">6</option>';
-                                break;
-                        }
-
-                        $container.find('[name$=_2]')
-                            .html(h).toggle(!!h)
-                            .val('-1').trigger('change');
-                    });
-
-                    return '\
-      <select name="' + name + '_1"> \
-        <option value="-1">-</option> \
-        <option value="A">A</option> \
-        <option value="B">B</option> \
-        <option value="C">C</option> \
-      </select> \
-      <select name="' + name + '_2" style="display:none;"></select>';
-                },
-                valueGetter: function (rule) {
-                    return rule.$el.find('.rule-value-container [name$=_1]').val()
-                        + '.' + rule.$el.find('.rule-value-container [name$=_2]').val();
-                },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs > 0) {
-                        var val = value.split('.');
-
-                        rule.$el.find('.rule-value-container [name$=_1]').val(val[0]).trigger('change');
-                        rule.$el.find('.rule-value-container [name$=_2]').val(val[1]).trigger('change');
-                    }
-                }
-            }],
-
-            rules: rules_widgets
+            if (!$.isEmptyObject(result)) {
+                alert(JSON.stringify(result, null, 2));
+            }
         });
 
 
-        $('#builder2').queryBuilder({
-            plugins: ['bt-tooltip-errors'],
+        $('#btn-reset-consumer-behaviour').on('click', function () {
 
-            filters: [{
-                id: 'date',
-                label: 'Datepicker',
-                type: 'date',
-                validation: {
-                    format: 'YYYY/MM/DD'
-                },
-                plugin: 'datepicker',
-                plugin_config: {
-                    format: 'yyyy/mm/dd',
-                    todayBtn: 'linked',
-                    todayHighlight: true,
-                    autoclose: true
-                }
-            }, {
-                id: 'rate',
-                label: 'Slider',
-                type: 'integer',
-                validation: {
-                    min: 0,
-                    max: 100
-                },
-                plugin: 'slider',
-                plugin_config: {
-                    min: 0,
-                    max: 100,
-                    value: 0
-                },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs == 1) value = [value];
-                    rule.$el.find('.rule-value-container input').each(function (i) {
-                        $(this).slider('setValue', value[i] || 0);
-                    });
-                },
-                valueGetter: function (rule) {
-                    var value = [];
-                    rule.$el.find('.rule-value-container input').each(function () {
-                        value.push($(this).slider('getValue'));
-                    });
-                    return rule.operator.nb_inputs == 1 ? value[0] : value;
-                }
-            }, {
-                id: 'category',
-                label: 'Selectize',
-                type: 'string',
-                plugin: 'selectize',
-                plugin_config: {
-                    valueField: 'id',
-                    labelField: 'name',
-                    searchField: 'name',
-                    sortField: 'name',
-                    create: true,
-                    maxItems: 1,
-                    plugins: ['remove_button'],
-                    onInitialize: function () {
-                        var that = this;
+            $('#builder-consumer-behaviour').queryBuilder('reset');
+        });
 
-                        if (localStorage.demoData === undefined) {
-                            $.getJSON(baseurl + '/assets/demo-data.json', function (data) {
-                                localStorage.demoData = JSON.stringify(data);
-                                data.forEach(function (item) {
-                                    that.addOption(item);
-                                });
-                            });
-                        }
-                        else {
-                            JSON.parse(localStorage.demoData).forEach(function (item) {
-                                that.addOption(item);
-                            });
-                        }
-                    }
-                },
-                valueSetter: function (rule, value) {
-                    rule.$el.find('.rule-value-container input')[0].selectize.setValue(value);
-                }
-            }, {
-                id: 'coord',
-                label: 'Coordinates',
-                type: 'string',
-                validation: {
-                    format: /^[A-C]{1}.[1-6]{1}$/
-                },
-                input: function (rule, name) {
-                    var $container = rule.$el.find('.rule-value-container');
+        $('#btn-set-consumer-behaviour').on('click', function () {
+            $('#builder-consumer-behaviour').queryBuilder('setRules', rules_basic);
+        });
 
-                    $container.on('change', '[name=' + name + '_1]', function () {
-                        var h = '';
+        $('#btn-get-consumer-behaviour').on('click', function () {
+            var result = $('#builder-consumer-behaviour').queryBuilder('getRules');
 
-                        switch ($(this).val()) {
-                            case 'A':
-                                h = '<option value="-1">-</option> <option value="1">1</option> <option value="2">2</option>';
-                                break;
-                            case 'B':
-                                h = '<option value="-1">-</option> <option value="3">3</option> <option value="4">4</option>';
-                                break;
-                            case 'C':
-                                h = '<option value="-1">-</option> <option value="5">5</option> <option value="6">6</option>';
-                                break;
-                        }
-
-                        $container.find('[name$=_2]')
-                            .html(h).toggle(!!h)
-                            .val('-1').trigger('change');
-                    });
-
-                    return '\
-      <select name="' + name + '_1"> \
-        <option value="-1">-</option> \
-        <option value="A">A</option> \
-        <option value="B">B</option> \
-        <option value="C">C</option> \
-      </select> \
-      <select name="' + name + '_2" style="display:none;"></select>';
-                },
-                valueGetter: function (rule) {
-                    return rule.$el.find('.rule-value-container [name$=_1]').val()
-                        + '.' + rule.$el.find('.rule-value-container [name$=_2]').val();
-                },
-                valueSetter: function (rule, value) {
-                    if (rule.operator.nb_inputs > 0) {
-                        var val = value.split('.');
-
-                        rule.$el.find('.rule-value-container [name$=_1]').val(val[0]).trigger('change');
-                        rule.$el.find('.rule-value-container [name$=_2]').val(val[1]).trigger('change');
-                    }
-                }
-            }],
-
-            rules: rules_widgets
+            if (!$.isEmptyObject(result)) {
+                alert(JSON.stringify(result, null, 2));
+            }
         });
 
     </script>
