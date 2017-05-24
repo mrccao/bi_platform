@@ -3,304 +3,1696 @@
 {% block page_title %}Sending Facebook Notification{% endblock %}
 
 {% block head_tail %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
+          rel="stylesheet">
+
+
 {% endblock %}
 
 {% block main_content %}
-<section class="content-header">
-  <h1>
-    Sending Facebook Notification
-  </h1>
-</section>
+    <section class="content-header">
+        <h1>
+            Sending Facebook Notification
+        </h1>
+    </section>
 
-{% if based_query %}
-<div class="pad margin no-print">
-  <div class="callout callout-info" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4>Sending Facebook notification to users based query blew:</h4>
-    <pre>{{ based_query.sql }}</pre>
-  </div>
-</div>
-{% else %}
-<div class="pad margin no-print">
-  <div class="callout callout-danger" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this screen.</h4>
-  </div>
-</div>
-{% endif %}
-
-<section class="content">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box box-primary" id="editor-box">
-                <div class="box-header" style="padding-bottom: 2px;">
-                    <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
-                      <div class="input-group-addon">
-                        <i class="fa fa-calendar"></i> &nbsp;Scheduled at (EST)
-                      </div>
-                      <input type="text" class="form-control" id="send-scheduled-at">
-                    </div>
-                    <button type="button" class="btn btn-success" id="btn-send" style="margin-right: 5px;"><i class="fa fa-toggle-right"></i> Send</button>
-                    <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i class="fa fa-indent"></i> Insert Facebook name</button>
-                </div>
-                <div class="box-body">
-                    <form>
-                      <div class="form-group" style="margin-bottom: 8px;">
-                        <textarea id="message-editor" class="form-control" rows="8" placeholder="Enter message"></textarea>
-                      </div>
-                    </form>
-                </div>
-                <!--<div class="box-footer clearfix">
-                </div>-->
-            </div>
-
-            <div class="nav-tabs-custom" id="tabs-box">
-              <ul class="nav nav-tabs">
-                <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a></li>
-              </ul>
-              <div class="tab-content">
-                <div class="tab-pane active table-responsive" id="tab-history">
-                    <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
-                        <thead>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td colspan="999">
-                                <div class="text-center">
-                                    There are no items in the history table.
-                                </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                    </table>
-                </div>
-              </div>
-              <!-- /.tab-content -->
+    {% if based_query %}
+        <div class="pad margin no-print">
+            <div class="callout callout-info"
+                 style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
+                <h4>Sending Facebook notification to users based query blew:</h4>
+                <pre>{{ based_query.sql }}</pre>
             </div>
         </div>
-    </div>
-</section>
+    {% else %}
+        <div class="pad margin no-print">
+            <div class="callout callout-danger"
+                 style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
+                <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this screen.</h4>
+            </div>
+        </div>
+    {% endif %}
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary" id="editor-box">
+                    <div class="box-header" style="padding-bottom: 2px;">
+                        <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i> &nbsp;Scheduled at (EST)
+                            </div>
+                            <input type="text" class="form-control" id="send-scheduled-at">
+                        </div>
+                        <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-select-users"
+                                data-toggle="modal" data-target="#select-users">
+                            <i class="fa fa-indent"></i> Select Users
+                        </button>
+
+
+
+                        <div class="modal fade" id="select-users" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+
+
+                            <link href="http://querybuilder.js.org/dist/seiyria-bootstrap-slider/dist/css/bootstrap-slider.min.css"
+                                  rel="stylesheet">
+                            <link href="http://querybuilder.js.org/dist/selectize/dist/css/selectize.bootstrap3.css"
+                                  rel="stylesheet">
+                            <link href="http://querybuilder.js.org/dist/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css"
+                                  rel="stylesheet">
+                            <link href="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/css/query-builder.default.min.css"
+                                  rel="stylesheet">
+                            <style>
+
+                                .ibox.collapsed .ibox-content {
+                                    display: none;
+                                }
+
+                                .ibox.collapsed .fa.fa-chevron-up:before {
+                                    content: "\f078";
+                                }
+
+                                .ibox.collapsed .fa.fa-chevron-down:before {
+                                    content: "\f077";
+                                }
+
+                                .ibox:after,
+                                .ibox:before {
+                                    display: table;
+                                }
+
+                                .ibox-title {
+                                    -moz-border-bottom-colors: none;
+                                    -moz-border-left-colors: none;
+                                    -moz-border-right-colors: none;
+                                    -moz-border-top-colors: none;
+                                    background-color: #ffffff;
+                                    border-color: #e7eaec;
+                                    border-image: none;
+                                    border-style: solid solid none;
+                                    border-width: 2px 0 0;
+                                    color: inherit;
+                                    margin-bottom: 0;
+                                    padding: 15px 15px 7px;
+                                    min-height: 48px;
+                                }
+
+                                .ibox-content {
+                                    background-color: #ffffff;
+                                    color: inherit;
+                                    padding: 15px 20px 20px 20px;
+                                    border-color: #e7eaec;
+                                    border-image: none;
+                                    border-style: solid solid none;
+                                    border-width: 1px 0;
+                                }
+
+                                .ibox-footer {
+                                    color: inherit;
+                                    border-top: 1px solid #e7eaec;
+                                    font-size: 90%;
+                                    background: #ffffff;
+                                    padding: 10px 15px;
+                                }
+
+                                table.table-mail tr td {
+                                    padding: 12px;
+                                }
+
+                                .table-mail .check-mail {
+                                    padding-left: 20px;
+                                }
+
+                                .table-mail .mail-date {
+                                    padding-right: 20px;
+                                }
+
+                                .star-mail,
+                                .check-mail {
+                                    width: 40px;
+                                }
+
+                                .unread td a,
+                                .unread td {
+                                    font-weight: 600;
+                                    color: inherit;
+                                }
+
+                                .read td a,
+                                .read td {
+                                    font-weight: normal;
+                                    color: inherit;
+                                }
+
+                                .unread td {
+                                    background-color: #f9f8f8;
+                                }
+
+                                .ibox-content {
+                                    clear: both;
+                                }
+
+                                .ibox-heading {
+                                    background-color: #f3f6fb;
+                                    border-bottom: none;
+                                }
+
+                                .ibox-heading h3 {
+                                    font-weight: 200;
+                                    font-size: 24px;
+                                }
+
+                                .ibox-title h5 {
+                                    display: inline-block;
+                                    font-size: 14px;
+                                    margin: 0 0 7px;
+                                    padding: 0;
+                                    text-overflow: ellipsis;
+                                    float: left;
+                                }
+
+                                .ibox-title .label {
+                                    float: left;
+                                    margin-left: 4px;
+                                }
+
+                                .ibox-tools {
+                                    display: block;
+                                    float: none;
+                                    margin-top: 0;
+                                    position: relative;
+                                    padding: 0;
+                                    text-align: right;
+                                }
+
+                                .ibox-tools a {
+                                    cursor: pointer;
+                                    margin-left: 5px;
+                                    color: #c4c4c4;
+                                }
+
+                                .ibox-tools a.btn-primary {
+                                    color: #fff;
+                                }
+
+                                .ibox-tools .dropdown-menu > li > a {
+                                    padding: 4px 10px;
+                                    font-size: 12px;
+                                }
+
+                                .ibox .ibox-tools.open > .dropdown-menu {
+                                    left: auto;
+                                    right: 0;
+                                }
+
+
+                                .btn-primary.btn-outline {
+                                    color: #1ab394;
+                                }
+
+                                .btn-success.btn-outline {
+                                    color: #00a65a;
+                                }
+
+                                .btn-info.btn-outline {
+                                    color: #23c6c8;
+                                }
+
+                                .btn-warning.btn-outline {
+                                    color: #f8ac59;
+                                }
+
+                                .btn-danger.btn-outline {
+                                    color: #ed5565;
+                                }
+
+                                .btn-primary.btn-outline:hover,
+                                .btn-success.btn-outline:hover,
+                                .btn-info.btn-outline:hover,
+                                .btn-warning.btn-outline:hover,
+                                .btn-danger.btn-outline:hover {
+                                    color: #fff;
+                                }
+
+                                .btn-primary {
+                                    background-color: #1ab394;
+                                    border-color: #1ab394;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-primary:hover,
+                                .btn-primary:focus,
+                                .btn-primary:active,
+                                .btn-primary.active,
+                                .open .dropdown-toggle.btn-primary,
+                                .btn-primary:active:focus,
+                                .btn-primary:active:hover,
+                                .btn-primary.active:hover,
+                                .btn-primary.active:focus {
+                                    background-color: #18a689;
+                                    border-color: #18a689;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-primary:active,
+                                .btn-primary.active,
+                                .open .dropdown-toggle.btn-primary {
+                                    background-image: none;
+                                }
+
+                                .btn-primary.disabled,
+                                .btn-primary.disabled:hover,
+                                .btn-primary.disabled:focus,
+                                .btn-primary.disabled:active,
+                                .btn-primary.disabled.active,
+                                .btn-primary[disabled],
+                                .btn-primary[disabled]:hover,
+                                .btn-primary[disabled]:focus,
+                                .btn-primary[disabled]:active,
+                                .btn-primary.active[disabled],
+                                fieldset[disabled] .btn-primary,
+                                fieldset[disabled] .btn-primary:hover,
+                                fieldset[disabled] .btn-primary:focus,
+                                fieldset[disabled] .btn-primary:active,
+                                fieldset[disabled] .btn-primary.active {
+                                    background-color: #1dc5a3;
+                                    border-color: #1dc5a3;
+                                }
+
+                                {#        .btn-success {#}
+                                {#            background-color: #1c84c6;#}
+                                {#            border-color: #1c84c6;#}
+                                {#            color: #FFFFFF;#}
+                                {#        }#}
+                                {##}
+                                {#        .btn-success:hover,#}
+                                {#        .btn-success:focus,#}
+                                {#        .btn-success:active,#}
+                                {#        .btn-success.active,#}
+                                {#        .open .dropdown-toggle.btn-success,#}
+                                {#        .btn-success:active:focus,#}
+                                {#        .btn-success:active:hover,#}
+                                {#        .btn-success.active:hover,#}
+                                {#        .btn-success.active:focus {#}
+                                {#            background-color: #1a7bb9;#}
+                                {#            border-color: #1a7bb9;#}
+                                {#            color: #FFFFFF;#}
+                                {#        }#}
+                                {##}
+                                {#        .btn-success:active,#}
+                                {#        .btn-success.active,#}
+                                {#        .open .dropdown-toggle.btn-success {#}
+                                {#            background-image: none;#}
+                                {#        }#}
+                                {##}
+                                {#        .btn-success.disabled,#}
+                                {#        .btn-success.disabled:hover,#}
+                                {#        .btn-success.disabled:focus,#}
+                                {#        .btn-success.disabled:active,#}
+                                {#        .btn-success.disabled.active,#}
+                                {#        .btn-success[disabled],#}
+                                {#        .btn-success[disabled]:hover,#}
+                                {#        .btn-success[disabled]:focus,#}
+                                {#        .btn-success[disabled]:active,#}
+                                {#        .btn-success.active[disabled],#}
+                                {#        fieldset[disabled] .btn-success,#}
+                                {#        fieldset[disabled] .btn-success:hover,#}
+                                {#        fieldset[disabled] .btn-success:focus,#}
+                                {#        fieldset[disabled] .btn-success:active,#}
+                                {#        fieldset[disabled] .btn-success.active {#}
+                                {#            background-color: #1f90d8;#}
+                                {#            border-color: #1f90d8;#}
+                                {#        }#}
+
+                                .btn-info {
+                                    background-color: #23c6c8;
+                                    border-color: #23c6c8;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-info:hover,
+                                .btn-info:focus,
+                                .btn-info:active,
+                                .btn-info.active,
+                                .open .dropdown-toggle.btn-info,
+                                .btn-info:active:focus,
+                                .btn-info:active:hover,
+                                .btn-info.active:hover,
+                                .btn-info.active:focus {
+                                    background-color: #21b9bb;
+                                    border-color: #21b9bb;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-info:active,
+                                .btn-info.active,
+                                .open .dropdown-toggle.btn-info {
+                                    background-image: none;
+                                }
+
+                                .btn-info.disabled,
+                                .btn-info.disabled:hover,
+                                .btn-info.disabled:focus,
+                                .btn-info.disabled:active,
+                                .btn-info.disabled.active,
+                                .btn-info[disabled],
+                                .btn-info[disabled]:hover,
+                                .btn-info[disabled]:focus,
+                                .btn-info[disabled]:active,
+                                .btn-info.active[disabled],
+                                fieldset[disabled] .btn-info,
+                                fieldset[disabled] .btn-info:hover,
+                                fieldset[disabled] .btn-info:focus,
+                                fieldset[disabled] .btn-info:active,
+                                fieldset[disabled] .btn-info.active {
+                                    background-color: #26d7d9;
+                                    border-color: #26d7d9;
+                                }
+
+                                .btn-default {
+                                    color: inherit;
+                                    background: white;
+                                    border: 1px solid #e7eaec;
+                                }
+
+                                .btn-default:hover,
+                                .btn-default:focus,
+                                .btn-default:active,
+                                .btn-default.active,
+                                .open .dropdown-toggle.btn-default,
+                                .btn-default:active:focus,
+                                .btn-default:active:hover,
+                                .btn-default.active:hover,
+                                .btn-default.active:focus {
+                                    color: inherit;
+                                    border: 1px solid #d2d2d2;
+                                }
+
+                                .btn-default:active,
+                                .btn-default.active,
+                                .open .dropdown-toggle.btn-default {
+                                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) inset;
+                                }
+
+                                .btn-default.disabled,
+                                .btn-default.disabled:hover,
+                                .btn-default.disabled:focus,
+                                .btn-default.disabled:active,
+                                .btn-default.disabled.active,
+                                .btn-default[disabled],
+                                .btn-default[disabled]:hover,
+                                .btn-default[disabled]:focus,
+                                .btn-default[disabled]:active,
+                                .btn-default.active[disabled],
+                                fieldset[disabled] .btn-default,
+                                fieldset[disabled] .btn-default:hover,
+                                fieldset[disabled] .btn-default:focus,
+                                fieldset[disabled] .btn-default:active,
+                                fieldset[disabled] .btn-default.active {
+                                    color: #cacaca;
+                                }
+
+                                .btn-warning {
+                                    background-color: #f8ac59;
+                                    border-color: #f8ac59;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-warning:hover,
+                                .btn-warning:focus,
+                                .btn-warning:active,
+                                .btn-warning.active,
+                                .open .dropdown-toggle.btn-warning,
+                                .btn-warning:active:focus,
+                                .btn-warning:active:hover,
+                                .btn-warning.active:hover,
+                                .btn-warning.active:focus {
+                                    background-color: #f7a54a;
+                                    border-color: #f7a54a;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-warning:active,
+                                .btn-warning.active,
+                                .open .dropdown-toggle.btn-warning {
+                                    background-image: none;
+                                }
+
+                                .btn-warning.disabled,
+                                .btn-warning.disabled:hover,
+                                .btn-warning.disabled:focus,
+                                .btn-warning.disabled:active,
+                                .btn-warning.disabled.active,
+                                .btn-warning[disabled],
+                                .btn-warning[disabled]:hover,
+                                .btn-warning[disabled]:focus,
+                                .btn-warning[disabled]:active,
+                                .btn-warning.active[disabled],
+                                fieldset[disabled] .btn-warning,
+                                fieldset[disabled] .btn-warning:hover,
+                                fieldset[disabled] .btn-warning:focus,
+                                fieldset[disabled] .btn-warning:active,
+                                fieldset[disabled] .btn-warning.active {
+                                    background-color: #f9b66d;
+                                    border-color: #f9b66d;
+                                }
+
+                                .btn-danger {
+                                    background-color: #ed5565;
+                                    border-color: #ed5565;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-danger:hover,
+                                .btn-danger:focus,
+                                .btn-danger:active,
+                                .btn-danger.active,
+                                .open .dropdown-toggle.btn-danger,
+                                .btn-danger:active:focus,
+                                .btn-danger:active:hover,
+                                .btn-danger.active:hover,
+                                .btn-danger.active:focus {
+                                    background-color: #ec4758;
+                                    border-color: #ec4758;
+                                    color: #FFFFFF;
+                                }
+
+                                .btn-danger:active,
+                                .btn-danger.active,
+                                .open .dropdown-toggle.btn-danger {
+                                    background-image: none;
+                                }
+
+                                .btn-danger.disabled,
+                                .btn-danger.disabled:hover,
+                                .btn-danger.disabled:focus,
+                                .btn-danger.disabled:active,
+                                .btn-danger.disabled.active,
+                                .btn-danger[disabled],
+                                .btn-danger[disabled]:hover,
+                                .btn-danger[disabled]:focus,
+                                .btn-danger[disabled]:active,
+                                .btn-danger.active[disabled],
+                                fieldset[disabled] .btn-danger,
+                                fieldset[disabled] .btn-danger:hover,
+                                fieldset[disabled] .btn-danger:focus,
+                                fieldset[disabled] .btn-danger:active,
+                                fieldset[disabled] .btn-danger.active {
+                                    background-color: #ef6776;
+                                    border-color: #ef6776;
+                                }
+
+                                .btn-link {
+                                    color: inherit;
+                                }
+
+                                .btn-link:hover,
+                                .btn-link:focus,
+                                .btn-link:active,
+                                .btn-link.active,
+                                .open .dropdown-toggle.btn-link {
+                                    color: #1ab394;
+                                    text-decoration: none;
+                                }
+
+                                .btn-link:active,
+                                .btn-link.active,
+                                .open .dropdown-toggle.btn-link {
+                                    background-image: none;
+                                }
+
+                                .btn-link.disabled,
+                                .btn-link.disabled:hover,
+                                .btn-link.disabled:focus,
+                                .btn-link.disabled:active,
+                                .btn-link.disabled.active,
+                                .btn-link[disabled],
+                                .btn-link[disabled]:hover,
+                                .btn-link[disabled]:focus,
+                                .btn-link[disabled]:active,
+                                .btn-link.active[disabled],
+                                fieldset[disabled] .btn-link,
+                                fieldset[disabled] .btn-link:hover,
+                                fieldset[disabled] .btn-link:focus,
+                                fieldset[disabled] .btn-link:active,
+                                fieldset[disabled] .btn-link.active {
+                                    color: #cacaca;
+                                }
+
+                                .btn-white {
+                                    color: inherit;
+                                    background: white;
+                                    border: 1px solid #e7eaec;
+                                }
+
+                                .btn-white:hover,
+                                .btn-white:focus,
+                                .btn-white:active,
+                                .btn-white.active,
+                                .open .dropdown-toggle.btn-white,
+                                .btn-white:active:focus,
+                                .btn-white:active:hover,
+                                .btn-white.active:hover,
+                                .btn-white.active:focus {
+                                    color: inherit;
+                                    border: 1px solid #d2d2d2;
+                                }
+
+                                .btn-white:active,
+                                .btn-white.active {
+                                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) inset;
+                                }
+
+                                .btn-white:active,
+                                .btn-white.active,
+                                .open .dropdown-toggle.btn-white {
+                                    background-image: none;
+                                }
+
+                                .btn-white.disabled,
+                                .btn-white.disabled:hover,
+                                .btn-white.disabled:focus,
+                                .btn-white.disabled:active,
+                                .btn-white.disabled.active,
+                                .btn-white[disabled],
+                                .btn-white[disabled]:hover,
+                                .btn-white[disabled]:focus,
+                                .btn-white[disabled]:active,
+                                .btn-white.active[disabled],
+                                fieldset[disabled] .btn-white,
+                                fieldset[disabled] .btn-white:hover,
+                                fieldset[disabled] .btn-white:focus,
+                                fieldset[disabled] .btn-white:active,
+                                fieldset[disabled] .btn-white.active {
+                                    color: #cacaca;
+                                }
+
+                                .form-control,
+                                .form-control:focus,
+                                .has-error .form-control:focus,
+                                .has-success .form-control:focus,
+                                .has-warning .form-control:focus,
+                                .navbar-collapse,
+                                .navbar-form,
+                                .navbar-form-custom .form-control:focus,
+                                .navbar-form-custom .form-control:hover,
+                                .open .btn.dropdown-toggle,
+                                .panel,
+                                .popover,
+                                .progress,
+                                .progress-bar {
+                                    box-shadow: none;
+                                }
+
+                                .btn-outline {
+                                    color: inherit;
+                                    background-color: transparent;
+                                    transition: all .5s;
+                                }
+
+                                .btn-rounded {
+                                    border-radius: 50px;
+                                }
+
+                                .btn-large-dim {
+                                    width: 90px;
+                                    height: 90px;
+                                    font-size: 42px;
+                                }
+
+                                button.dim {
+                                    display: inline-block;
+                                    text-decoration: none;
+                                    text-transform: uppercase;
+                                    text-align: center;
+                                    padding-top: 6px;
+                                    margin-right: 10px;
+                                    position: relative;
+                                    cursor: pointer;
+                                    border-radius: 5px;
+                                    font-weight: 600;
+                                    margin-bottom: 20px !important;
+                                }
+
+                                button.dim:active {
+                                    top: 3px;
+                                }
+
+                                button.btn-primary.dim {
+                                    box-shadow: inset 0 0 0 #16987e, 0 5px 0 0 #16987e, 0 10px 5px #999999;
+                                }
+
+                                button.btn-primary.dim:active {
+                                    box-shadow: inset 0 0 0 #16987e, 0 2px 0 0 #16987e, 0 5px 3px #999999;
+                                }
+
+                                button.btn-default.dim {
+                                    box-shadow: inset 0 0 0 #b3b3b3, 0 5px 0 0 #b3b3b3, 0 10px 5px #999999;
+                                }
+
+                                button.btn-default.dim:active {
+                                    box-shadow: inset 0 0 0 #b3b3b3, 0 2px 0 0 #b3b3b3, 0 5px 3px #999999;
+                                }
+
+                                button.btn-warning.dim {
+                                    box-shadow: inset 0 0 0 #f79d3c, 0 5px 0 0 #f79d3c, 0 10px 5px #999999;
+                                }
+
+                                button.btn-warning.dim:active {
+                                    box-shadow: inset 0 0 0 #f79d3c, 0 2px 0 0 #f79d3c, 0 5px 3px #999999;
+                                }
+
+                                button.btn-info.dim {
+                                    box-shadow: inset 0 0 0 #1eacae, 0 5px 0 0 #1eacae, 0 10px 5px #999999;
+                                }
+
+                                button.btn-info.dim:active {
+                                    box-shadow: inset 0 0 0 #1eacae, 0 2px 0 0 #1eacae, 0 5px 3px #999999;
+                                }
+
+                                button.btn-success.dim {
+                                    box-shadow: inset 0 0 0 #1872ab, 0 5px 0 0 #1872ab, 0 10px 5px #999999;
+                                }
+
+                                button.btn-success.dim:active {
+                                    box-shadow: inset 0 0 0 #1872ab, 0 2px 0 0 #1872ab, 0 5px 3px #999999;
+                                }
+
+                                button.btn-danger.dim {
+                                    box-shadow: inset 0 0 0 #ea394c, 0 5px 0 0 #ea394c, 0 10px 5px #999999;
+                                }
+
+                                button.btn-danger.dim:active {
+                                    box-shadow: inset 0 0 0 #ea394c, 0 2px 0 0 #ea394c, 0 5px 3px #999999;
+                                }
+
+                                button.dim:before {
+                                    font-size: 50px;
+                                    line-height: 1em;
+                                    font-weight: normal;
+                                    color: #fff;
+                                    display: block;
+                                    padding-top: 10px;
+                                }
+
+                                button.dim:active:before {
+                                    top: 7px;
+                                    font-size: 50px;
+                                }
+
+                                .btn:focus {
+                                    outline: none !important;
+                                }
+
+                                .left {
+                                    align-self: center;
+                                }
+
+                                .query-builder .rules-group-container {
+                                    padding: 10px 10px 6px;
+                                    background: rgb(255, 255, 255);
+                                    border: 1px solid #d2d4d4;
+                                }
+
+                                .condition-relation-line {
+                                    background: -webkit-gradient(linear, left bottom, left top, color-stop(100%, #d2d4d4), to(#d2d4d4));
+                                    background: linear-gradient(0, #d2d4d4 100%, #d2d4d4 100%);
+                                    background-size: 3px;
+                                    background-repeat: repeat-y;
+                                    background-position-x: 45px;
+                                }
+
+                                .panel-primary {
+                                    border-color: #1ab394;
+                                }
+
+                                .panel-primary > .panel-heading {
+                                    background-color: #1ab394;
+                                    border-color: #1ab394;
+                                }
+
+                                .panel-success {
+                                    border-color: #1c84c6;
+                                }
+
+                                .panel-success > .panel-heading {
+                                    background-color: #3c8dbc;
+                                    border-color: #1c84c6;
+                                    color: #ffffff;
+                                }
+
+                                .btn-primary {
+                                    background-color: #fff;
+                                }
+
+                                .panel-info {
+                                    border-color: #23c6c8;
+                                }
+
+                                .panel-info > .panel-heading {
+                                    background-color: #23c6c8;
+                                    border-color: #23c6c8;
+                                    color: #ffffff;
+                                }
+
+                                .panel-warning {
+                                    border-color: #f8ac59;
+                                }
+
+                                .panel-warning > .panel-heading {
+                                    background-color: #f8ac59;
+                                    border-color: #f8ac59;
+                                    color: #ffffff;
+                                }
+
+                                .panel-danger {
+                                    border-color: #ed5565;
+                                }
+
+                                .panel-danger > .panel-heading {
+                                    background-color: #ed5565;
+                                    border-color: #ed5565;
+                                    color: #ffffff;
+                                }
+
+                                .panel-default {
+                                    border-color: #ddd;
+                                }
+
+                                .panel-body {
+                                    padding: 15px;
+                                }
+
+                                .btn-primary.disabled, .btn-primary.disabled:hover, .btn-primary.disabled:focus, .btn-primary.disabled:active, .btn-primary.disabled.active, .btn-primary[disabled], .btn-primary[disabled]:hover, .btn-primary[disabled]:focus, .btn-primary[disabled]:active, .btn-primary.active[disabled], fieldset[disabled] .btn-primary, fieldset[disabled] .btn-primary:hover, fieldset[disabled] .btn-primary:focus, fieldset[disabled] .btn-primary:active, fieldset[disabled] .btn-primary.active {
+                                    background-color: #18a689;
+                                    border-color: #1dc5a3;
+                                }
+
+                            </style>
+                            <div class="modal-dialog modal-lg" role="document">
+
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                            &times;
+                                        </button>
+                                        <h4 class="modal-title" id="myModalLabel">
+                                            Select Criteria To Filter Users
+                                        </h4>
+                                    </div>
+                                    <div class="modal-body">
+
+
+                                        <div class="row">
+
+                                            <div class="col-md-12">
+                                            </div>
+
+
+                                            <div class="box-body">
+                                                    <div class="col-md-12 col-lg-10 col-lg-offset-1">
+
+
+                                                            <div class="panel-body">
+
+                                                                <div id="builder-basic-property"></div>
+
+                                                        </div>
+
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close
+                                        </button>
+                                        <button type="button" class="btn btn-primary" style="background-color: #00a65a;">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i
+                                class="fa fa-indent"></i> Insert Facebook name
+                        </button>
+                        <button type="button" class="btn btn-success" id="btn-send" style="margin-right: 5px;"><i
+                                class="fa fa-toggle-right"></i> Send
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <form>
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <textarea id="message-editor" class="form-control" rows="8"
+                                          placeholder="Enter message"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <!--<div class="box-footer clearfix">
+                    </div>-->
+                </div>
+
+
+                <div class="nav-tabs-custom" id="tabs-box">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active table-responsive" id="tab-history">
+                            <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td colspan="999">
+                                        <div class="text-center">
+                                            There are no items in the history table.
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.tab-content -->
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% block body_tail %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.3.0/bootbox.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/seiyria-bootstrap-slider/dist/bootstrap-slider.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/selectize/dist/js/standalone/selectize.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/js/query-builder.standalone.min.js"></script>
+    <script src="http://querybuilder.js.org/dist/sql-parser/browser/sql-parser.js"></script>
+    <script src="http://querybuilder.js.org/dist/interact/dist/interact.min.js"></script>
+    <script src="http://querybuilder.js.org/assets/demo.js"></script>
 
     <script type="text/javascript">
 
-    var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
+        var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
 
-    function insertAtCaret(areaId, text) {
-    		var txtarea = document.getElementById(areaId);
-    		if (!txtarea) { return; }
+        function insertAtCaret(areaId, text) {
+            var txtarea = document.getElementById(areaId);
+            if (!txtarea) {
+                return;
+            }
 
-    		var scrollPos = txtarea.scrollTop;
-    		var strPos = 0;
-    		var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ? "ff" : (document.selection ? "ie" : false ) );
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var range = document.selection.createRange();
-    			range.moveStart ('character', -txtarea.value.length);
-    			strPos = range.text.length;
-    		} else if (br == "ff") {
-    			strPos = txtarea.selectionStart;
-    		}
+            var scrollPos = txtarea.scrollTop;
+            var strPos = 0;
+            var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ? "ff" : (document.selection ? "ie" : false ) );
+            if (br == "ie") {
+                txtarea.focus();
+                var range = document.selection.createRange();
+                range.moveStart('character', -txtarea.value.length);
+                strPos = range.text.length;
+            } else if (br == "ff") {
+                strPos = txtarea.selectionStart;
+            }
 
-    		var front = (txtarea.value).substring(0, strPos);
-    		var back = (txtarea.value).substring(strPos, txtarea.value.length);
-    		txtarea.value = front + text + back;
-    		strPos = strPos + text.length;
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var ieRange = document.selection.createRange();
-    			ieRange.moveStart ('character', -txtarea.value.length);
-    			ieRange.moveStart ('character', strPos);
-    			ieRange.moveEnd ('character', 0);
-    			ieRange.select();
-    		} else if (br == "ff") {
-    			txtarea.selectionStart = strPos;
-    			txtarea.selectionEnd = strPos;
-    			txtarea.focus();
-    		}
+            var front = (txtarea.value).substring(0, strPos);
+            var back = (txtarea.value).substring(strPos, txtarea.value.length);
+            txtarea.value = front + text + back;
+            strPos = strPos + text.length;
+            if (br == "ie") {
+                txtarea.focus();
+                var ieRange = document.selection.createRange();
+                ieRange.moveStart('character', -txtarea.value.length);
+                ieRange.moveStart('character', strPos);
+                ieRange.moveEnd('character', 0);
+                ieRange.select();
+            } else if (br == "ff") {
+                txtarea.selectionStart = strPos;
+                txtarea.selectionEnd = strPos;
+                txtarea.focus();
+            }
 
-    		txtarea.scrollTop = scrollPos;
-    	}
+            txtarea.scrollTop = scrollPos;
+        }
 
-    $(document).ready(function() {
+        $(document).ready(function () {
 
-      $('#send-scheduled-at').daterangepicker({
-          opens: 'right',
-          showDropdowns: true,
-          autoApply: true,
-          singleDatePicker: true,
-          timePicker: true,
-          timePicker24Hour: true,
-          locale: {
-            format: 'YYYY-MM-DD HH:mm:ss',
-          },
-          minDate: moment()
-      });
+            $('#send-scheduled-at').daterangepicker({
+                opens: 'right',
+                showDropdowns: true,
+                autoApply: true,
+                singleDatePicker: true,
+                timePicker: true,
+                timePicker24Hour: true,
+                locale: {
+                    format: 'YYYY-MM-DD HH:mm:ss',
+                },
+                minDate: moment()
+            });
 
-      ////////////////////
+            ////////////////////
 
-      var loadingOverlayConfig = {
-          image       : '',
-          fontawesome : 'fa fa-spinner fa-spin',
-          maxSize     : "26px",
-          minSize     : "26px"
-      }
+            var loadingOverlayConfig = {
+                image: '',
+                fontawesome: 'fa fa-spinner fa-spin',
+                maxSize: "26px",
+                minSize: "26px"
+            }
 
-      function startRequestLoading() {
-          $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
-      }
+            function startRequestLoading() {
+                $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
+            }
 
-      function stopRequestLoading() {
-          $('#editor-box').LoadingOverlay('hide', true);
-      }
+            function stopRequestLoading() {
+                $('#editor-box').LoadingOverlay('hide', true);
+            }
 
-      ////////////////////
+            ////////////////////
 
-      $('#btn-insert-name').click(function() {
-        insertAtCaret('message-editor', ' @[fb_name] ');
-      });
+            $('#btn-insert-name').click(function () {
+                insertAtCaret('message-editor', ' @[fb_name] ');
+            });
 
-      {% if based_query %}
-        var basedQueryId = {{ based_query.id }};
-        var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
-      {% else %}
-        var basedQueryId = null;
-        var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';
-      {% endif %}
+            {% if based_query %}
+                var basedQueryId = {{ based_query.id }};
+                var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
+            {% else %}
+                var basedQueryId = null;
+                var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';
+            {% endif %}
 
-      var retryConfirmAlert = 'Do you want to retry?';
+            var retryConfirmAlert = 'Do you want to retry?';
 
-      $('#btn-send').click(function() {
-          if ( $('#message-editor').val().length === 0) return;
+            $('#btn-send').click(function () {
+                if ($('#message-editor').val().length === 0) return;
 
-          if (!confirm(submitConfirmAlert)) {
-              return;
-          }
+                if (!confirm(submitConfirmAlert)) {
+                    return;
+                }
 
-          startRequestLoading();
-        
-          $.ajax({
-              type: 'POST',
-              url: '/promotion/facebook_notification/sender',
-              data: basedQueryId === null ? { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val() } : { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val(), based_query_id: basedQueryId },
-              dataType: "json",
-              success: function(result) {
-                  alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                  stopRequestLoading();
-                  getPushHistories();
-              },
-              error: function(xhr) {
-                  alert('Error: ' + JSON.parse(xhr.responseText).error);
-                  stopRequestLoading();
-              }
-          });
-      });
+                startRequestLoading();
 
-      $(document).on('click', '.btn-retry', function() {
-          if (!confirm(retryConfirmAlert)) {
-              return;
-          }
-
-          var pushId = $(this).attr('data-push-id');
-        
-          $.ajax({
-              type: 'POST',
-              url: '/promotion/facebook_notification/retry',
-              data: { push_id: pushId },
-              dataType: "json",
-              success: function(result) {
-                  alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                  getPushHistories();
-              },
-              error: function(xhr) {
-                  alert('Error: ' + JSON.parse(xhr.responseText).error);
-              }
-          });
-      });
-
-      function getPushHistories() {
-            $.ajax({
-                type: 'GET',
-                url: '/promotion/facebook_notification/histories',
-                dataType: "json",
-                success: function(result) {
-                    var headers = []
-                    headers.push('<tr>')
-                    for (var i in historyTableColumns) {
-                        var column = historyTableColumns[i];
-                        if (column === 'based_query_id') {
-                            column = 'based query';
-                        } else if (column === 'requested_by') {
-                            column = 'requested by';
-                        }
-                        headers.push('<th>' + column + '</th>')
+                $.ajax({
+                    type: 'POST',
+                    url: '/promotion/facebook_notification/sender',
+                    data: basedQueryId === null ? {
+                        'scheduled_at': $('#send-scheduled-at').val(),
+                        message: $('#message-editor').val()
+                    } : {
+                        'scheduled_at': $('#send-scheduled-at').val(),
+                        message: $('#message-editor').val(),
+                        based_query_id: basedQueryId
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        alert('Your request has submitted successfully. Please wait background job to processing your request.');
+                        stopRequestLoading();
+                        getPushHistories();
+                    },
+                    error: function (xhr) {
+                        alert('Error: ' + JSON.parse(xhr.responseText).error);
+                        stopRequestLoading();
                     }
-                    headers.push('<th style="width: 128px;"></th>');
-                    headers.push('</tr>');
-                    $('#history-table thead').html(headers.join());
+                });
+            });
 
-                    var rows = [];
-                    for (var j in result.data) {
-                        var row = result.data[j];
-                        rows.push('<tr>')
+            $(document).on('click', '.btn-retry', function () {
+                if (!confirm(retryConfirmAlert)) {
+                    return;
+                }
+
+                var pushId = $(this).attr('data-push-id');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/promotion/facebook_notification/retry',
+                    data: {push_id: pushId},
+                    dataType: "json",
+                    success: function (result) {
+                        alert('Your request has submitted successfully. Please wait background job to processing your request.');
+                        getPushHistories();
+                    },
+                    error: function (xhr) {
+                        alert('Error: ' + JSON.parse(xhr.responseText).error);
+                    }
+                });
+            });
+
+            function getPushHistories() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/promotion/facebook_notification/histories',
+                    dataType: "json",
+                    success: function (result) {
+                        var headers = []
+                        headers.push('<tr>')
                         for (var i in historyTableColumns) {
                             var column = historyTableColumns[i];
                             if (column === 'based_query_id') {
-                                if (row[column] === null) {
-                                    rows.push('<td></td>');
-                                } else {
-                                    rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
-                                }
-                            } else if (column === 'status') {
-                                if (row[column] === 'failed') {
-                                    rows.push('<td>' +
-                                                '<span class="text-red">Prepare failed</span><br />' + 
-                                              '</td>'); 
-                                } else if (row[column] === 'pending') {
-                                    rows.push('<td>' +
-                                                '<span class="text-muted">Pending</span><br />' + 
-                                              '</td>'); 
-                                } else if (row[column] === 'preparing') {
-                                    rows.push('<td>' +
-                                                '<span class="text-muted">Preparing</span><br />' + 
-                                              '</td>'); 
-                                } else {
-                                    rows.push('<td>' +
-                                                '<span>Total: ' + row[column].total_count + '</span><br />' + 
-                                                '<span class="text-aqua">Running: ' + row[column].running_count + '</span><br />' + 
-                                                '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' + 
-                                                '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' + 
-                                                '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' + 
-                                              '</td>');    
-                                }
-                            } else {
-                                rows.push('<td>' + row[column] + '</td>');
+                                column = 'based query';
+                            } else if (column === 'requested_by') {
+                                column = 'requested by';
                             }
+                            headers.push('<th>' + column + '</th>')
+                        }
+                        headers.push('<th style="width: 128px;"></th>');
+                        headers.push('</tr>');
+                        $('#history-table thead').html(headers.join());
+
+                        var rows = [];
+                        for (var j in result.data) {
+                            var row = result.data[j];
+                            rows.push('<tr>')
+                            for (var i in historyTableColumns) {
+                                var column = historyTableColumns[i];
+                                if (column === 'based_query_id') {
+                                    if (row[column] === null) {
+                                        rows.push('<td></td>');
+                                    } else {
+                                        rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
+                                    }
+                                } else if (column === 'status') {
+                                    if (row[column] === 'failed') {
+                                        rows.push('<td>' +
+                                            '<span class="text-red">Prepare failed</span><br />' +
+                                            '</td>');
+                                    } else if (row[column] === 'pending') {
+                                        rows.push('<td>' +
+                                            '<span class="text-muted">Pending</span><br />' +
+                                            '</td>');
+                                    } else if (row[column] === 'preparing') {
+                                        rows.push('<td>' +
+                                            '<span class="text-muted">Preparing</span><br />' +
+                                            '</td>');
+                                    } else {
+                                        rows.push('<td>' +
+                                            '<span>Total: ' + row[column].total_count + '</span><br />' +
+                                            '<span class="text-aqua">Running: ' + row[column].running_count + '</span><br />' +
+                                            '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' +
+                                            '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' +
+                                            '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' +
+                                            '</td>');
+                                    }
+                                } else {
+                                    rows.push('<td>' + row[column] + '</td>');
+                                }
+                            }
+
+                            var btnGroup = '<td>' +
+                                '<div class="btn-group">' +
+                                '  <button type="button" class="btn btn-sm btn-success btn-retry" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
+                                '</div>' +
+                                '</td>';
+
+                            rows.push(btnGroup);
+                            rows.push('</tr>');
                         }
 
-                        var btnGroup = '<td>' + 
-                                        '<div class="btn-group">' + 
-                                        '  <button type="button" class="btn btn-sm btn-success btn-retry" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
-                                        '</div>' +
-                                        '</td>';
+                        if (rows.length > 0) {
+                            $('#history-table tbody').html(rows.join());
+                        }
+                    },
+                    error: function (xhr) {
 
-                        rows.push(btnGroup);
-                        rows.push('</tr>');
                     }
+                });
+            }
 
-                    if (rows.length > 0) {
-                        $('#history-table tbody').html(rows.join());
-                    }
-                },
-                error: function(xhr) {
-                    
-                }
+            getPushHistories();
+        });
+
+
+        $('#btn-select-users').on('click', function () {
+
+
+            $('#this').avgrund({
+                height: 200,
+                holderClass: 'custom',
+                showClose: true,
+                showCloseText: 'Close',
+                enableStackAnimation: true,
+                onBlurContainer: '.container',
+                template: '<p>So implement your design and place content here! If you want to close modal, please hit "Esc", click somewhere on the screen or use special button.</p>' +
+                '<div>' +
+                '<a href="http://github.com/voronianski/jquery.avgrund.js" target="_blank" class="github">Avgrund on Github</a>' +
+                '<a href="http://twitter.com/voronianski" target="_blank" class="twitter">Twitter</a>' +
+                '<a href="http://dribbble.com/voronianski" target="_blank" class="dribble">Dribbble</a>' +
+                '</div>'
             });
-        }
+            {#        $('this').avgrund({#}
+            {#            width: 380, // max is 640px#}
+            {#            height: 280, // max is 350px#}
+            {#            showClose: true, // switch to 'true' for enabling close button#}
+            {#            showCloseText: '', // type your text for close button#}
+            {#            closeByEscape: true, // enables closing popup by 'Esc'..#}
+            {#            closeByDocument: true, // ..and by clicking document itself#}
+            {#            holderClass: '', // lets you name custom class for popin holder..#}
+            {#            overlayClass: '', // ..and overlay block#}
+            {#            enableStackAnimation: false, // another animation type#}
+            {#            onBlurContainer: '', // enables blur filter for specified block#}
+            {#            openOnEvent: true, // set to 'false' to init on load#}
+            {#            setEvent: 'click', // use your event like 'mouseover', 'touchmove', etc.#}
+            {#            onLoad: function (elem) { ... }, // set custom call before popin is inited..#}
+            {#            onUnload: function (elem) { ... }, // ..and after it was closed#}
+            {#            template: 'r content goes here..' // or function (elem) { ... }#}
+            {#        });#}
+            {##}
+            {##}
+        })
 
-        getPushHistories();
-    });
-</script>
+
+    </script>
+
+
+
+
+    <script>
+
+
+        var gameBehaviour = {
+            condition: 'OR',
+            rules: [{
+                id: 'lastLogin',
+                operator: 'equal',
+                value: '2016/06/01'
+            }
+            ]
+        };
+        var consumerBehaviour = {
+            condition: 'OR',
+            rules: [{
+                id: 'lastPurchase',
+                operator: 'equal',
+            }
+            ]
+        };
+        var userProperty = {
+            condition: 'OR',
+            rules: [{
+                id: '_____',
+            }
+            ]
+        };
+
+        $('#builder-basic-property').queryBuilder({
+            plugins: ['bt-tooltip-errors'],
+
+            filters: [{
+                id: 'registered',
+                label: 'Registered',
+                type: 'date',
+
+                validation: {
+                    format: 'YYYY/MM/DD'
+                },
+                plugin: 'datepicker',
+                plugin_config: {
+                    format: 'yyyy/mm/dd',
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    autoclose: true
+                },
+
+                operators: ['less', 'equal', 'greater', 'between']
+
+            }
+                , {
+                    id: 'birthday',
+                    label: 'Birthday',
+                    type: 'date',
+
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                }
+                , {
+                    id: 'regCountry',
+                    label: 'Reg Country',
+                    input: 'text',
+                    operators: ['equal']
+                }
+
+                , {
+                    id: 'regState',
+                    label: 'Reg State',
+                    type: 'integer',
+                    input: 'text',
+
+                    operators: ['equal']
+                },
+                {
+                    id: 'lastLogin',
+                    label: 'Last Login',
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                }
+                , {
+                    id: 'gameFrequency',
+                    label: 'Login days this month',
+                    type: 'integer',
+                    input: 'number',
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'continuousLogin',
+                    label: 'Continuous login days this month',
+                    type: 'integer',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'lastPurchase',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'totalPurchase',
+                    label: 'Total Purchase',
+                    input: 'number',
+                    type: 'double',
+                    validation: {
+                        min: 0,
+                        step: 0.1
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'rewardLevel',
+                    label: 'Reward Level',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'lastPurchaseGold',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'lastPurchaseAvatar',
+
+                    label: 'Last Purchase Avatar',
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'lastPurchaseCharm',
+                    label: 'Last Purchase Charm',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+                {
+                    id: 'lastFreeSpin',
+                    label: 'Last Free Spin',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'countOfPurchase',
+                    label: 'Count of Purchase',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'countOfAvatarPurchase',
+                    label: 'Count of Avatar Purchase',
+
+                    input: 'number',
+                },
+
+
+                {
+                    id: 'countOfCharmPurchase',
+                    label: 'Count of Charm Purchase',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+            ],
+
+            rules: userProperty
+        });
+
+        $('#builder-game-behaviour').queryBuilder({
+            plugins: ['bt-tooltip-errors'],
+
+            filters: [{
+                id: 'lastLogin',
+                label: 'Last Login',
+                type: 'date',
+                validation: {
+                    format: 'YYYY/MM/DD'
+                },
+                plugin: 'datepicker',
+                plugin_config: {
+                    format: 'yyyy/mm/dd',
+                    todayBtn: 'linked',
+                    todayHighlight: true,
+                    autoclose: true
+                },
+
+                operators: ['less', 'equal', 'greater', 'between']
+            }
+                , {
+                    id: 'gameFrequency',
+                    label: 'Login days this month',
+                    type: 'integer',
+                    input: 'number',
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'continuousLogin',
+                    label: 'Continuous login days this month',
+                    type: 'integer',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                }
+            ],
+
+            rules: gameBehaviour
+        });
+
+        $('#builder-consumer-behaviour').queryBuilder({
+            plugins: ['bt-tooltip-errors'],
+
+
+            filters: [
+
+                {
+                    id: 'lastPurchase',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+                {
+                    id: 'totalPurchase',
+                    label: 'Total Purchase',
+                    input: 'number',
+                    type: 'double',
+                    validation: {
+                        min: 0,
+                        step: 0.1
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'rewardLevel',
+                    label: 'Reward Level',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'lastPurchaseGold',
+                    label: 'Last Purchase',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'lastPurchaseAvatar',
+
+                    label: 'Last Purchase Avatar',
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'lastPurchaseCharm',
+                    label: 'Last Purchase Charm',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+                {
+                    id: 'lastFreeSpin',
+                    label: 'Last Free Spin',
+
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY/MM/DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy/mm/dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+
+                {
+                    id: 'countOfPurchase',
+                    label: 'Count of Purchase',
+                    type: 'integer',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+                {
+                    id: 'countOfAvatarPurchase',
+                    label: 'Count of Avatar Purchase',
+
+                    input: 'number',
+                },
+
+
+                {
+                    id: 'countOfCharmPurchase',
+                    label: 'Count of Charm Purchase',
+                    input: 'number',
+                    operators: ['less', 'equal', 'greater', 'between']
+                },
+
+
+            ],
+            rules: consumerBehaviour
+        });
+
+        {##}
+        {#        $('#btn-reset-basic-property').on('click', function () {#}
+        {#            $('#builder-basic').queryBuilder('reset');#}
+        {#        });#}
+        {##}
+        {#        $('#btn-set-basic-property').on('click', function () {#}
+        {#            $('#builder-basic').queryBuilder('setRules', rules_basic);#}
+        {#        });#}
+        {##}
+        {#        $('#btn-get-basic-property').on('click', function () {#}
+        {#            var result = $('#builder-basic').queryBuilder('getRules');#}
+        {##}
+        {#            if (!$.isEmptyObject(result)) {#}
+        {#                alert(JSON.stringify(result, null, 2));#}
+        {#            }#}
+        {#        });#}
+        {##}
+        {##}
+        {#        $('#btn-reset-game-behaviour').on('click', function () {#}
+        {#            $('#builder-game-behaviour').queryBuilder('reset');#}
+        {#        });#}
+        {##}
+        {#        $('#btn-set-game-behaviour').on('click', function () {#}
+        {#            $('#builder-game-behaviour').queryBuilder('setRules', rules_basic);#}
+        {#        });#}
+        {##}
+        {#        $('#btn-get-game-behaviour').on('click', function () {#}
+        {#            var result = $('#builder-game-behaviour').queryBuilder('getRules');#}
+        {##}
+        {#            if (!$.isEmptyObject(result)) {#}
+        {#                alert(JSON.stringify(result, null, 2));#}
+        {#            }#}
+        {#        });#}
+        {##}
+        {##}
+        {#        $('#btn-reset-consumer-behaviour').on('click', function () {#}
+        {##}
+        {#            $('#builder-consumer-behaviour').queryBuilder('reset');#}
+        {#        });#}
+        {##}
+        {#        $('#btn-set-consumer-behaviour').on('click', function () {#}
+        {#            $('#builder-consumer-behaviour').queryBuilder('setRules', rules_basic);#}
+        {#        });#}
+        {##}
+        {#        $('#btn-get-consumer-behaviour').on('click', function () {#}
+        {#            var result = $('#builder-consumer-behaviour').queryBuilder('getRules');#}
+        {##}
+        {#            if (!$.isEmptyObject(result)) {#}
+        {#                alert(JSON.stringify(result, null, 2));#}
+        {#            }#}
+        {#        });#}
+        {##}
+
+
+    </script>
 {% endblock %}

@@ -424,7 +424,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end                                                    AS platform,
+                                                   END                                                    AS platform,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 1
@@ -442,7 +442,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end      AS platform
+                                                   END      AS platform
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 1
                                                    AND reg_source != 'Facebook Game'
@@ -667,7 +667,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end                                                    AS platform,
+                                                   END                                                    AS platform,
                                                    COUNT(*)                                               AS sum
                                             FROM   bi_user
                                             WHERE  reg_facebook_connect = 0
@@ -685,7 +685,7 @@ def process_bi_statistic_new_reg(target):
                                                      WHEN LEFT(reg_source, 3) = 'iOS' THEN 'iOS'
                                                      WHEN LEFT(reg_source, 8) = 'Facebook' THEN 'Facebook Game'
                                                      WHEN LEFT(reg_source, 7) = 'Android' THEN 'Android'
-                                                   end      AS platform,
+                                                   END      AS platform,
                                                    COUNT(*) AS sum
                                             FROM   bi_user
                                             WHERE  DATE(CONVERT_TZ(reg_time, '+00:00', :timezone_offset)) = :on_day
