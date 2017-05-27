@@ -1,10 +1,10 @@
 import json
 import urllib.parse
-from random import randrange
 
 import arrow
 import requests
-from sqlalchemy import text, and_
+from random import randrange
+from sqlalchemy import text
 from sqlalchemy.sql.expression import bindparam
 
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
@@ -17,6 +17,7 @@ from app.utils import current_time, error_msg_from_exception
 def get_facebook_users():
     def collection(connection, transaction):
         return connection.execute(text('SELECT u_id AS user_id, pu_id AS platform_user_id FROM tb_platform_user_info'))
+
     result_proxy = with_db_context(db, collection, 'orig_wpt')
     return [[row['user_id'], row['platform_user_id']] for row in result_proxy]
 
@@ -35,7 +36,8 @@ def update_promotion_facebook_notification_status(data, status_value):
 @celery.task
 def process_promotion_facebook_notification_items(push_id, scheduled_at, data=None):
     try:
-        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.PREPARING.value}, synchronize_session=False)
+        db.session.query(PromotionPush).filter_by(id=push_id).update(
+            {PromotionPush.status: PROMOTION_PUSH_STATUSES.PREPARING.value}, synchronize_session=False)
         db.session.commit()
 
         rows = []
@@ -48,7 +50,8 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
             data = get_facebook_users()
             max_minutes = int(len(data) / 1000) + 1
             for row in data:
-                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
+                    'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
@@ -56,11 +59,12 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
                     'target': row[1],
                     'scheduled_at': scheduled_time,
                     'status': status_value
-                    })
+                })
         else:
             max_minutes = int(len(data) / 1000) + 1
             for row in data:
-                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format('YYYY-MM-DD HH:mm:ss')
+                scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
+                    'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
@@ -72,13 +76,15 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
 
         db.engine.execute(PromotionPushHistory.__table__.insert(), rows)
 
-        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.SCHEDULED.value}, synchronize_session=False)
+        db.session.query(PromotionPush).filter_by(id=push_id).update(
+            {PromotionPush.status: PROMOTION_PUSH_STATUSES.SCHEDULED.value}, synchronize_session=False)
         db.session.commit()
     except Exception as e:
         print('process_promotion_facebook_notification_items exception: ' + error_msg_from_exception(e))
         db.session.rollback()
 
-        db.session.query(PromotionPush).filter_by(id=push_id).update({PromotionPush.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
+        db.session.query(PromotionPush).filter_by(id=push_id).update(
+            {PromotionPush.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
         db.session.commit()
 
 
@@ -86,21 +92,21 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
 def process_promotion_facebook_notification_retrying(push_id):
     status_values = [PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value]
     db.session.query(PromotionPushHistory).filter_by(push_id=push_id) \
-                                          .filter(PromotionPushHistory.status.in_(status_values)) \
-                                          .update({PromotionPushHistory.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
+        .filter(PromotionPushHistory.status.in_(status_values)) \
+        .update({PromotionPushHistory.status: PROMOTION_PUSH_STATUSES.FAILED.value}, synchronize_session=False)
     db.session.commit()
 
 
 @celery.task
 def process_promotion_facebook_notification():
-
     print('process_promotion_facebook_notification: preparing')
 
     now = current_time().format('YYYY-MM-DD HH:mm:ss')
-    push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
-                                                                      status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
-                                                           .filter(PromotionPushHistory.scheduled_at <= now) \
-                                                           .all()
+    push_histories = db.session.query(PromotionPushHistory).filter_by(
+        push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
+        status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
+        .filter(PromotionPushHistory.scheduled_at <= now) \
+        .all()
 
     if len(push_histories) == 0:
         print('process_promotion_facebook_notification: no data')
@@ -129,13 +135,14 @@ def process_promotion_facebook_notification():
                                   'relative_url': 'v2.7/' + item.target + '/notifications',
                                   'body': urllib.parse.urlencode(
                                       {
-                                          'template': id_to_message_mapping[item.push_id].replace(fb_name_identifier, '@[%s]' % item.target) if
+                                          'template': id_to_message_mapping[item.push_id].replace(fb_name_identifier,
+                                                                                                  '@[%s]' % item.target) if
                                           id_to_fb_name_replace_mapping[item.push_id] else
                                           id_to_message_mapping[item.push_id]
                                       }
                                   )
-                                 } for item in partitions])
-            }
+                                  } for item in partitions])
+        }
 
         try:
             req = requests.post('https://graph.facebook.com', data=data)
@@ -155,11 +162,13 @@ def process_promotion_facebook_notification():
                     push_history_id = str(partition_ids[idx])
                     resp_body = json.loads(response['body'])
                     if 'error' in resp_body:
-                        failed_partition_data.append({'_id': push_history_id, 'error_message': resp_body['error']['message'].split('.')[0]})
+                        failed_partition_data.append(
+                            {'_id': push_history_id, 'error_message': resp_body['error']['message'].split('.')[0]})
                     else:
                         succeeded_partition_data.append({'_id': push_history_id})
 
-                print('process_promotion_facebook_notification succeeded count: ' + str(len(succeeded_partition_data)) + ', failed count: ' + str(len(failed_partition_data)))
+                print('process_promotion_facebook_notification succeeded count: ' + str(
+                    len(succeeded_partition_data)) + ', failed count: ' + str(len(failed_partition_data)))
 
                 if len(succeeded_partition_data) > 0:
                     update_promotion_facebook_notification_status(succeeded_partition_data,

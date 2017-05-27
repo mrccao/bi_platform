@@ -1,6 +1,7 @@
-import hashlib
+import json
 
 import arrow
+import hashlib
 import pandas as pd
 import sqlparse
 from dateutil import tz
@@ -14,8 +15,7 @@ from app.extensions import db
 from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
-                                 process_promotion_facebook_notification_retrying,
-                                 process_promotion_email_items)
+                                 process_promotion_facebook_notification_retrying)
 from app.utils import error_msg_from_exception, current_time
 
 promotion = Blueprint('promotion', __name__)
@@ -37,7 +37,8 @@ def facebook_notification():
 @promotion.route("/promotion/facebook_notification/histories", methods=["GET"])
 @login_required
 def facebook_notification_histories():
-    data = db.session.query(PromotionPush).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value).order_by(PromotionPush.created_at.desc()).limit(10).all()
+    data = db.session.query(PromotionPush).filter_by(push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value).order_by(
+        PromotionPush.created_at.desc()).limit(10).all()
     return jsonify(data=[item.to_dict() for item in data])
 
 
@@ -57,7 +58,10 @@ def facebook_notification_retry():
 @login_required
 def facebook_notification_sender():
     based_query_id = request.form.get('based_query_id')
+    query_rules = json.loads(request.form.get('query_rules'))
     message = request.form.get('message')
+
+    user_id_list = parse_query_rules(query_rules)
 
     scheduled_at = request.form.get('scheduled_at')
     if scheduled_at:
@@ -68,7 +72,8 @@ def facebook_notification_sender():
         scheduled_at = current_time()
 
     formatted_message = message.strip()
-    pending_digest = (str(current_user.id) + '_' + formatted_message + '_' + scheduled_at.format('YYYYMMDD')).encode('utf-8')
+    pending_digest = (str(current_user.id) + '_' + formatted_message + '_' + scheduled_at.format('YYYYMMDD')).encode(
+        'utf-8')
     message_key = hashlib.md5(pending_digest).hexdigest()
 
     push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
@@ -86,7 +91,8 @@ def facebook_notification_sender():
         db.session.add(push)
         db.session.commit()
     else:
-        return jsonify(error="You have been sent this message before, Please change message if you don't need to send the same message."), 500
+        return jsonify(
+            error="You have been sent this message before, Please change message if you don't need to send the same message."), 500
 
     push_id = push.id
 
@@ -107,7 +113,8 @@ def facebook_notification_sender():
                 data = result_proxy.fetchall()
 
                 df = pd.DataFrame(data, columns=column_names)
-                data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if (row['user_id'] is not None and row['facebook_id'] is not None)]
+                data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if
+                        (row['user_id'] is not None and row['facebook_id'] is not None)]
 
                 if app.config['ENV'] == 'prod':
                     process_promotion_facebook_notification_items.delay(push_id, scheduled_at.format(), data)
@@ -144,7 +151,8 @@ def email():
 @promotion.route("/promotion/email/histories", methods=["GET"])
 @login_required
 def email_histories():
-    data = db.session.query(PromotionPush).filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value).order_by(PromotionPush.created_at.desc()).limit(10).all()
+    data = db.session.query(PromotionPush).filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value).order_by(
+        PromotionPush.created_at.desc()).limit(10).all()
     return jsonify(data=[item.to_dict() for item in data])
 
 
@@ -164,6 +172,7 @@ def email_retry():
 @login_required
 def email_sender():
     pass
+
 
 def __del__(self):
     db.session.close()
