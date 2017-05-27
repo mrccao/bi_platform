@@ -1,7 +1,5 @@
 import arrow
 from flask import current_app as app
-from functools import reduce
-from operator import iand, ior
 from sqlalchemy import text
 from sqlalchemy.schema import Index
 
@@ -102,7 +100,8 @@ class BasicProperty(object):
 
         def collection(connection, transaction, field=field):
 
-            if field in ["reg_time", "last_active_time", " last_purchase", "last_purchase_avatar", "last_purchase_charms",
+            if field in ["reg_time", "last_active_time", " last_purchase", "last_purchase_avatar",
+                         "last_purchase_charms",
                          "last_free_spin"]: field = "DATE_FORMAT(on_day,'%Y-%m-%d')"
 
             if operator == "less":
@@ -152,48 +151,59 @@ class BasicProperty(object):
 
         return cls.sql_execute(sql, operator, value)
 
-    # TODO
-    # @classmethod
-    # def current_gold_balance(cls, operator, value):
+        # TODO
+        # @classmethod
+        # def current_gold_balance(cls, operator, value):
 
-    # sql = "SELECT user_id FROM bi_user"
-    #
-    # return cls.sql_execute(sql, operator, value)
+        # sql = "SELECT user_id FROM bi_user"
+        #
+        # return cls.sql_execute(sql, operator, value)
 
 
 class GameBehaviour(BasicProperty):
     @classmethod
-    def last_active_time(cls, operator, value):
-        sql = ""
+    def x_days_inactive(cls, operator, value):
+        sql = """
+            SELECT DISTINCT (user_id)
+            FROM bi_user
+            WHERE user_id NOT IN (
+                SELECT DISTINCT user_id
+            FROM bi_user_currency
+            WHERE date(created_at) > :value
+            
+            AND
+            transaction_type != 20132001)
+              """
 
-        return cls.sql_execute(sql, operator, value)
+        def collection_user_id():
+            user_id = db.engine.execute(text(sql), value)
+            return user_id
+
+        result_proxy = with_db_context(collection_user_id)
+
+        return result_proxy
 
     @classmethod
     def active_days_of_the_month(cls, operator, value):
-        sql = """
-        
-        SELECT user_id
-FROM (
-       SELECT DISTINCT
-         DATE(created_at),
-         user_id
-       FROM bi_user_currency
-       WHERE DATE(created_at) > '2017-04-14'
-     ) t
-GROUP BY user_id
-HAVING count(*) > 5;
-        
-        
-        """
-
+        # sql = """
+        #             SELECT user_id
+        #     FROM (
+        #            SELECT DISTINCT
+        #              DATE(created_at),
+        #              user_id
+        #            FROM bi_user_currency
+        #            WHERE DATE(created_at) > '2017-04-14'
+        #          ) t
+        #     GROUP BY user_id
+        #     HAVING count(*) > 5;
+        #
+        # """
 
         return cls.sql_execute(sql, operator, value)
 
-
     @classmethod
     def consecutive_active_day_of_the_month(cls, operator, value):
-
-        sql ="""
+        sql = """
         
         
 SELECT *
@@ -257,196 +267,183 @@ ORDER BY lianxu_days DESC
         
         """
 
+        return cls.sql_execute(sql, operator, value)
+
+
+class PaidBehaviour(GameBehaviour):
+    @classmethod
+    def total_purchase(cls, operator, value):
+
+        sql = """
+            SELECT user_id,total_purchase
+            FROM (
+
+                SELECT
+            user_id,
+            sum(currency_amount) AS total_purchase
+            FROM bi_user_bill
+            WHERE currency_type = 'Dollar'
+            GROUP BY user_id
+
+            ) t
+         """
+        return cls.sql_execute(sql, operator, value)
+
+
+    @classmethod
+    def count_of_purchase(cls, operator, value):
+
+        sql  = """
+
+            SELECT user_id
+            FROM ( SELECT
+                     user_id,
+                     count(*) AS purchase_count
+                   FROM bi_user_bill
+                   WHERE currency_type = 'gold'
+                         AND category_orig = 6
+                   GROUP BY user_id
+                 ) t
+         """
 
         return cls.sql_execute(sql, operator, value)
-#
-# class PaidBehaviour(GameBehaviour):
-#     @classmethod
-#     def total_purchase(cls, operator, value):
-#
-#         sql = """
-#             SELECT user_id,total_purchase
-#             FROM (
-#
-#                 SELECT
-#             user_id,
-#             sum(currency_amount) AS total_purchase
-#             FROM bi_user_bill
-#             WHERE currency_type = 'Dollar'
-#             GROUP BY user_id
-#
-#             ) t
-#             ORDER BY  total_purchase DESC
-#          """
-#         return cls.sql_execute(sql, operator, value)
-#
-#
-#     @classmethod
-#     def count_of_purchase(cls, operator, value):
-#
-#         sql = """
-#          SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          count(*) AS purchase_count
-#        FROM bi_user_bill
-#        WHERE currency_type = 'gold'
-#              AND category_orig = 6
-#        GROUP BY user_id
-#      ) t
-# WHERE purchase_count > 40;
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def last_purchase(cls, operator, value):
-#
-#         sql = """
-#
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def last_purchase_gold(cls, operator, value):
-#
-#         sql = """
-#            SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-#                          1) AS last_purchase
-#        FROM bi_user_bill
-#        WHERE currency_type = 'dollar'
-#              AND category = 'Gold'
-#        GROUP BY user_id
-#      ) t
-# WHERE last_purchase = '2017-04-10';
-#
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def last_purchase_avatar(cls, operator, value):
-#         sql = """
-#            SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-#                          1) AS last_purchase
-#        FROM bi_user_bill
-#        WHERE currency_type = 'gold'
-#              AND category_orig = 6
-#        GROUP BY user_id
-#      ) t
-# WHERE last_purchase = '2017-04-10';
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def count_of_avatar_purchase(cls, operator, value):
-#
-#         sql = """
-# SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          count(*) AS purchase_count
-#        FROM bi_user_bill
-#        WHERE currency_type = 'gold'
-#              AND category_orig = 6
-#        GROUP BY user_id
-#      ) t
-# WHERE purchase_count > 40;
-#
-#
-#          """
-#
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def last_purchase_charms(cls, operator, value):
-#
-#         sql = """
-#
-# SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-#                          1) AS last_purchase
-#        FROM bi_user_bill
-#        WHERE currency_type = 'gold'
-#              AND category_orig = 5
-#        GROUP BY user_id
-#      ) t
-# WHERE last_purchase = '2017-04-10';
-#
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def count_of_charms_purchase(cls, operator, value):
-#
-#         sql = """
-#
-#
-# SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          count(*) AS purchase_count
-#        FROM bi_user_bill
-#        WHERE currency_type = 'gold'
-#              AND category_orig = 6
-#        GROUP BY user_id
-#      ) t
-# WHERE purchase_count > 40;
-#
-#
-#
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def reward_level(cls, operator, value):
-#
-#         sql = """
-#
-#          """
-#
-#         return cls.sql_execute(sql, operator, value)
-#
-#     @classmethod
-#     def last_free_spin(cls, operator, value):   sql = """
-#
-# SELECT user_id
-# FROM (
-#        SELECT
-#          user_id,
-#          substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-#                          1) AS last_purchase
-#        FROM bi_user_bill
-#        WHERE currency_type = 'dollar'
-#              AND category_orig = 3
-#        GROUP BY user_id
-#      ) t
-# WHERE last_purchase = '2017-04-10';
-#
-#          """
-#
-#
-#
-#         return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def last_purchase(cls, operator, value):
+
+        sql = """
+        
+        
+
+         """
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def last_purchase_gold(cls, operator, value):
+
+        sql = """
+           SELECT user_id
+FROM (
+       SELECT
+         user_id,
+         substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
+                         1) AS last_purchase
+       FROM bi_user_bill
+       WHERE currency_type = 'dollar'
+             AND category = 'Gold'
+       GROUP BY user_id
+     ) t
+
+         """
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def last_purchase_avatar(cls, operator, value):
+        sql = """
+            SELECT user_id
+            FROM (
+                   SELECT
+                     user_id,
+                     substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
+                                     1) AS last_purchase
+                   FROM bi_user_bill
+                   WHERE currency_type = 'gold'
+                         AND category_orig = 6
+                   GROUP BY user_id
+                 ) t
+         """
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def count_of_avatar_purchase(cls, operator, value):
+
+        sql = """
+            SELECT user_id
+            FROM (
+                   SELECT
+                     user_id,
+                     count(*) AS purchase_count
+                   FROM bi_user_bill
+                   WHERE currency_type = 'gold'
+                         AND category_orig = 6
+                   GROUP BY user_id
+                 ) t
+         """
+
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def last_purchase_charms(cls, operator, value):
+
+        sql = """
+            
+            SELECT user_id
+            FROM (
+                   SELECT
+                     user_id,
+                     substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
+                                     1) AS last_purchase_charms
+                   FROM bi_user_bill
+                   WHERE currency_type = 'gold'
+                         AND category_orig = 5
+                   GROUP BY user_id
+                 ) t
+         """
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def count_of_charms_purchase(cls, operator, value):
+
+        sql = """
+            SELECT user_id
+            FROM (
+                   SELECT
+                     user_id,
+                     count(*) AS count_of_charms_purchase
+                   FROM bi_user_bill
+                   WHERE currency_type = 'gold'
+                         AND category_orig = 6
+                   GROUP BY user_id
+                 ) t
+            WHERE purchase_count > 40;
+          """
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def reward_level(cls, operator, value):
+
+        sql = """
+
+         """
+
+        return cls.sql_execute(sql, operator, value)
+
+    @classmethod
+    def last_free_spin(cls, operator, value):
+        sql = """
+                            
+        SELECT user_id
+        FROM (
+               SELECT
+                 user_id,
+                 substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
+                                 1) AS last_free_spin
+               FROM bi_user_bill
+               WHERE currency_type = 'dollar'
+                     AND category_orig = 3
+               GROUP BY user_id
+             ) t
+
+         """
+
+
+
+        return cls.sql_execute(sql, operator, value)
 #
 #
 # class UsersGrouping(PaidBehaviour):
