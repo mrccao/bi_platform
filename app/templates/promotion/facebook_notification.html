@@ -185,11 +185,11 @@
                     type: 'date',
 
                     validation: {
-                        format: 'YYYY/MM/DD'
+                        format: 'YYYY-MM-DD'
                     },
                     plugin: 'datepicker',
                     plugin_config: {
-                        format: 'yyyy/mm/dd',
+                        format: 'yyyy-mm-dd',
                         todayBtn: 'linked',
                         todayHighlight: true,
                         autoclose: true
@@ -203,11 +203,11 @@
                         type: 'date',
 
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -215,19 +215,13 @@
 
                         operators: ['less', 'equal', 'greater', 'between']
                     }
-                    , {
-                        id: 'regCountry',
-                        label: 'Reg Country',
-                        input: 'text',
-                        operators: ['equal']
-                    }
 
                     , {
                         id: 'regState',
                         label: 'Reg State',
                         type: 'integer',
-                        input: 'text',
-
+                        input: 'select',
+                        values: ['Oregon', 'California', 'Illinois', 'Nevada', 'Texas', 'Missouri', 'Massachusetts', 'Georgia', 'Florida', 'Arizona', 'North Carolina', 'New Jersey', 'Tennessee', 'New York', 'Indiana', 'Kansas', 'Pennsylvania', 'Louisiana', 'South Dakota', 'Minnesota', 'Michigan', 'Colorado', 'Montana', 'Maryland', 'Virginia', 'Alabama', 'Alaska', 'Hawaii', 'Mississippi', 'Delaware', 'Maine', 'North Dakota', 'New Hampshire', 'Ohio', 'Oklahoma', 'South Carolina', 'Connecticut', 'Nebraska', 'Idaho', 'New Mexico', 'Arkansas', 'Kentucky', 'Iowa', 'Rhode Island', 'Washington', 'Wisconsin', 'Utah', 'Wyoming', 'Vermont', 'West Virginia', ' District of Columbia'],
                         operators: ['equal']
                     },
                     {
@@ -235,11 +229,11 @@
                         label: 'Last Login',
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -268,11 +262,11 @@
 
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -308,11 +302,11 @@
 
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -329,11 +323,11 @@
                         label: 'Last Purchase Avatar',
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -350,11 +344,11 @@
 
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -370,11 +364,11 @@
 
                         type: 'date',
                         validation: {
-                            format: 'YYYY/MM/DD'
+                            format: 'YYYY-MM-DD'
                         },
                         plugin: 'datepicker',
                         plugin_config: {
-                            format: 'yyyy/mm/dd',
+                            format: 'yyyy-mm-dd',
                             todayBtn: 'linked',
                             todayHighlight: true,
                             autoclose: true
@@ -676,3 +670,5 @@
 
 
 {% endblock %}
+
+
