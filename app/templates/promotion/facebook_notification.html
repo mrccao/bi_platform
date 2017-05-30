@@ -3,18 +3,20 @@
 {% block page_title %}Sending Facebook Notification{% endblock %}
 
 {% block head_tail %}
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
           rel="stylesheet">
+
 {% endblock %}
 
 {% block main_content %}
+
     <section class="content-header">
-        <h1>
-            Sending Facebook Notification
-        </h1>
+        <h1> Sending Facebook Notification </h1>
     </section>
 
     {% if based_query %}
+
         <div class="pad margin no-print">
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
@@ -22,13 +24,16 @@
                 <pre>{{ based_query.sql }}</pre>
             </div>
         </div>
+
     {% else %}
+
         <div class="pad margin no-print">
             <div class="callout callout-danger"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
                 <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this screen.</h4>
             </div>
         </div>
+
     {% endif %}
 
     <section class="content">
@@ -44,29 +49,62 @@
                         </div>
 
 
-                        <span id="user-grouping">
+                        {% if not  based_query %}
+                            <span id="user-grouping">
 
-                                <link href="http://querybuilder.js.org/dist/selectize/dist/css/selectize.bootstrap3.css"
-                                      rel="stylesheet">
-                                <link href="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/css/query-builder.default.min.css"
-                                      rel="stylesheet">
+
+                            <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
+                                  rel="stylesheet">
+
+                            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
+                                  rel="stylesheet">
+
+                            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
+                                  rel="stylesheet">
+
+                            <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
+                                  rel="stylesheet">
 
                             <button type="button" class="btn btn-default" style="margin-right: 5px;"
-                                    id="btn-select-users"
-                                    data-toggle="modal" data-target="#select-users">
-                                <i class="fa fa-indent"></i> Select Users
+                                    id="btn-select-users" data-toggle="modal" data-target="#select-users"> <i
+                                    class="fa fa-indent"></i> Select Users
                             </button>
+
                             <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
                                  aria-labelledby="myModalLabel" aria-hidden="true">
 
 
-                                <style>
+                            <style>
+
+                                    .slider.slider-horizontal {
+                                        width: 600px;
+                                    }
+
+                                    .slider {
+                                        margin-top: 36px;
+
+                                    }
+
+                                    .btn-primary.active, .btn-primary:hover {
+                                        color: #fff;
+                                        background-color: #0887c7;
+                                    }
+
+                                    .btn-primary {
+
+                                        background-color: #fff;
+                                    }
+
                                     .query-builder .rules-group-container {
                                         padding: 10px 10px 6px;
-                                        background: #fff;
+                                        background-color: #fff;
                                         border: 1px solid #d2d4d4;
+                                        font-weight: 600;
                                     }
-                                </style>
+
+
+                            </style>
+
                                 <div class="modal-dialog modal-lg" role="document">
 
                                     <div class="modal-content">
@@ -75,22 +113,17 @@
                                                 &times;
                                             </button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                Select Criteria To Filter Users
+                                                Filter Users
                                             </h4>
                                         </div>
                                         <div class="modal-body">
 
-
                                             <div class="row">
 
-
-
-                                                    <div class="col-md-12 col-lg-10 col-lg-offset-1">
+                                                <div class="col-md-12">
 
                                                             <div id="builder-select-users"></div>
-
                                                     </div>
-
                                             </div>
 
                                         </div>
@@ -104,7 +137,10 @@
                                 </div>
 
                             </div>
+
                         </span>
+
+                        {% endif %}
 
                         <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i
                                 class="fa fa-indent"></i> Insert Facebook name
@@ -154,54 +190,45 @@
             </div>
         </div>
     </section>
+
 {% endblock %}
 
 {% block body_tail %}
+
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
 
-    <div id="user-grouping-scripts">
-        <script src="http://querybuilder.js.org/dist/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
-        <script src="http://querybuilder.js.org/dist/jQuery-QueryBuilder/dist/js/query-builder.standalone.min.js"></script>
-        <script src="http://querybuilder.js.org/dist/sql-parser/browser/sql-parser.js"></script>
 
+    {% if not  based_query %}
 
-        <script>
+        <div id="user-grouping-scripts">
 
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/js/query-builder.standalone.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
 
-            var userRulesOption = {
-                condition: 'OR',
-                rules: [{
-                    id: 'registered'
-                }
-                ]
-            };
-            $('#builder-select-users').queryBuilder({
-                plugins: ['bt-tooltip-errors'],
+            <script>
 
-                filters: [{
-                    id: 'registered',
-                    label: 'Registered',
-                    type: 'date',
+                var userRulesOption = {
+                    condition: 'OR',
+                    rules: [{
+                        id: 'Registered'
+                    }]
+                };
 
-                    validation: {
-                        format: 'YYYY-MM-DD'
-                    },
-                    plugin: 'datepicker',
-                    plugin_config: {
-                        format: 'yyyy-mm-dd',
-                        todayBtn: 'linked',
-                        todayHighlight: true,
-                        autoclose: true
-                    },
-                    operators: ['less', 'equal', 'greater', 'between']
+                $('#builder-select-users').queryBuilder({
 
-                }
-                    , {
-                        id: 'birthday',
-                        label: 'Birthday',
+                    plugins: [
+                        'bt-tooltip-errors',
+                        'bt-checkbox'
+                    ],
+
+                    filters: [{
+                        id: 'Registered',
+                        field: 'reg_time',
+                        label: 'Registered',
                         type: 'date',
-
                         validation: {
                             format: 'YYYY-MM-DD'
                         },
@@ -212,213 +239,295 @@
                             todayHighlight: true,
                             autoclose: true
                         },
-
                         operators: ['less', 'equal', 'greater', 'between']
+
+                    },
+                        {
+                            id: 'birthday',
+                            field: 'birthday',
+                            label: 'Birthday',
+                            type: 'date',
+                            validation: {
+                                format: 'YYYY-MM-DD'
+                            },
+                            plugin: 'datepicker',
+                            plugin_config: {
+                                format: 'yyyy-mm-dd',
+                                todayBtn: 'linked',
+                                todayHighlight: true,
+                                autoclose: true
+                            },
+
+                            operators: ['less', 'equal', 'greater', 'between']
+                        },
+
+                        {
+                            id: 'Reg State',
+                            field: 'reg_state',
+                            label: 'Reg State',
+                            type: 'integer',
+                            input: 'select',
+                            values: ['Oregon', 'California', 'Illinois', 'Nevada', 'Texas', 'Missouri', 'Massachusetts', 'Georgia', 'Florida', 'Arizona', 'North Carolina', 'New Jersey', 'Tennessee', 'New York', 'Indiana', 'Kansas', 'Pennsylvania', 'Louisiana', 'South Dakota', 'Minnesota', 'Michigan', 'Colorado', 'Montana', 'Maryland', 'Virginia', 'Alabama', 'Alaska', 'Hawaii', 'Mississippi', 'Delaware', 'Maine', 'North Dakota', 'New Hampshire', 'Ohio', 'Oklahoma', 'South Carolina', 'Connecticut', 'Nebraska', 'Idaho', 'New Mexico', 'Arkansas', 'Kentucky', 'Iowa', 'Rhode Island', 'Washington', 'Wisconsin', 'Utah', 'Wyoming', 'Vermont', 'West Virginia', ' District of Columbia'],
+                            operators: ['equal']
+                        },
+
+                        {
+                            id: 'X_days_inactive',
+                            field: 'X_days_inactive',
+                            label: 'X Days Inactive',
+                            type: 'integer',
+                            input: 'number',
+                            operators: ['equal']
+                        },
+
+                        {
+                            id: 'Average_active_days_weekly',
+                            field: 'Average_active_days_weekly',
+                            label: 'Average Active Days Weekly',
+                            type: 'integer',
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 7
+                            },
+                            plugin: 'slider',
+
+                            plugin_config: {
+                                min: 1,
+                                max: 7,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+                        {
+                            id: 'Average_active_days_monthly',
+                            field: 'Average_active_days_monthly',
+                            label: 'Average Active Days Monthly',
+                            type: 'integer',
+                            {#                        operators: ['equal'],#}
+                            operators: ['less', 'equal', 'greater', 'between'],
+
+                            validation: {
+                                min: 0,
+                                max: 30
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+                                min: 1,
+                                max: 30,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+
+                        },
+
+                        {
+                            id: 'Purchased',
+                            type: 'integer',
+                            input: 'radio',
+                            values: {
+                                1: 'Never Purchased',
+                                0: 'Purchased'
+                            },
+                            colors: {
+                                1: 'success',
+                                0: 'danger'
+                            },
+                            {#                        operators: ['equal']#}
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                        },
+
+
+                        {
+                            id: 'Average_purchase_amount_weekly',
+                            field: 'Average_purchase_amount_weekly',
+                            label: 'Average Purchase Amount Weekly',
+                            type: 'double',
+
+                            operators: ['equal'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 10000,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+                        {
+                            id: 'Average_purchase_amount_monthly',
+                            field: 'Average_purchase_amount_monthly',
+                            label: 'Average Purchase Amount Monthly',
+                            type: 'double',
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            {#                        operators: ['equal'],#}
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 10000,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+
+                        {
+                            id: 'average_purchase_count_monthly',
+                            field: 'average_purchase_count_monthly',
+                            label: 'Average Purchase Count Monthly',
+                            type: 'double',
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            {#                        operators: ['equal'],#}
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 7,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+                        {
+                            id: 'average_purchase_count_weekly',
+                            field: 'average_purchase_count_weekly',
+                            label: 'Average Purchase Count Weekly',
+                            {#                        operators: ['equal'],#}
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+                                min: 1,
+                                max: 7,
+                                value: 0,
+                                {#                            tooltip: 'always'#}
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        }
+
+                    ],
+
+                    rules: userRulesOption
+                });
+
+                $('.parse-json').on('click', function () {
+
+                    var usersRules = $('#builder-select-users').queryBuilder('getRules');
+                    if (!$.isEmptyObject(usersRules)) {
+                        $('#close').trigger('click')
                     }
 
-                    , {
-                        id: 'regState',
-                        label: 'Reg State',
-                        type: 'integer',
-                        input: 'select',
-                        values: ['Oregon', 'California', 'Illinois', 'Nevada', 'Texas', 'Missouri', 'Massachusetts', 'Georgia', 'Florida', 'Arizona', 'North Carolina', 'New Jersey', 'Tennessee', 'New York', 'Indiana', 'Kansas', 'Pennsylvania', 'Louisiana', 'South Dakota', 'Minnesota', 'Michigan', 'Colorado', 'Montana', 'Maryland', 'Virginia', 'Alabama', 'Alaska', 'Hawaii', 'Mississippi', 'Delaware', 'Maine', 'North Dakota', 'New Hampshire', 'Ohio', 'Oklahoma', 'South Carolina', 'Connecticut', 'Nebraska', 'Idaho', 'New Mexico', 'Arkansas', 'Kentucky', 'Iowa', 'Rhode Island', 'Washington', 'Wisconsin', 'Utah', 'Wyoming', 'Vermont', 'West Virginia', ' District of Columbia'],
-                        operators: ['equal']
-                    },
-                    {
-                        id: 'lastLogin',
-                        label: 'Last Login',
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
+                });
 
-                        operators: ['less', 'equal', 'greater', 'between']
-                    }
-                    , {
-                        id: 'gameFrequency',
-                        label: 'Login days this month',
-                        type: 'integer',
-                        input: 'number',
+            </script>
+        </div>
 
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-                    {
-                        id: 'continuousLogin',
-                        label: 'Continuous login days this month',
-                        type: 'integer',
-                        input: 'number',
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-                    {
-                        id: 'lastPurchase',
-                        label: 'Last Purchase',
-
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-                    {
-                        id: 'totalPurchase',
-                        label: 'Total Purchase',
-                        input: 'number',
-                        type: 'double',
-                        validation: {
-                            min: 0,
-                            step: 0.1
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-
-
-                    {
-                        id: 'rewardLevel',
-                        label: 'Reward Level',
-                        input: 'number',
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-
-
-                    {
-                        id: 'lastPurchaseGold',
-                        label: 'Last Purchase',
-
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-
-                    },
-
-
-                    {
-                        id: 'lastPurchaseAvatar',
-
-                        label: 'Last Purchase Avatar',
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-
-                    },
-
-
-                    {
-                        id: 'lastPurchaseCharm',
-                        label: 'Last Purchase Charm',
-
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-
-                    },
-
-                    {
-                        id: 'lastFreeSpin',
-                        label: 'Last Free Spin',
-
-                        type: 'date',
-                        validation: {
-                            format: 'YYYY-MM-DD'
-                        },
-                        plugin: 'datepicker',
-                        plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
-                        },
-
-                        operators: ['less', 'equal', 'greater', 'between']
-
-                    },
-
-
-                    {
-                        id: 'countOfPurchase',
-                        label: 'Count of Purchase',
-                        type: 'integer',
-                        input: 'number',
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-
-
-                    {
-                        id: 'countOfAvatarPurchase',
-                        label: 'Count of Avatar Purchase',
-
-                        input: 'number',
-                    },
-
-
-                    {
-                        id: 'countOfCharmPurchase',
-                        label: 'Count of Charm Purchase',
-                        input: 'number',
-                        operators: ['less', 'equal', 'greater', 'between']
-                    },
-
-                ],
-
-                rules: userRulesOption
-            });
-
-            $('.parse-json').on('click', function () {
-
-                var usersRules = $('#builder-select-users').queryBuilder('getRules');
-                if (!$.isEmptyObject(usersRules)) {
-                    $('#close').trigger('click')
-                }
-
-            });
-
-        </script>
-    </div>
+    {% endif %}
 
     <script type="text/javascript">
 
@@ -522,11 +631,10 @@
                 var query_rules = JSON.stringify($('#builder-select-users').queryBuilder('getRules'));
 
 
-                {#                if ($.isEmptyObject(query_rules)) {#}
-                {#                    var userRules =null;#}
-                {#                }#}
-
-                {#                console.log(query_rules)#}
+                if ($.isEmptyObject(query_rules)) {
+                    var userRules = null;
+                }
+                console.log(query_rules);
 
                 var data = {
                     'scheduled_at': $('#send-scheduled-at').val(),
@@ -664,11 +772,10 @@
 
     </script>
 
-
-
-
-
-
 {% endblock %}
+
+
+
+
 
 

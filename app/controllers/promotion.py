@@ -1,7 +1,6 @@
-import json
+import hashlib
 
 import arrow
-import hashlib
 import pandas as pd
 import sqlparse
 from dateutil import tz
@@ -13,7 +12,7 @@ from sqlalchemy import text
 from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.extensions import db
 from app.models.main import AdminUserQuery
-from app.models.promotion import PromotionPush
+from app.models.promotion import PromotionPush, UsersGrouping
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
                                  process_promotion_facebook_notification_retrying)
 from app.utils import error_msg_from_exception, current_time
@@ -58,10 +57,10 @@ def facebook_notification_retry():
 @login_required
 def facebook_notification_sender():
     based_query_id = request.form.get('based_query_id')
-    query_rules = json.loads(request.form.get('query_rules'))
+    query_rules = request.form.get('query_rules')
     message = request.form.get('message')
 
-    user_id_list = parse_query_rules(query_rules)
+    user_id = UsersGrouping.get_user_id(query_rules)
 
     scheduled_at = request.form.get('scheduled_at')
     if scheduled_at:

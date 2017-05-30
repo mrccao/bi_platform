@@ -1,3 +1,7 @@
+import json
+from functools import reduce
+from operator import iand, ior
+
 import arrow
 from flask import current_app as app
 from sqlalchemy import text
@@ -96,415 +100,265 @@ class PromotionPushHistory(db.Model):
 
 class BasicProperty(object):
     @classmethod
-    def sql_execute(cls, sql, field, operator, value):
+    def reg_time(cls, field, operator, value):
+        sql = """ SELECT user_id FROM( SELECT user_id, DATE_FORMAT(reg_time,'%Y-%m-%d') AS reg_time FROM bi_user )t """
 
-        def collection(connection, transaction, field=field):
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-            if field in ["reg_time", "last_active_time", " last_purchase", "last_purchase_avatar",
-                         "last_purchase_charms",
-                         "last_free_spin"]: field = "DATE_FORMAT(on_day,'%Y-%m-%d')"
-
-            if operator == "less":
-
-                user_id = db.engine.execute(text(sql + ' WHERE' + field + ' < :value'), value=value, field=field)
-
-            elif operator == "equal":
-
-                user_id = db.engine.execute(text(sql + 'WHERE' + field + ' = :value'), value=value, field=field)
-
-            elif operator == "greater":
-
-                user_id = db.engine.execute(text(sql + 'WHERE' + field + ' > :value'), value=value, field=field)
-
-            else:
-
-                user_id = db.engine.execute(text(sql + 'WHERE' + field + ' BETWEEN :value1 AND :value2'),
-                                            value1=value[0],
-                                            value2=value[1], field=field)
-
-            return set(user_id)
-
-        result_proxy = with_db_context(db, collection)
-
-        result_proxy = set(list(result_proxy))
-
-        return result_proxy
+        return user_id
 
     @classmethod
-    def reg_time(cls, field, operator, value):
+    def birthday(cls, field, operator, value):
+        sql = 'SELECT user_id FROM bi_user WHERE birthday'
 
-        sql = 'SELECT user_id FROM bi_user'
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        return cls.sql_execute(sql, field, operator, value)
+        return user_id
 
     @classmethod
     def reg_state(cls, field, operator, value):
+        sql = "SELECT user_id FROM bi_user WHERE reg_state = :value"
 
-        sql = "SELECT user_id FROM bi_user"
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        return cls.sql_execute(sql, field, operator, value)
-
-    @classmethod
-    def reg_source(cls, operator, value):
-
-        sql = "SELECT user_id FROM bi_user"
-
-        return cls.sql_execute(sql, operator, value)
-
-        # TODO
-        # @classmethod
-        # def current_gold_balance(cls, operator, value):
-
-        # sql = "SELECT user_id FROM bi_user"
-        #
-        # return cls.sql_execute(sql, operator, value)
+        return user_id
 
 
 class GameBehaviour(BasicProperty):
     @classmethod
-    def x_days_inactive(cls, operator, value):
+    def x_days_inactive(cls, field, operator, value):
         sql = """
-            SELECT DISTINCT (user_id)
-            FROM bi_user
-            WHERE user_id NOT IN (
-                SELECT DISTINCT user_id
-            FROM bi_user_currency
-            WHERE date(created_at) > :value
-            
-            AND
-            transaction_type != 20132001)
+                SELECT DISTINCT ( user_id )
+                FROM   bi_user
+                WHERE  user_id NOT IN (SELECT DISTINCT user_id
+                                       FROM   bi_user_currency
+                                       WHERE  DATE(created_at)> DATE_ADD(CURDATE(), INTERVAL - :value DAY)
+                                              AND transaction_type != 20132001) 
               """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        def collection_user_id():
-            user_id = db.engine.execute(text(sql), value)
-            return user_id
-
-        result_proxy = with_db_context(collection_user_id)
-
-        return result_proxy
+        return user_id
 
     @classmethod
-    def active_days_of_the_month(cls, operator, value):
-        # sql = """
-        #             SELECT user_id
-        #     FROM (
-        #            SELECT DISTINCT
-        #              DATE(created_at),
-        #              user_id
-        #            FROM bi_user_currency
-        #            WHERE DATE(created_at) > '2017-04-14'
-        #          ) t
-        #     GROUP BY user_id
-        #     HAVING count(*) > 5;
-        #
-        # """
-
-        return cls.sql_execute(sql, operator, value)
-
-    @classmethod
-    def consecutive_active_day_of_the_month(cls, operator, value):
+    def average_active_days_weekly(cls, field, operator, value):
+        # if value ==7
+        # ??
         sql = """
-        
-        
-SELECT *
-FROM (SELECT *
-      FROM (
-             SELECT
-               user_id,
-               max(days)      lianxu_days,
-               min(login_day) start_date,
-               max(login_day) end_date
-             FROM (
 
+                SELECT average_active_days_weekly FROM (
+                SELECT c.user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7) AS average_active_days_weekly
+                FROM   bi_user u
+                       INNER JOIN bi_user_currency c
+                               ON u.user_id = c.user_id
+                GROUP BY c.user_id 
+                )t
+             """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-                    SELECT
-                      user_id,
-                      @cont_day :=
-                      (CASE
-                       WHEN (@last_uid = user_id AND DATEDIFF(created_at, @last_dt) = 1)
-                         THEN
-                           (@cont_day + 1)
-                       WHEN (@last_uid = user_id AND DATEDIFF(created_at, @last_dt) < 1)
-                         THEN
-                           (@cont_day + 0)
-                       ELSE
-                         1
-                       END)                                              AS days,
-                      (@cont_ix := (@cont_ix + IF(@cont_day = 1, 1, 0))) AS cont_ix,
-                      @last_uid := user_id,
-                      @last_dt := created_at                                login_day
-                    FROM
+        return user_id
 
+    @classmethod
+    def average_active_days_monthly(cls, field, operator, value):
+        sql = """
+                SELECT average_active_days_monthly FROM (
+                SELECT c.user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30) AS average_active_days_monthly
+                FROM   bi_user u
+                       INNER JOIN bi_user_currency c
+                               ON u.user_id = c.user_id
 
-                      (
+                GROUP BY c.user_id 
+                ) t 
+             """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-
-                        SELECT DISTINCT
-                          user_id,
-                          DATE(created_at) created_at
-                        FROM bi_user_currency
-                        WHERE user_id != 0
-                        ORDER BY user_id, created_at) AS t,
-
-
-                      (SELECT
-                         @last_uid := '',
-                         @last_dt := '',
-                         @cont_ix := 0,
-                         @cont_day := 0) AS t1
-                  ) AS t2
-             GROUP BY user_id, cont_ix
-             HAVING lianxu_days > 50
-           )
-
-
-           tmp
-      ORDER BY lianxu_days DESC) ntmp
-GROUP BY user_id
-ORDER BY lianxu_days DESC
-        
-        
-        
-        """
-
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
 
 class PaidBehaviour(GameBehaviour):
     @classmethod
-    def total_purchase(cls, operator, value):
-
+    def never_purchased_users(cls, field, operator, value):
         sql = """
-            SELECT user_id,total_purchase
-            FROM (
+                SELECT user_id
+                FROM   bi_user
+                WHERE  user_id NOT IN (SELECT DISTINCT user_id
+                                       FROM   bi_user_bill) 
+              """
 
-                SELECT
-            user_id,
-            sum(currency_amount) AS total_purchase
-            FROM bi_user_bill
-            WHERE currency_type = 'Dollar'
-            GROUP BY user_id
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-            ) t
-         """
-        return cls.sql_execute(sql, operator, value)
-
+        return set(user_id)
 
     @classmethod
-    def count_of_purchase(cls, operator, value):
+    def purchased_users(cls, field, operator, value):
+        sql = """ SELECT DISTINCT user_id FROM bi_user_bill """
 
-        sql  = """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-            SELECT user_id
-            FROM ( SELECT
-                     user_id,
-                     count(*) AS purchase_count
-                   FROM bi_user_bill
-                   WHERE currency_type = 'gold'
-                         AND category_orig = 6
-                   GROUP BY user_id
-                 ) t
-         """
-
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
     @classmethod
-    def last_purchase(cls, operator, value):
-
+    def x_days_not_purchase(cls, field, operator, value):
         sql = """
-        
-        
+                SELECT DISTINCT ( user_id )
+                FROM   bi_user_bill
+                WHERE  user_id NOT IN (SELECT DISTINCT user_id
+                                       FROM   bi_user_bill
+                                       WHERE  DATE(created_at) > :value
+                                              AND currency_type = 'Dollar') 
+               """
 
-         """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
     @classmethod
-    def last_purchase_gold(cls, operator, value):
+    def average_purchase_amount_monthly(cls, field, operator, value):
+        # 8000
+        sql = """ 
+                SELECT average_purchase_amount_monthly FROM(
+                SELECT b.user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30) AS average_purchase_amount_monthly
+                FROM   bi_user u
+                       INNER JOIN bi_user_bill b
+                               ON u.user_id = b.user_id
+                WHERE b.currency_type = 'Dollar'
+                GROUP BY b.user_id 
+                ) t
+                
+               """
 
-        sql = """
-           SELECT user_id
-FROM (
-       SELECT
-         user_id,
-         substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-                         1) AS last_purchase
-       FROM bi_user_bill
-       WHERE currency_type = 'dollar'
-             AND category = 'Gold'
-       GROUP BY user_id
-     ) t
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-         """
-
-        return cls.sql_execute(sql, operator, value)
-
-    @classmethod
-    def last_purchase_avatar(cls, operator, value):
-        sql = """
-            SELECT user_id
-            FROM (
-                   SELECT
-                     user_id,
-                     substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-                                     1) AS last_purchase
-                   FROM bi_user_bill
-                   WHERE currency_type = 'gold'
-                         AND category_orig = 6
-                   GROUP BY user_id
-                 ) t
-         """
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
     @classmethod
-    def count_of_avatar_purchase(cls, operator, value):
+    def average_purchase_amount_weekly(cls, field, operator, value):
+        # 25000
 
         sql = """
-            SELECT user_id
-            FROM (
-                   SELECT
-                     user_id,
-                     count(*) AS purchase_count
-                   FROM bi_user_bill
-                   WHERE currency_type = 'gold'
-                         AND category_orig = 6
-                   GROUP BY user_id
-                 ) t
-         """
+                SELECT average_purchase_amount_weekly FROM(
+                SELECT b.user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7) AS average_purchase_amount_weekly
+                FROM   bi_user u
+                       INNER JOIN bi_user_bill b
+                               ON u.user_id = b.user_id
+                WHERE b.currency_type = 'Dollar'
+                GROUP BY b.user_id 
+                ) t
+              """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
     @classmethod
-    def last_purchase_charms(cls, operator, value):
-
+    def average_purchase_count_monthly(cls, field, operator, value):
         sql = """
-            
-            SELECT user_id
-            FROM (
-                   SELECT
-                     user_id,
-                     substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-                                     1) AS last_purchase_charms
-                   FROM bi_user_bill
-                   WHERE currency_type = 'gold'
-                         AND category_orig = 5
-                   GROUP BY user_id
-                 ) t
+                SELECT average_purchase_amount_monthly FROM (
+                SELECT b.user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30) AS average_purchase_amount_monthly
+                FROM   bi_user u
+                       INNER JOIN bi_user_bill b
+                               ON u.user_id = b.user_id
+                WHERE b.currency_type = 'Dollar'
+                GROUP BY b.user_id 
+                ) t
          """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        return cls.sql_execute(sql, operator, value)
+        return user_id
 
     @classmethod
-    def count_of_charms_purchase(cls, operator, value):
-
+    def average_purchase_count_weekly(cls, field, operator, value):
         sql = """
-            SELECT user_id
-            FROM (
-                   SELECT
-                     user_id,
-                     count(*) AS count_of_charms_purchase
-                   FROM bi_user_bill
-                   WHERE currency_type = 'gold'
-                         AND category_orig = 6
-                   GROUP BY user_id
-                 ) t
-            WHERE purchase_count > 40;
-          """
+                SELECT b.user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7) AS average_purchase_count_weekly
+                FROM   bi_user u
+                       INNER JOIN bi_user_bill b
+                               ON u.user_id = b.user_id
+                WHERE b.currency_type = 'Dollar'
+                GROUP BY b.user_id 
+         """
+        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
-        return cls.sql_execute(sql, operator, value)
+        return user_id
+
+
+class UsersGrouping(PaidBehaviour):
+    @classmethod
+    def parse_query_rules(cls, rules):
+
+        field = rules["field"]
+        operator = rules["operator"]
+        value = rules["value"]
+
+        fields = {"reg_time": super(UsersGrouping, cls).reg_time, "reg_state": super(UsersGrouping, cls).reg_state,
+                  "birthday": super(UsersGrouping, cls).birthday,
+                  "x_days_inactive": super(UsersGrouping, cls).x_days_inactive,
+                  "average_active_days_weekly": super(UsersGrouping, cls).average_active_days_weekly,
+                  "average_active_days_monthly": super(UsersGrouping, cls).average_active_days_monthly,
+                  "purchased_users": super(UsersGrouping, cls).purchased_users,
+                  "never_purchased_users": super(UsersGrouping, cls).never_purchased_users,
+                  "x_days_not_purchase": super(UsersGrouping, cls).x_days_inactive,
+                  "average_purchase_count_monthly": super(UsersGrouping, cls).average_purchase_count_monthly,
+                  "average_purchase_count_weekly": super(UsersGrouping, cls).average_purchase_count_weekly,
+                  "average_purchase_amount_monthly": super(UsersGrouping, cls).average_purchase_amount_monthly,
+                  "average_purchase_amount_weekly": super(UsersGrouping, cls).average_purchase_amount_weekly}
+
+        user_id = fields[field](field, operator, value)
+
+        return set(user_id)
 
     @classmethod
-    def reward_level(cls, operator, value):
+    def get_user_id(cls, query_rules):
 
-        sql = """
+        query_rules = json.loads(query_rules)
+        condition = query_rules["condition"]
+        rules = query_rules["rules"]
 
-         """
+        def get_child_query_rules(rules):
 
-        return cls.sql_execute(sql, operator, value)
+            if "condition" in rules:
 
-    @classmethod
-    def last_free_spin(cls, operator, value):
-        sql = """
-                            
-        SELECT user_id
-        FROM (
-               SELECT
-                 user_id,
-                 substring_index(group_concat(date(created_at) ORDER BY date(created_at) DESC SEPARATOR ','), ',',
-                                 1) AS last_free_spin
-               FROM bi_user_bill
-               WHERE currency_type = 'dollar'
-                     AND category_orig = 3
-               GROUP BY user_id
-             ) t
+                cls.get_user_id(rules)
 
-         """
+            else:
+
+                every_child_query_user_id = cls.parse_query_rules(rules)
+
+                return every_child_query_user_id
+
+        user_id = list(map(get_child_query_rules, rules))
+
+        if condition == "AND":
+
+            query_result = list(reduce(iand, user_id))
+
+        else:
+
+            query_result = list(reduce(ior, user_id))
+
+        return query_result
 
 
+def sql_filter_option(connection, transaction, sql, field, operator, value):
+    if operator == "less":
 
-        return cls.sql_execute(sql, operator, value)
-#
-#
-# class UsersGrouping(PaidBehaviour):
-#     fields = {"reg_time": super().reg_time, "reg_state": super().reg_state,
-#               "reg_source": super().reg_source, "current_gold_balance": super().current_gold_balance,
-#               "last_active_time": super().last_active_time, "game_frequency": super().game_frequency,
-#               "total_purchase": super().total_purchase, "count_of_purchase": super().count_of_purchase,
-#               " last_purchase": super().last_purchase, "last_purchase_gold": super().last_purchase_gold,
-#               "last_purchase_avatar": super().last_purchase_avatar,
-#               "last_purchase_charms": super().last_purchase_charms,
-#               "last_free_spin": super().last_free_spin, "count_of_avatar_purchase": super().count_of_avatar_purchase,
-#               "count_of_charms_purchase": super().count_of_charms_purchase, "reward_level": super().reward_level}
-#
-#     @classmethod
-#     def parse_query_rules(cls, rules):
-#         field = rules["field"]
-#         operator = rules["operator"]
-#         value = rules["value"]
-#         value = list(map(lambda datetime: arrow.Arrow.strptime(datetime, "YYYY-MM-DD"), value))
-#         if isinstance(value, str):
-#             value = arrow.Arrow.strptime(value, "YYYY-MM-DD")
-#
-#         user_id_set = cls.fields[field](field, operator, value)
-#
-#         return user_id_set
-#
-#     @classmethod
-#     def get_user_id(cls, query_rules):
-#         condition = query_rules["condition"]
-#         rules = query_rules["rules"]
-#
-#         def get_child_query_rules(rules):
-#             if "condition" in rules:
-#                 cls.get_user_id(rules)
-#             else:
-#                 cls.parse_query_rules(rules)
-#
-#         user_id_list = list(map(get_child_query_rules, rules))
-#
-#         if condition == "AND":
-#             result = list(reduce(iand, user_id_list))
-#         else:
-#             result = list(reduce(ior, user_id_list))
-#
-#         return result
-#
-#
-#
-#         # @classmethod
-#         # def parse_query_rules(cls, rules):
-#         #     field = rules["field"]
-#         #     operator = rules["operator"]
-#         #     value = rules["value"]
-#         #
-#         #     filter_str_dict = {"less": lambda value: '< {}'.format(value), "equal": lambda value: '= {}'.format(value),
-#         #                        "greater": lambda value: '> {}'.format(value),
-#         #                        "between": lambda value: 'between {} AND {}'.format(*value)}
-#         #
-#         #     filter_str = filter_str_dict[operator](value)
-#         #
-#         #     user_id_set = cls.fields[field](filter_str)
-#         #
-#         #     return user_id_set
-#         #
+        result_proxy = connection.execute(text(sql + 'WHERE ' + field + '< :value'), value=value)
+
+    elif operator == "equal":
+
+        result_proxy = connection.execute(text(sql + 'WHERE ' + field + '= :value'), value=value)
+
+    elif operator == "greater":
+
+        result_proxy = connection.execute(text(sql + 'WHERE ' + field + '> :value'),
+                                          value=value)
+    else:
+
+        result_proxy = connection.execute(text(sql + 'WHERE ' + field + ' BETWEEN :value1 AND :value2'),
+                                          value1=value[0], value2=value[1])
+
+    result_proxy = list(result_proxy)
+    return result_proxy
