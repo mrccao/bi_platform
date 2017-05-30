@@ -15,7 +15,7 @@
         <h1> Sending Facebook Notification </h1>
     </section>
 
-    {% if based_query %}
+    {% if  based_query %}
 
         <div class="pad margin no-print">
             <div class="callout callout-info"
@@ -25,12 +25,17 @@
             </div>
         </div>
 
+
     {% else %}
 
         <div class="pad margin no-print">
             <div class="callout callout-danger"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-                <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this screen.</h4>
+
+                <div id="query_info">
+                    <h4 style="margin-bottom: 0!important;">Sending Facebook notification to ALL users in this
+                        screen.</h4>
+                </div>
             </div>
         </div>
 
@@ -50,7 +55,7 @@
 
 
                         {% if not  based_query %}
-                            <span id="user-grouping">
+                            <span id="user-grouping-button">
 
 
                             <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
@@ -80,8 +85,14 @@
                                         width: 600px;
                                     }
 
+                                    slider-selection {
+                                        background: #ffffff;
+                                    }
+
                                     .slider {
-                                        margin-top: 36px;
+
+                                        margin-top: 15px;
+                                        margin-bottom: 20px;
 
                                     }
 
@@ -113,7 +124,7 @@
                                                 &times;
                                             </button>
                                             <h4 class="modal-title" id="myModalLabel">
-                                                Filter Users
+                                                Set User Properties
                                             </h4>
                                         </div>
                                         <div class="modal-body">
@@ -198,7 +209,6 @@
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
 
-
     {% if not  based_query %}
 
         <div id="user-grouping-scripts">
@@ -209,6 +219,19 @@
             <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
 
             <script>
+                {#                中位数#}
+                {##}
+                {#                highValueUsers = '付费过 且每月登录次数大于15'#}
+                {##}
+                {#                potentialValueUsers = '未付费过 且每月登录次数大于15'#}
+                {##}
+                {#                generalUsers ='没付费,每月登录小于5'#}
+                {##}
+                {#                generalUsers ='付过费,每月登录小于5'#} {##}
+                {#                nonPayingUsers = '未付费过'#}
+                {##}
+                {#                paidusers = '付过费'#}
+                {##}
 
                 var userRulesOption = {
                     condition: 'OR',
@@ -281,8 +304,8 @@
                         },
 
                         {
-                            id: 'Average_active_days_weekly',
-                            field: 'Average_active_days_weekly',
+                            id: 'average_active_days_weekly',
+                            field: 'average_active_days_weekly',
                             label: 'Average Active Days Weekly',
                             type: 'integer',
                             operators: ['less', 'equal', 'greater', 'between'],
@@ -296,7 +319,9 @@
                                 min: 1,
                                 max: 7,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
+
 
                             },
                             valueSetter: function (rule, value) {
@@ -315,11 +340,10 @@
                         },
 
                         {
-                            id: 'Average_active_days_monthly',
-                            field: 'Average_active_days_monthly',
+                            id: 'average_active_days_monthly',
+                            field: 'average_active_days_monthly',
                             label: 'Average Active Days Monthly',
                             type: 'integer',
-                            {#                        operators: ['equal'],#}
                             operators: ['less', 'equal', 'greater', 'between'],
 
                             validation: {
@@ -331,7 +355,9 @@
                                 min: 1,
                                 max: 30,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
                             },
                             valueSetter: function (rule, value) {
@@ -351,30 +377,31 @@
                         },
 
                         {
-                            id: 'Purchased',
+                            id: 'purchased',
+                            field: 'purchased',
+                            label: 'Purchased',
                             type: 'integer',
                             input: 'radio',
                             values: {
-                                1: 'Never Purchased',
-                                0: 'Purchased'
+                                0: 'Never Purchased',
+                                1: 'Purchased'
                             },
                             colors: {
                                 1: 'success',
                                 0: 'danger'
                             },
-                            {#                        operators: ['equal']#}
 
-                            operators: ['less', 'equal', 'greater', 'between'],
+                            operators: ['equal'],
                         },
 
 
                         {
-                            id: 'Average_purchase_amount_weekly',
-                            field: 'Average_purchase_amount_weekly',
+                            id: 'average_purchase_amount_weekly',
+                            field: 'average_purchase_amount_weekly',
                             label: 'Average Purchase Amount Weekly',
                             type: 'double',
 
-                            operators: ['equal'],
+                            operators: ['less', 'equal', 'greater', 'between'],
                             validation: {
                                 min: 0,
                                 max: 1000000
@@ -385,7 +412,8 @@
                                 min: 1,
                                 max: 10000,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
 
                             },
@@ -405,13 +433,12 @@
                         },
 
                         {
-                            id: 'Average_purchase_amount_monthly',
-                            field: 'Average_purchase_amount_monthly',
+                            id: 'average_purchase_amount_monthly',
+                            field: 'average_purchase_amount_monthly',
                             label: 'Average Purchase Amount Monthly',
                             type: 'double',
 
                             operators: ['less', 'equal', 'greater', 'between'],
-                            {#                        operators: ['equal'],#}
                             validation: {
                                 min: 0,
                                 max: 1000000
@@ -422,7 +449,8 @@
                                 min: 1,
                                 max: 10000,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
                             },
                             valueSetter: function (rule, value) {
@@ -448,7 +476,6 @@
                             type: 'double',
 
                             operators: ['less', 'equal', 'greater', 'between'],
-                            {#                        operators: ['equal'],#}
                             validation: {
                                 min: 0,
                                 max: 1000000
@@ -459,7 +486,11 @@
                                 min: 1,
                                 max: 7,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+
+                                tooltip_position: 'bottom',
+
+                                tooltip: 'always'
+
 
                             },
                             valueSetter: function (rule, value) {
@@ -481,7 +512,6 @@
                             id: 'average_purchase_count_weekly',
                             field: 'average_purchase_count_weekly',
                             label: 'Average Purchase Count Weekly',
-                            {#                        operators: ['equal'],#}
                             operators: ['less', 'equal', 'greater', 'between'],
                             validation: {
                                 min: 0,
@@ -492,7 +522,8 @@
                                 min: 1,
                                 max: 7,
                                 value: 0,
-                                {#                            tooltip: 'always'#}
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
                             },
                             valueSetter: function (rule, value) {
@@ -517,10 +548,20 @@
 
                 $('.parse-json').on('click', function () {
 
+
                     var usersRules = $('#builder-select-users').queryBuilder('getRules');
+                    var query_info = $('#builder-select-users').queryBuilder('getSQL');
+
+
                     if (!$.isEmptyObject(usersRules)) {
                         $('#close').trigger('click')
                     }
+
+                    $('#query_info').html(
+                        "<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>"
+                    );
+
+                    $('.callout-danger').addClass('callout-info')
 
                 });
 
