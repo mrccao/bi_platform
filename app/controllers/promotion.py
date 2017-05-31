@@ -57,10 +57,10 @@ def facebook_notification_retry():
 @login_required
 def facebook_notification_sender():
     based_query_id = request.form.get('based_query_id')
-    query_rules = request.form.get('query_rules')
+    # query_rules = request.form.get('query_rules')
     message = request.form.get('message')
 
-    user_id = UsersGrouping.get_user_id(query_rules)
+    # user_id = UsersGrouping.get_user_id(query_rules)
 
     scheduled_at = request.form.get('scheduled_at')
     if scheduled_at:

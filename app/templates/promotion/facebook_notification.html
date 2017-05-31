@@ -6,6 +6,7 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
           rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
 
 {% endblock %}
 
@@ -13,6 +14,7 @@
 
     <section class="content-header">
         <h1> Sending Facebook Notification </h1>
+
     </section>
 
     {% if  based_query %}
@@ -208,6 +210,7 @@
 
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
     {% if not  based_query %}
 
@@ -614,6 +617,7 @@
 
         $(document).ready(function () {
 
+
             $('#send-scheduled-at').daterangepicker({
                 opens: 'right',
                 showDropdowns: true,
@@ -662,47 +666,69 @@
 
 
             $('#btn-send').click(function () {
+
+
                 if ($('#message-editor').val().length === 0) return;
 
-                if (!confirm(submitConfirmAlert)) {
-                    return;
-                }
+
+                swal({
+                    title: "Are you sure?",
+                    text: submitConfirmAlert,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, send it!",
+                    closeOnConfirm: false
+                }, function () {
 
 
-                var query_rules = JSON.stringify($('#builder-select-users').queryBuilder('getRules'));
+                    if ($('#message-editor').val().length === 0) return;
 
+                    {% if  based_query %}
 
-                if ($.isEmptyObject(query_rules)) {
-                    var userRules = null;
-                }
-                console.log(query_rules);
+                        var data = {
+                            'scheduled_at': $('#send-scheduled-at').val(),
+                            message: $('#message-editor').val(),
+                            based_query_id: basedQueryId,
+                        };
 
-                var data = {
-                    'scheduled_at': $('#send-scheduled-at').val(),
-                    message: $('#message-editor').val(),
-                    based_query_id: basedQueryId,
-                    query_rules: query_rules
-                };
+                    {% else %}
 
+                        var query_rules = JSON.stringify($('#builder-select-users').queryBuilder('getRules'));
+                        if ($.isEmptyObject(query_rules)) {
+                            var userRules = null;
+                        }
 
-                startRequestLoading();
+                        var data = {
+                            'scheduled_at': $('#send-scheduled-at').val(),
+                            message: $('#message-editor').val(),
+                            based_query_id: basedQueryId,
+                            query_rules: query_rules
+                        };
 
-                $.ajax({
-                    type: 'POST',
-                    url: '/promotion/facebook_notification/sender',
-                    data: data,
-                    dataType: "json",
-                    success: function (result) {
-                        alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                        stopRequestLoading();
-                        getPushHistories();
-                    },
-                    error: function (xhr) {
-                        alert('Error: ' + JSON.parse(xhr.responseText).error);
-                        stopRequestLoading();
-                    }
+                    {% endif %}
+
+                    startRequestLoading();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/promotion/facebook_notification/sender',
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
+                            stopRequestLoading();
+                            getPushHistories();
+                        },
+                        error: function (xhr) {
+                            alert('Error: ' + JSON.parse(xhr.responseText).error);
+                            stopRequestLoading();
+                        }
+                    });
+
                 });
             });
+
 
             $(document).on('click', '.btn-retry', function () {
                 if (!confirm(retryConfirmAlert)) {
