@@ -672,13 +672,16 @@
 
 
                 swal({
+
                     title: "Are you sure?",
                     text: submitConfirmAlert,
                     type: "warning",
                     showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
                     confirmButtonColor: "#DD6B55",
                     confirmButtonText: "Yes, send it!",
-                    closeOnConfirm: false
+
                 }, function () {
 
 
@@ -708,7 +711,6 @@
 
                     {% endif %}
 
-                    startRequestLoading();
 
                     $.ajax({
                         type: 'POST',
@@ -716,13 +718,13 @@
                         data: data,
                         dataType: "json",
                         success: function (result) {
+
                             swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
                             stopRequestLoading();
                             getPushHistories();
                         },
                         error: function (xhr) {
-                            swal('Error: ' + JSON.parse(xhr.responseText).error);
-                            stopRequestLoading();
+                            swal("Error", JSON.parse(xhr.responseText).error, "error");
                         }
                     });
 
@@ -754,7 +756,7 @@
                             getPushHistories();
                         },
                         error: function (xhr) {
-                            swal('Error: ' + JSON.parse(xhr.responseText).error);
+                            swal("Error", JSON.parse(xhr.responseText).error, "error");
                         }
                     })
                 })
