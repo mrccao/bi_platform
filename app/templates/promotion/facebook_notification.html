@@ -721,7 +721,7 @@
                             getPushHistories();
                         },
                         error: function (xhr) {
-                            alert('Error: ' + JSON.parse(xhr.responseText).error);
+                            swal('Error: ' + JSON.parse(xhr.responseText).error);
                             stopRequestLoading();
                         }
                     });
@@ -731,25 +731,33 @@
 
 
             $(document).on('click', '.btn-retry', function () {
-                if (!confirm(retryConfirmAlert)) {
-                    return;
-                }
 
-                var pushId = $(this).attr('data-push-id');
+                swal({
+                    title: retryConfirmAlert,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, retry it!",
+                    closeOnConfirm: false
 
-                $.ajax({
-                    type: 'POST',
-                    url: '/promotion/facebook_notification/retry',
-                    data: {push_id: pushId},
-                    dataType: "json",
-                    success: function (result) {
-                        alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                        getPushHistories();
-                    },
-                    error: function (xhr) {
-                        alert('Error: ' + JSON.parse(xhr.responseText).error);
-                    }
-                });
+                }, function () {
+
+                    var pushId = $(this).attr('data-push-id');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/promotion/facebook_notification/retry',
+                        data: {push_id: pushId},
+                        dataType: "json",
+                        success: function (result) {
+                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
+                            getPushHistories();
+                        },
+                        error: function (xhr) {
+                            swal('Error: ' + JSON.parse(xhr.responseText).error);
+                        }
+                    })
+                })
             });
 
             function getPushHistories() {
