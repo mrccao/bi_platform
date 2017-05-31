@@ -13,6 +13,7 @@ from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.extensions import db
 from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush
+from app.tasks.sendgrid import get_campaigns
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
                                  process_promotion_facebook_notification_retrying,
                                  process_promotion_email_items)
@@ -131,14 +132,30 @@ def facebook_notification_sender():
 @promotion.route("/promotion/email", methods=["GET"])
 @login_required
 def email():
+    campaigns = list(map(lambda x: {'id': x['id'], 'title': x['title'], 'status': x['status']}, get_campaigns()))
+    statuses = list(set(map(lambda x: x['status'], campaigns)))
+
     based_query_id = request.args.get('based_query_id')
+    template_file = 'promotion/email.html'
     if based_query_id is None:
-        return render_template('promotion/email.html')
+        return render_template(template_file, statuses=statuses, campaigns=campaigns)
 
     based_query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
     if based_query is None:
-        return render_template('promotion/email.html')
-    return render_template('promotion/email.html', based_query=based_query)
+        return render_template(template_file, statuses=statuses, campaigns=campaigns)
+    return render_template(template_file, based_query=based_query, statuses=statuses, campaigns=campaigns)
+
+
+@promotion.route("/promotion/email/campaign_html_content", methods=["GET"])
+@login_required
+def email_campaign_html_content():
+    campaign_id = int(request.args.get('campaign_id'))
+    html_content = None
+    for campaign in get_campaigns():
+        if campaign_id == campaign['id']:
+            html_content = campaign['html_content']
+            break
+    return jsonify(html_content=html_content)
 
 
 @promotion.route("/promotion/email/histories", methods=["GET"])

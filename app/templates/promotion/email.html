@@ -33,21 +33,56 @@
         <div class="col-xs-12">
             <div class="box box-primary" id="editor-box">
                 <div class="box-header" style="padding-bottom: 2px;">
-                    <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
-                      <div class="input-group-addon">
-                        <i class="fa fa-calendar"></i> &nbsp;Scheduled at (EST)
-                      </div>
-                      <input type="text" class="form-control" id="send-scheduled-at">
+                    <div class="row">
+                       <div class="col-md-2">
+                          <div class="form-group">
+                             <label>Status</label>
+                             <select class="form-control select2" style="width: 100%;" id="sendgrid-status">
+                                <option value="All" selected="selected">All</option>
+                                {% for status in statuses %}
+                                <option>{{status}}</option>
+                                {% endfor %}
+                             </select>
+                          </div>
+                       </div>
+                       <div class="col-md-6">
+                          <div class="form-group">
+                             <label>Campaign name</label>
+                             <select class="form-control select2" style="width: 100%;" id="sendgrid-campaign">
+                                {% for campaign in campaigns %}
+                                <option value="{{campaign['id']}}">{{campaign['title']}}</option>
+                                {% endfor %}
+                             </select>
+                          </div>
+                       </div>
+                       <div class="col-md-2">
+                          <div class="form-group">
+                             <label>Scheduled at (EST)</label>
+                             <div class="input-group" style="width: 100%;">
+                                <div class="input-group-addon">
+                                   <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control" id="send-scheduled-at">
+                             </div>
+                          </div>
+                       </div>
+                       <div class="col-md-2">
+                          <div class="form-group">
+                             <div style="margin-top: 24px;">
+                                <button type="button" class="btn btn-success" id="btn-executive-apply">Apply</button>
+                             </div>
+                          </div>
+                       </div>
                     </div>
-                    <button type="button" class="btn btn-success" id="btn-send" style="margin-right: 5px;"><i class="fa fa-toggle-right"></i> Send</button>
-                    <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i class="fa fa-indent"></i> Insert Facebook name</button>
                 </div>
                 <div class="box-body">
-                    <form>
-                      <div class="form-group" style="margin-bottom: 8px;">
-                        <textarea id="message-editor" class="form-control" rows="8" placeholder="Enter message"></textarea>
-                      </div>
-                    </form>
+                    <div class="row">
+                       <div class="col-md-12">
+                          <div class="form-group" style="margin-bottom: 0px; overflow: hidden;">
+                              <iframe id="sendgrid-preview" src="about:blank" width="100%" height="500px" style="border: 1px solid #DDD;">{{campaigns[0]['html_content'] | safe}}</iframe>
+                          </div>
+                       </div>
+                    </div>
                 </div>
                 <!--<div class="box-footer clearfix">
                 </div>-->
@@ -86,45 +121,15 @@
 
     <script type="text/javascript">
 
+    var campaigns = {{campaigns | safe}};
+    var statuses = {{statuses | safe}};
+    var currentCampaignId = null;
+
     var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
 
-    function insertAtCaret(areaId, text) {
-    		var txtarea = document.getElementById(areaId);
-    		if (!txtarea) { return; }
-
-    		var scrollPos = txtarea.scrollTop;
-    		var strPos = 0;
-    		var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ? "ff" : (document.selection ? "ie" : false ) );
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var range = document.selection.createRange();
-    			range.moveStart ('character', -txtarea.value.length);
-    			strPos = range.text.length;
-    		} else if (br == "ff") {
-    			strPos = txtarea.selectionStart;
-    		}
-
-    		var front = (txtarea.value).substring(0, strPos);
-    		var back = (txtarea.value).substring(strPos, txtarea.value.length);
-    		txtarea.value = front + text + back;
-    		strPos = strPos + text.length;
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var ieRange = document.selection.createRange();
-    			ieRange.moveStart ('character', -txtarea.value.length);
-    			ieRange.moveStart ('character', strPos);
-    			ieRange.moveEnd ('character', 0);
-    			ieRange.select();
-    		} else if (br == "ff") {
-    			txtarea.selectionStart = strPos;
-    			txtarea.selectionEnd = strPos;
-    			txtarea.focus();
-    		}
-
-    		txtarea.scrollTop = scrollPos;
-    	}
-
     $(document).ready(function() {
+
+      $(".select2").select2();
 
       $('#send-scheduled-at').daterangepicker({
           opens: 'right',
@@ -158,9 +163,65 @@
 
       ////////////////////
 
-      $('#btn-insert-name').click(function() {
-        insertAtCaret('message-editor', ' @[name] ');
+      function reloadEmailPreview(html_content) {
+            var doc = document.getElementById('sendgrid-preview').contentWindow.document;
+            doc.open();
+            doc.write(html_content);
+            doc.close();
+      }
+
+      function previewPlaceholderContent(subject) {
+            return '<div style="margin: 0 auto; width: 200px; padding-top: 230px; font-size: 13px; color: #AAA; -webkit-font-smoothing: antialiased; font-smoothing: antialiased; font-family: \'Source Sans Pro\',\'Helvetica Neue\',Helvetica,Arial,sans-serif; font-weight: 400;">' + subject + '</div>'
+      }
+
+      $('#sendgrid-status').on('change', function() {
+            var currentStatus = $(this).find(":selected").val();
+            var filteredCampaigns = [];
+
+            if (currentStatus == 'All') {
+                filteredCampaigns = campaigns;
+            } else {
+                $(campaigns).each(function(x) {
+                    if (x.status == currentStatus) {
+                        filteredCampaigns.push(x);
+                    }
+                });
+            }
+
+            $('#sendgrid-campaign').empty();
+            $(filteredCampaigns).each(function(i, obj) {
+                $('#sendgrid-campaign').append('<option value="' + obj.id + '">' + obj.title + '</option>');
+            });
+            $('#sendgrid-campaign').trigger("change");
       });
+
+      $('#sendgrid-campaign').on('change', function() {
+            currentCampaignId = $(this).find(":selected").val();
+
+            if (!!!currentCampaignId) {
+                reloadEmailPreview(previewPlaceholderContent('[ Nothing to preview ]'));
+                return;
+            }
+
+            reloadEmailPreview(previewPlaceholderContent('[ Rendering ]'));
+
+            $.ajax({
+                type: 'GET',
+                url: '/promotion/email/campaign_html_content',
+                data: {
+                    campaign_id: currentCampaignId
+                },
+                dataType: 'json',
+                success: function(result) {
+                    reloadEmailPreview(result.html_content);
+                },
+                error: function(xhr) {
+                }
+            });
+      });
+      $('#sendgrid-campaign').trigger("change");
+
+      ////////////////////
 
       {% if based_query %}
         var basedQueryId = {{ based_query.id }};
@@ -194,28 +255,6 @@
               error: function(xhr) {
                   alert('Error: ' + JSON.parse(xhr.responseText).error);
                   stopRequestLoading();
-              }
-          });
-      });
-
-      $(document).on('click', '.btn-retry', function() {
-          if (!confirm(retryConfirmAlert)) {
-              return;
-          }
-
-          var pushId = $(this).attr('data-push-id');
-        
-          $.ajax({
-              type: 'POST',
-              url: '/promotion/email/retry',
-              data: { push_id: pushId },
-              dataType: "json",
-              success: function(result) {
-                  alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                  getPushHistories();
-              },
-              error: function(xhr) {
-                  alert('Error: ' + JSON.parse(xhr.responseText).error);
               }
           });
       });
@@ -281,7 +320,7 @@
 
                         var btnGroup = '<td>' + 
                                         '<div class="btn-group">' + 
-                                        '  <button type="button" class="btn btn-sm btn-success btn-retry" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
+                                        '  <button type="button" class="btn btn-sm btn-success" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
                                         '</div>' +
                                         '</td>';
 
