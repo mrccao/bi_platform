@@ -10,6 +10,7 @@ from app import create_app
 from app.extensions import db
 from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
     BIUserStatistic
+from app.models.orig_wpt_bi import WPTBIUserStatistic
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
 from app.models.promotion import PromotionPush, PromotionPushHistory
 from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
@@ -18,7 +19,7 @@ from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
-from app.tasks.scheduled import process_bi
+from app.tasks.scheduled import process_bi, process_wpt_bi
 
 # default to dev config because no one should use this in
 # production anyway
@@ -39,6 +40,21 @@ def make_shell_context():
     """
 
     return dict(app=app, db=db, AdminUser=AdminUser, BIUserStatistic=BIUserStatistic, and_=and_, BIUser=BIUser)
+
+
+def init_wpt_bi_user_statistic_import_config():
+    """ Init BIImportConfig Table """
+
+    BIImportConfig.__table__.create(db.engine, checkfirst=True)
+
+    variables = ['last_synced_wpt_bi_user_statistic_user_id',
+                 'last_synced_wpt_bi_user_statistic_update_time']
+
+    for v in variables:
+        db.session.query(BIImportConfig).filter_by(var=v).delete()
+        db.session.add(BIImportConfig(var=v))
+
+    db.session.commit()
 
 
 def init_bi_user_import_config():
@@ -127,6 +143,7 @@ def reset_bi():
         db.create_all(bind=None)
 
         init_bi_user_import_config()
+        init_wpt_bi_user_statistic_import_config()
         init_bi_user_bill_import_config()
         init_bi_user_currency_import_config()
         init_bi_clubwpt_user_import_config()
@@ -139,6 +156,18 @@ def reset_bi():
         user.name = "Test1 Account"
         db.session.add(user)
 
+        db.session.commit()
+
+
+@manager.command
+def reset_wpt_bi():
+    """ ReCreate Database and Seed """
+
+    answer = input("Do you want? (yes/no) ")
+    if answer == 'yes':
+        init_wpt_bi_user_statistic_import_config()
+
+        db.session.query(WPTBIUserStatistic).delete()
         db.session.commit()
 
 
@@ -317,6 +346,14 @@ def sync_bi():
         process_bi.delay()
     else:
         process_bi()
+
+
+@manager.command
+def sync_wpt_bi():
+    if app.config['ENV'] == 'prod':
+        process_wpt_bi.delay()
+    else:
+        process_wpt_bi()
 
 
 @manager.command

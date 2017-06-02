@@ -7,6 +7,7 @@ from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.promotion import process_promotion_facebook_notification
+from app.tasks.sync_wpt_bi import process_wpt_bi_user_statistic
 
 
 @celery.task
@@ -22,6 +23,11 @@ def process_bi():
 def process_bi_currency():
     if app.config['ENV'] == 'prod':
         process_bi_user_currency()
+
+
+@celery.task
+def process_wpt_bi():
+    process_wpt_bi_user_statistic()
 
 
 @celery.task

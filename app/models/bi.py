@@ -160,6 +160,7 @@ class BIUser(db.Model):
 
     first_free_spin_time = db.Column(OGInsertableAwareDateTime)
     last_free_spin_time = db.Column(OGInsertableAwareDateTime, index=True)
+    last_premium_spin_time = db.Column(OGInsertableAwareDateTime, index=True)
 
     reward_level = db.Column(db.Integer)
     reward_xp = db.Column(db.Integer)
