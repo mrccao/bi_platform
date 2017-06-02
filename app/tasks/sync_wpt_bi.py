@@ -209,7 +209,7 @@ def process_user_statistic_newly_updated_records():
 
             try:
                 connection.execute(WPTBIUserStatistic.__table__.update().where(where).values(values), rows)
-                set_config_value_with_db_instance(db, 'last_synced_wpt_bi_user_statistic_user_id', new_config_value)
+                set_config_value_with_db_instance(db, 'last_synced_wpt_bi_user_statistic_update_time', new_config_value)
             except:
                 print('sync_wpt_bi process_user_statistic_newly_updated_records transaction.rollback()')
                 transaction.rollback()
