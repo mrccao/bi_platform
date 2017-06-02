@@ -34,6 +34,7 @@ def get_config_value(db_instance, key):
 
 def set_config_value(connection, key, value):
     """ Set import config with key. """
+    connection.execute(text('UPDATE bi_import_config SET value = :value, last_synced_at = :last_synced_at  WHERE var = :key'), key=key, value=value, last_synced_at=current_time().format('YYYY-MM-DD HH:mm:ss'))
     return
 
 
