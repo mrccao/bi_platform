@@ -87,6 +87,8 @@ def parse_user_account_status(status):
         return 'Locked'
     if status == 5:
         return 'Banned'
+    if status == 0:
+        return 'Guest'
 
     return 'Unknown'
 

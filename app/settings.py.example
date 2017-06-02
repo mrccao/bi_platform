@@ -21,6 +21,8 @@ class ProdConfig(Config):
     APP_HOST = 'https://bi.playwpt.com'
     APP_TIMEZONE = 'America/New_York'
 
+    SENDGRID_API_KEY = ''
+
     REPORT_FILE_EXTENSION = 'csv.gz'
     REPORT_FILE_COMPRESSION = 'gzip'
     REPORT_FILE_CONTENT_TYPE = 'application/gzip'
@@ -99,6 +101,8 @@ class DevConfig(Config):
 
     APP_HOST = 'http://localhost:5000'
     APP_TIMEZONE = 'America/New_York'
+
+    SENDGRID_API_KEY = ''
 
     REPORT_FILE_EXTENSION = 'csv.gz'
     REPORT_FILE_COMPRESSION = 'gzip'
@@ -179,6 +183,8 @@ class TestConfig(Config):
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     USE_X_SENDFILE = False
     WTF_CSRF_ENABLED = False
+
+    SENDGRID_API_KEY = ''
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + db_file.name

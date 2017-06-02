@@ -3,303 +3,881 @@
 {% block page_title %}Sending Email{% endblock %}
 
 {% block head_tail %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
+          rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block main_content %}
-<section class="content-header">
-  <h1>
-    Sending Email
-  </h1>
-</section>
+    <section class="content-header">
+        <h1>
+            Sending Email
+        </h1>
+    </section>
 
-{% if based_query %}
-<div class="pad margin no-print">
-  <div class="callout callout-info" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4>Sending email to users based query blew:</h4>
-    <pre>{{ based_query.sql }}</pre>
-  </div>
-</div>
-{% else %}
-<div class="pad margin no-print">
-  <div class="callout callout-danger" style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
-    <h4 style="margin-bottom: 0!important;">Sending email to ALL users in this screen.</h4>
-  </div>
-</div>
-{% endif %}
-
-<section class="content">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="box box-primary" id="editor-box">
-                <div class="box-header" style="padding-bottom: 2px;">
-                    <div class="input-group pull-left" style="width: 300px; margin-right: 20px;">
-                      <div class="input-group-addon">
-                        <i class="fa fa-calendar"></i> &nbsp;Scheduled at (EST)
-                      </div>
-                      <input type="text" class="form-control" id="send-scheduled-at">
-                    </div>
-                    <button type="button" class="btn btn-success" id="btn-send" style="margin-right: 5px;"><i class="fa fa-toggle-right"></i> Send</button>
-                    <button type="button" class="btn btn-default" style="margin-right: 5px;" id="btn-insert-name"><i class="fa fa-indent"></i> Insert Facebook name</button>
-                </div>
-                <div class="box-body">
-                    <form>
-                      <div class="form-group" style="margin-bottom: 8px;">
-                        <textarea id="message-editor" class="form-control" rows="8" placeholder="Enter message"></textarea>
-                      </div>
-                    </form>
-                </div>
-                <!--<div class="box-footer clearfix">
-                </div>-->
-            </div>
-
-            <div class="nav-tabs-custom" id="tabs-box">
-              <ul class="nav nav-tabs">
-                <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a></li>
-              </ul>
-              <div class="tab-content">
-                <div class="tab-pane active table-responsive" id="tab-history">
-                    <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
-                        <thead>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td colspan="999">
-                                <div class="text-center">
-                                    There are no items in the history table.
-                                </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                    </table>
-                </div>
-              </div>
-              <!-- /.tab-content -->
+    {% if based_query %}
+        <div class="pad margin no-print">
+            <div class="callout callout-info"
+                 style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
+                <h4>Sending email to users based query blew:</h4>
+                <pre> <strong> {{ based_query.sql }}   </strong> </pre>
             </div>
         </div>
-    </div>
-</section>
+    {% else %}
+        <div class="pad margin no-print">
+            <div class="callout callout-danger"
+                 style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
+
+                <div id="query_info">
+                    <h4 style="margin-bottom: 0!important;">Sending email to ALL users in this screen.</h4>
+
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary" id="editor-box">
+                    <div class="box-header" style="padding-bottom: 2px;">
+                        <div class="row">
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+
+                                    <label>Status</label>
+                                    <select class="form-control select2" style="width: 100%;" id="sendgrid-status">
+                                        <option value="All" selected="selected">All</option>
+                                        {% for status in statuses %}
+                                            <option>{{ status }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Campaign name</label>
+                                    <select class="form-control select2" style="width: 100%;" id="sendgrid-campaign">
+                                        {% for campaign in campaigns %}
+                                            <option value="{{ campaign['id'] }}">{{ campaign['title'] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Scheduled at (EST)</label>
+                                    <div class="input-group" style="width: 100%;">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control" id="send-scheduled-at">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if not  based_query %}
+
+
+                                <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
+                                      rel="stylesheet">
+
+                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
+                                      rel="stylesheet">
+
+                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
+                                      rel="stylesheet">
+
+                                <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
+                                      rel="stylesheet">
+
+
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <div style="margin-top: 24px;">
+                                            <button type="button" class="btn btn-default" style="margin-right: 5px;"
+                                                    id="btn-select-users" data-toggle="modal"
+                                                    data-target="#select-users"><i
+                                                    class="fa fa-indent"></i> Select Users
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+                                    <style>
+
+                                        .slider.slider-horizontal {
+                                            width: 600px;
+                                        }
+
+                                        slider-selection {
+                                            background: #ffffff;
+                                        }
+
+                                        .slider {
+
+                                            margin-top: 15px;
+                                            margin-bottom: 20px;
+
+                                        }
+
+                                        .btn-primary.active, .btn-primary:hover {
+                                            color: #fff;
+                                            background-color: #0887c7;
+                                        }
+
+                                        .btn-primary {
+
+                                            background-color: #fff;
+                                        }
+
+                                        .query-builder .rules-group-container {
+                                            padding: 10px 10px 6px;
+                                            background-color: #fff;
+                                            border: 1px solid #d2d4d4;
+                                            font-weight: 600;
+                                        }
+
+
+                                    </style>
+
+                                    <div class="modal-dialog modal-lg" role="document">
+
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-hidden="true">
+                                                    &times;
+                                                </button>
+                                                <h4 class="modal-title" id="myModalLabel">
+                                                    Set User Properties
+                                                </h4>
+                                            </div>
+                                            <div class="modal-body">
+
+                                                <div class="row">
+
+                                                    <div class="col-md-12">
+
+                                                        <div id="builder-select-users"></div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal"
+                                                        id="close">Close
+                                                </button>
+                                                <button class="btn btn-primary  parse-json" data-target="select-users"
+                                                        style="background-color: #00a65a;">Apply
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            {% endif %}
+
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div style="margin-top: 24px;">
+
+                                        <button type="button" class="btn btn-success" id="btn-send">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group" style="margin-bottom: 0px; overflow: hidden;"
+                                     id="message-editor">
+                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="500px"
+                                            style="border: 1px solid #DDD;">{{ campaigns[0]['html_content'] | safe }}</iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--<div class="box-footer clearfix">
+                    </div>-->
+                </div>
+
+                <div class="nav-tabs-custom" id="tabs-box">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active table-responsive" id="tab-history">
+                            <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
+                                <thead>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td colspan="999">
+                                        <div class="text-center">
+                                            There are no items in the history table.
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- /.tab-content -->
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% block body_tail %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
-    <script type="text/javascript">
 
-    var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
+    {% if not  based_query %}
 
-    function insertAtCaret(areaId, text) {
-    		var txtarea = document.getElementById(areaId);
-    		if (!txtarea) { return; }
+        <div id="user-grouping-scripts">
 
-    		var scrollPos = txtarea.scrollTop;
-    		var strPos = 0;
-    		var br = ((txtarea.selectionStart || txtarea.selectionStart == '0') ? "ff" : (document.selection ? "ie" : false ) );
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var range = document.selection.createRange();
-    			range.moveStart ('character', -txtarea.value.length);
-    			strPos = range.text.length;
-    		} else if (br == "ff") {
-    			strPos = txtarea.selectionStart;
-    		}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/js/query-builder.standalone.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
 
-    		var front = (txtarea.value).substring(0, strPos);
-    		var back = (txtarea.value).substring(strPos, txtarea.value.length);
-    		txtarea.value = front + text + back;
-    		strPos = strPos + text.length;
-    		if (br == "ie") {
-    			txtarea.focus();
-    			var ieRange = document.selection.createRange();
-    			ieRange.moveStart ('character', -txtarea.value.length);
-    			ieRange.moveStart ('character', strPos);
-    			ieRange.moveEnd ('character', 0);
-    			ieRange.select();
-    		} else if (br == "ff") {
-    			txtarea.selectionStart = strPos;
-    			txtarea.selectionEnd = strPos;
-    			txtarea.focus();
-    		}
+            <script>
+                {#                中位数#}
+                {##}
+                {#                highValueUsers = '付费过 且每月登录次数大于15'#}
+                {##}
+                {#                potentialValueUsers = '未付费过 且每月登录次数大于15'#}
+                {##}
+                {#                generalUsers ='没付费,每月登录小于5'#}
+                {##}
+                {#                generalUsers ='付过费,每月登录小于5'#} {##}
+                {#                nonPayingUsers = '未付费过'#}
+                {##}
+                {#                paidusers = '付过费'#}
+                {##}
 
-    		txtarea.scrollTop = scrollPos;
-    	}
+                var userRulesOption = {
+                    condition: 'OR',
+                    rules: [{
+                        id: 'Registered'
+                    }]
+                };
 
-    $(document).ready(function() {
+                $('#builder-select-users').queryBuilder({
 
-      $('#send-scheduled-at').daterangepicker({
-          opens: 'right',
-          showDropdowns: true,
-          autoApply: true,
-          singleDatePicker: true,
-          timePicker: true,
-          timePicker24Hour: true,
-          locale: {
-            format: 'YYYY-MM-DD HH:mm:ss',
-          },
-          minDate: moment()
-      });
+                    plugins: [
+                        'bt-tooltip-errors',
+                        'bt-checkbox'
+                    ],
 
-      ////////////////////
+                    filters: [{
+                        id: 'Registered',
+                        field: 'reg_time',
+                        label: 'Registered',
+                        type: 'date',
+                        validation: {
+                            format: 'YYYY-MM-DD'
+                        },
+                        plugin: 'datepicker',
+                        plugin_config: {
+                            format: 'yyyy-mm-dd',
+                            todayBtn: 'linked',
+                            todayHighlight: true,
+                            autoclose: true
+                        },
+                        operators: ['less', 'equal', 'greater', 'between']
 
-      var loadingOverlayConfig = {
-          image       : '',
-          fontawesome : 'fa fa-spinner fa-spin',
-          maxSize     : "26px",
-          minSize     : "26px"
-      }
+                    },
+                        {
+                            id: 'birthday',
+                            field: 'birthday',
+                            label: 'Birthday',
+                            type: 'date',
+                            validation: {
+                                format: 'YYYY-MM-DD'
+                            },
+                            plugin: 'datepicker',
+                            plugin_config: {
+                                format: 'yyyy-mm-dd',
+                                todayBtn: 'linked',
+                                todayHighlight: true,
+                                autoclose: true
+                            },
 
-      function startRequestLoading() {
-          $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
-      }
+                            operators: ['less', 'equal', 'greater', 'between']
+                        },
 
-      function stopRequestLoading() {
-          $('#editor-box').LoadingOverlay('hide', true);
-      }
+                        {
+                            id: 'Reg State',
+                            field: 'reg_state',
+                            label: 'Reg State',
+                            type: 'integer',
+                            input: 'select',
+                            values: ['Oregon', 'California', 'Illinois', 'Nevada', 'Texas', 'Missouri', 'Massachusetts', 'Georgia', 'Florida', 'Arizona', 'North Carolina', 'New Jersey', 'Tennessee', 'New York', 'Indiana', 'Kansas', 'Pennsylvania', 'Louisiana', 'South Dakota', 'Minnesota', 'Michigan', 'Colorado', 'Montana', 'Maryland', 'Virginia', 'Alabama', 'Alaska', 'Hawaii', 'Mississippi', 'Delaware', 'Maine', 'North Dakota', 'New Hampshire', 'Ohio', 'Oklahoma', 'South Carolina', 'Connecticut', 'Nebraska', 'Idaho', 'New Mexico', 'Arkansas', 'Kentucky', 'Iowa', 'Rhode Island', 'Washington', 'Wisconsin', 'Utah', 'Wyoming', 'Vermont', 'West Virginia', ' District of Columbia'],
+                            operators: ['equal']
+                        },
 
-      ////////////////////
+                        {
+                            id: 'X_days_inactive',
+                            field: 'X_days_inactive',
+                            label: 'X Days Inactive',
+                            type: 'integer',
+                            input: 'number',
+                            operators: ['equal']
+                        },
 
-      $('#btn-insert-name').click(function() {
-        insertAtCaret('message-editor', ' @[name] ');
-      });
+                        {
+                            id: 'average_active_days_weekly',
+                            field: 'average_active_days_weekly',
+                            label: 'Average Active Days Weekly',
+                            type: 'integer',
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 7
+                            },
+                            plugin: 'slider',
 
-      {% if based_query %}
-        var basedQueryId = {{ based_query.id }};
-        var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';
-      {% else %}
-        var basedQueryId = null;
-        var submitConfirmAlert = 'Do you want to send email to ALL users?';
-      {% endif %}
+                            plugin_config: {
+                                min: 1,
+                                max: 7,
+                                value: 0,
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
-      var retryConfirmAlert = 'Do you want to retry?';
 
-      $('#btn-send').click(function() {
-          if ( $('#message-editor').val().length === 0) return;
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
 
-          if (!confirm(submitConfirmAlert)) {
-              return;
-          }
+                        {
+                            id: 'average_active_days_monthly',
+                            field: 'average_active_days_monthly',
+                            label: 'Average Active Days Monthly',
+                            type: 'integer',
+                            operators: ['less', 'equal', 'greater', 'between'],
 
-          startRequestLoading();
+                            validation: {
+                                min: 0,
+                                max: 30
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+                                min: 1,
+                                max: 30,
+                                value: 0,
 
-          $.ajax({
-              type: 'POST',
-              url: '/promotion/email/sender',
-              data: basedQueryId === null ? { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val() } : { 'scheduled_at': $('#send-scheduled-at').val(), message: $('#message-editor').val(), based_query_id: basedQueryId },
-              dataType: "json",
-              success: function(result) {
-                  alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                  stopRequestLoading();
-                  getPushHistories();
-              },
-              error: function(xhr) {
-                  alert('Error: ' + JSON.parse(xhr.responseText).error);
-                  stopRequestLoading();
-              }
-          });
-      });
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
 
-      $(document).on('click', '.btn-retry', function() {
-          if (!confirm(retryConfirmAlert)) {
-              return;
-          }
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
 
-          var pushId = $(this).attr('data-push-id');
-        
-          $.ajax({
-              type: 'POST',
-              url: '/promotion/email/retry',
-              data: { push_id: pushId },
-              dataType: "json",
-              success: function(result) {
-                  alert('Your request has submitted successfully. Please wait background job to processing your request.');
-                  getPushHistories();
-              },
-              error: function(xhr) {
-                  alert('Error: ' + JSON.parse(xhr.responseText).error);
-              }
-          });
-      });
+                        },
 
-      function getPushHistories() {
-            $.ajax({
-                type: 'GET',
-                url: '/promotion/email/histories',
-                dataType: "json",
-                success: function(result) {
-                    var headers = []
-                    headers.push('<tr>')
-                    for (var i in historyTableColumns) {
-                        var column = historyTableColumns[i];
-                        if (column === 'based_query_id') {
-                            column = 'based query';
-                        } else if (column === 'requested_by') {
-                            column = 'requested by';
-                        }
-                        headers.push('<th>' + column + '</th>')
-                    }
-                    headers.push('<th style="width: 128px;"></th>');
-                    headers.push('</tr>');
-                    $('#history-table thead').html(headers.join());
+                        {
+                            id: 'purchased',
+                            field: 'purchased',
+                            label: 'Purchased',
+                            type: 'integer',
+                            input: 'radio',
+                            values: {
+                                0: 'Never Purchased',
+                                1: 'Purchased'
+                            },
+                            colors: {
+                                1: 'success',
+                                0: 'danger'
+                            },
 
-                    var rows = [];
-                    for (var j in result.data) {
-                        var row = result.data[j];
-                        rows.push('<tr>')
-                        for (var i in historyTableColumns) {
-                            var column = historyTableColumns[i];
-                            if (column === 'based_query_id') {
-                                if (row[column] === null) {
-                                    rows.push('<td></td>');
-                                } else {
-                                    rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
-                                }
-                            } else if (column === 'status') {
-                                if (row[column] === 'failed') {
-                                    rows.push('<td>' +
-                                                '<span class="text-red">Prepare failed</span><br />' + 
-                                              '</td>'); 
-                                } else if (row[column] === 'pending') {
-                                    rows.push('<td>' +
-                                                '<span class="text-muted">Pending</span><br />' + 
-                                              '</td>'); 
-                                } else if (row[column] === 'preparing') {
-                                    rows.push('<td>' +
-                                                '<span class="text-muted">Preparing</span><br />' + 
-                                              '</td>'); 
-                                } else {
-                                    rows.push('<td>' +
-                                                '<span>Total: ' + row[column].total_count + '</span><br />' + 
-                                                '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' + 
-                                                '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' + 
-                                                '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' + 
-                                              '</td>');    
-                                }
-                            } else {
-                                rows.push('<td>' + row[column] + '</td>');
+                            operators: ['equal'],
+                        },
+
+
+                        {
+                            id: 'average_purchase_amount_weekly',
+                            field: 'average_purchase_amount_weekly',
+                            label: 'Average Purchase Amount Weekly',
+                            type: 'double',
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 10000,
+                                value: 0,
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
+
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+                        {
+                            id: 'average_purchase_amount_monthly',
+                            field: 'average_purchase_amount_monthly',
+                            label: 'Average Purchase Amount Monthly',
+                            type: 'double',
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 10000,
+                                value: 0,
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+
+                        {
+                            id: 'average_purchase_count_monthly',
+                            field: 'average_purchase_count_monthly',
+                            label: 'Average Purchase Count Monthly',
+                            type: 'double',
+
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+
+                                min: 1,
+                                max: 7,
+                                value: 0,
+
+                                tooltip_position: 'bottom',
+
+                                tooltip: 'always'
+
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
+                            }
+                        },
+
+                        {
+                            id: 'average_purchase_count_weekly',
+                            field: 'average_purchase_count_weekly',
+                            label: 'Average Purchase Count Weekly',
+                            operators: ['less', 'equal', 'greater', 'between'],
+                            validation: {
+                                min: 0,
+                                max: 1000000
+                            },
+                            plugin: 'slider',
+                            plugin_config: {
+                                min: 1,
+                                max: 7,
+                                value: 0,
+                                tooltip_position: 'bottom',
+                                tooltip: 'always'
+
+                            },
+                            valueSetter: function (rule, value) {
+                                if (rule.operator.nb_inputs == 1) value = [value];
+                                rule.$el.find('.rule-value-container input').each(function (i) {
+                                    $(this).slider('setValue', value[i] || 0);
+                                });
+                            },
+                            valueGetter: function (rule) {
+                                var value = [];
+                                rule.$el.find('.rule-value-container input').each(function () {
+                                    value.push($(this).slider('getValue'));
+                                });
+                                return rule.operator.nb_inputs == 1 ? value[0] : value;
                             }
                         }
 
-                        var btnGroup = '<td>' + 
-                                        '<div class="btn-group">' + 
-                                        '  <button type="button" class="btn btn-sm btn-success btn-retry" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
-                                        '</div>' +
-                                        '</td>';
+                    ],
 
-                        rows.push(btnGroup);
-                        rows.push('</tr>');
+                    rules: userRulesOption
+                });
+
+                $('.parse-json').on('click', function () {
+
+
+                    var usersRules = $('#builder-select-users').queryBuilder('getRules');
+                    var query_info = $('#builder-select-users').queryBuilder('getSQL');
+
+
+                    if (!$.isEmptyObject(usersRules)) {
+                        $('#close').trigger('click')
                     }
 
-                    if (rows.length > 0) {
-                        $('#history-table tbody').html(rows.join());
-                    }
+                    console.log(query_info.sql)
+                    $('#query_info').html("<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>");
+
+                    $('.callout-danger').addClass('callout-info')
+
+                });
+
+            </script>
+        </div>
+
+    {% endif %}
+    <script type="text/javascript">
+
+        var campaigns = {{campaigns | safe}};
+        var statuses = {{statuses | safe}};
+        var currentCampaignId = null;
+
+        var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
+
+        $(document).ready(function () {
+
+            $(".select2").select2();
+
+            $('#send-scheduled-at').daterangepicker({
+                opens: 'right',
+                showDropdowns: true,
+                autoApply: true,
+                singleDatePicker: true,
+                timePicker: true,
+                timePicker24Hour: true,
+                locale: {
+                    format: 'YYYY-MM-DD HH:mm:ss',
                 },
-                error: function(xhr) {
-                    
-                }
+                minDate: moment()
             });
-        }
 
-        getPushHistories();
-    });
-</script>
+            ////////////////////
+
+            var loadingOverlayConfig = {
+                image: '',
+                fontawesome: 'fa fa-spinner fa-spin',
+                maxSize: "26px",
+                minSize: "26px"
+            }
+
+            function startRequestLoading() {
+                $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
+            }
+
+            function stopRequestLoading() {
+                $('#editor-box').LoadingOverlay('hide', true);
+            }
+
+            ////////////////////
+
+            function reloadEmailPreview(html_content) {
+                var doc = document.getElementById('sendgrid-preview').contentWindow.document;
+                doc.open();
+                doc.write(html_content);
+                doc.close();
+            }
+
+            function previewPlaceholderContent(subject) {
+                return '<div style="margin: 0 auto; width: 200px; padding-top: 230px; font-size: 13px; color: #AAA; -webkit-font-smoothing: antialiased; font-smoothing: antialiased; font-family: \'Source Sans Pro\',\'Helvetica Neue\',Helvetica,Arial,sans-serif; font-weight: 400;">' + subject + '</div>'
+            }
+
+            $('#sendgrid-status').on('change', function () {
+                var currentStatus = $(this).find(":selected").val();
+                var filteredCampaigns = [];
+
+                if (currentStatus == 'All') {
+                    filteredCampaigns = campaigns;
+                } else {
+                    $(campaigns).each(function (x) {
+                        if (x.status == currentStatus) {
+                            filteredCampaigns.push(x);
+                        }
+                    });
+                }
+
+                $('#sendgrid-campaign').empty();
+                $(filteredCampaigns).each(function (i, obj) {
+                    $('#sendgrid-campaign').append('<option value="' + obj.id + '">' + obj.title + '</option>');
+                });
+                $('#sendgrid-campaign').trigger("change");
+            });
+
+            $('#sendgrid-campaign').on('change', function () {
+                currentCampaignId = $(this).find(":selected").val();
+
+                if (!!!currentCampaignId) {
+                    reloadEmailPreview(previewPlaceholderContent('[ Nothing to preview ]'));
+                    return;
+                }
+
+                reloadEmailPreview(previewPlaceholderContent('[ Rendering ]'));
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/promotion/email/campaign_html_content',
+                    data: {
+                        campaign_id: currentCampaignId
+                    },
+                    dataType: 'json',
+                    success: function (result) {
+                        reloadEmailPreview(result.html_content);
+                    },
+                    error: function (xhr) {
+                    }
+                });
+            });
+            $('#sendgrid-campaign').trigger("change");
+
+            ////////////////////
+
+
+
+            {% if based_query %}
+                var basedQueryId = {{ based_query.id }};
+                var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';
+            {% else %}
+                var basedQueryId = null;
+                var submitConfirmAlert = 'Do you want to send email to ALL users?';
+            {% endif %}
+
+            var retryConfirmAlert = 'Do you want to retry?';
+
+            $('#btn-send').click(function () {
+
+                {% if  not based_query %}
+
+                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
+
+                {% else %}
+
+                    var query_rules = null;
+
+                {% endif %}
+
+                if (query_rules !== null) {
+
+                    submitConfirmAlert = 'Do you want to send email to users based rules in the screen?';
+
+                }
+
+                if (!!!currentCampaignId) return;
+
+
+                swal({
+
+                    title: "Are you sure?",
+                    text: submitConfirmAlert,
+                    type: "warning",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, send it!",
+
+                }, function () {
+
+                    {% if  based_query %}
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            based_query_id: basedQueryId
+                        };
+
+                    {% else %}
+
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            query_rules: JSON.stringify(query_rules)
+                        };
+
+                    {% endif %}
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/promotion/email/sender',
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
+                            stopRequestLoading();
+                            getPushHistories();
+                        },
+                        error: function (xhr) {
+                            swal("Error", JSON.parse(xhr.responseText).error, "error");
+                            stopRequestLoading();
+                        }
+                    });
+
+                });
+            });
+
+
+            function getPushHistories() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/promotion/email/histories',
+                    dataType: "json",
+                    success: function (result) {
+                        var headers = []
+                        headers.push('<tr>')
+                        for (var i in historyTableColumns) {
+                            var column = historyTableColumns[i];
+                            if (column === 'based_query_id') {
+                                column = 'based query';
+                            } else if (column === 'requested_by') {
+                                column = 'requested by';
+                            }
+                            headers.push('<th>' + column + '</th>')
+                        }
+                        headers.push('<th style="width: 128px;"></th>');
+                        headers.push('</tr>');
+                        $('#history-table thead').html(headers.join());
+
+                        var rows = [];
+                        for (var j in result.data) {
+                            var row = result.data[j];
+                            rows.push('<tr>')
+                            for (var i in historyTableColumns) {
+                                var column = historyTableColumns[i];
+                                if (column === 'based_query_id') {
+                                    if (row[column] === null) {
+                                        rows.push('<td></td>');
+                                    } else {
+                                        rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
+                                    }
+                                } else if (column === 'status') {
+                                    if (row[column] === 'failed') {
+                                        rows.push('<td>' +
+                                            '<span class="text-red">Prepare failed</span><br />' +
+                                            '</td>');
+                                    } else if (row[column] === 'pending') {
+                                        rows.push('<td>' +
+                                            '<span class="text-muted">Pending</span><br />' +
+                                            '</td>');
+                                    } else if (row[column] === 'preparing') {
+                                        rows.push('<td>' +
+                                            '<span class="text-muted">Preparing</span><br />' +
+                                            '</td>');
+                                    } else {
+                                        rows.push('<td>' +
+                                            '<span>Total: ' + row[column].total_count + '</span><br />' +
+                                            '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' +
+                                            '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' +
+                                            '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' +
+                                            '</td>');
+                                    }
+                                } else {
+                                    rows.push('<td>' + row[column] + '</td>');
+                                }
+                            }
+
+                            var btnGroup = '<td>' +
+                                '<div class="btn-group">' +
+                                '  <button type="button" class="btn btn-sm btn-success" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
+                                '</div>' +
+                                '</td>';
+
+                            rows.push(btnGroup);
+                            rows.push('</tr>');
+                        }
+
+                        if (rows.length > 0) {
+                            $('#history-table tbody').html(rows.join());
+                        }
+                    },
+                    error: function (xhr) {
+
+                    }
+                });
+            }
+
+            getPushHistories();
+        });
+
+    </script>
+
 {% endblock %}

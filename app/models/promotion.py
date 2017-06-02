@@ -362,3 +362,7 @@ def sql_filter_option(connection, transaction, sql, field, operator, value):
 
     result_proxy = list(result_proxy)
     return result_proxy
+
+
+
+    # data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if (row['user_id'] is not None and row['facebook_id'] is not None)]

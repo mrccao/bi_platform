@@ -23,7 +23,7 @@
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
                 <h4>Sending Facebook notification to users based query blew:</h4>
-                <pre>{{ based_query.sql }}</pre>
+                <pre> <strong> {{ based_query.sql }}   </strong> </pre>
             </div>
         </div>
 
@@ -560,9 +560,7 @@
                         $('#close').trigger('click')
                     }
 
-                    $('#query_info').html(
-                        "<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>"
-                    );
+                    $('#query_info').html("<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>");
 
                     $('.callout-danger').addClass('callout-info')
 
@@ -657,15 +655,35 @@
             {% if based_query %}
                 var basedQueryId = {{ based_query.id }};
                 var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
+
             {% else %}
                 var basedQueryId = null;
                 var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';
+
             {% endif %}
 
             var retryConfirmAlert = 'Do you want to retry?';
 
 
             $('#btn-send').click(function () {
+
+
+                {% if  not based_query %}
+
+                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
+
+                {% else %}
+
+                    var query_rules = null;
+
+                {% endif %}
+
+
+                if (query_rules !== null) {
+
+                    submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
+
+                }
 
 
                 if ($('#message-editor').val().length === 0) return;
@@ -697,16 +715,10 @@
 
                     {% else %}
 
-                        var query_rules = JSON.stringify($('#builder-select-users').queryBuilder('getRules'));
-                        if ($.isEmptyObject(query_rules)) {
-                            var userRules = null;
-                        }
-
                         var data = {
                             'scheduled_at': $('#send-scheduled-at').val(),
                             message: $('#message-editor').val(),
-                            based_query_id: basedQueryId,
-                            query_rules: query_rules
+                            query_rules: JSON.stringify(query_rules)
                         };
 
                     {% endif %}

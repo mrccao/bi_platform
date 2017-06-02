@@ -5,6 +5,8 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_gravatar import Gravatar
 from flask_mail import Mail
+from sendgrid import SendGridAPIClient
+
 
 import geoip2.database
 import os
@@ -18,7 +20,7 @@ login = LoginManager()
 gravatar = Gravatar()
 mail = Mail()
 geoip_reader = geoip2.database.Reader(os.path.dirname(__file__) + '/data/GeoIP2-City.mmdb')
-
+sendgrid = SendGridAPIClient(apikey='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')
 
 def __del__(self):
     geoip_reader.close()
