@@ -21,6 +21,7 @@ gravatar = Gravatar()
 mail = Mail()
 geoip_reader = geoip2.database.Reader(os.path.dirname(__file__) + '/data/GeoIP2-City.mmdb')
 sendgrid = SendGridAPIClient(apikey='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')
+# sendgrid = SendGridAPIClient(apikey='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')
 
 def __del__(self):
     geoip_reader.close()

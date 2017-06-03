@@ -55,7 +55,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-5">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Campaign name</label>
                                     <select class="form-control select2" style="width: 100%;" id="sendgrid-campaign">
@@ -93,7 +93,7 @@
                                       rel="stylesheet">
 
 
-                                <div class="col-md-1">
+                                <div class="col-md-2">
                                     <div class="form-group">
                                         <div style="margin-top: 24px;">
                                             <button type="button" class="btn btn-default" style="margin-right: 5px;"
@@ -203,8 +203,14 @@
                             <div class="col-md-12">
                                 <div class="form-group" style="margin-bottom: 0px; overflow: hidden;"
                                      id="message-editor">
-                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="500px"
-                                            style="border: 1px solid #DDD;">{{ campaigns[0]['html_content'] | safe }}</iframe>
+                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="500px" style="border: 1px solid #DDD;">
+                                        {% if  campaigns %}
+
+                                            {{ campaigns[0]['html_content'] | safe }}
+
+                                        {% endif %}
+
+                                    </iframe>
                                 </div>
                             </div>
                         </div>
