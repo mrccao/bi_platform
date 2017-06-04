@@ -1,7 +1,7 @@
+import hashlib
 import json
 
 import arrow
-import hashlib
 import pandas as pd
 import sqlparse
 from dateutil import tz
@@ -221,10 +221,12 @@ def email_notification():
     email_title = [str(campaign['title']) for campaign in get_campaigns() if campaign_id == campaign['id']]
     email_body = [str(campaign['html_content']) for campaign in get_campaigns() if campaign_id == campaign['id']]
 
-    message = email_title[0].strip() + separator + email_body[0].strip()
+    email = email_title[0].strip() + separator + email_body[0].strip()
 
-    pending_digest = (str(current_user.id) + '_' + message + '_' + scheduled_at.format('YYYYMMDD')).encode(
-        'utf-8')
+    pending_digest = (
+        str(current_user.id) + separator + str(campaign_id) + separator + email + separator + scheduled_at.format(
+            'YYYYMMDD')).encode('utf-8')
+
     message_key = hashlib.md5(pending_digest).hexdigest()
     push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
 
@@ -234,7 +236,7 @@ def email_notification():
             admin_user_id=current_user.id,
             based_query_id=based_query_id,
             push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
-            message=message,
+            message=email,
             message_key=message_key,
             status=PROMOTION_PUSH_STATUSES.PENDING.value,
             scheduled_at=scheduled_at.format('YYYY-MM-DD HH:mm:ss'))
@@ -250,7 +252,7 @@ def email_notification():
     push_id = push.id
 
     try:
-        if  based_query_id:
+        if based_query_id:
             # based some query
             query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
 
@@ -264,12 +266,12 @@ def email_notification():
 
             if 'email' in column_names:
 
-                data = result_proxy.fetchall()
+                data = [{'username': row['username'], 'country': row['reg_country'], 'state': row['reg_sate'],
+                         'email': row['email']} for row in result_proxy]
 
-                df = pd.DataFrame(data, columns=column_names)
+                custom_field = {'xxxx': 1}.update({'query': 111})
 
-                data = [[row['user_id'], row['email']] for _, row in df.iterrows() if
-                        (row['user_id'] is not None and row['email'] is not None)]
+                [recipient.update(custom_field) for recipient in data]
 
                 if app.config['ENV'] == 'prod':
                     process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), data)
@@ -278,11 +280,11 @@ def email_notification():
 
                 return jsonify(result='ok')
             else:
-                return jsonify(error="based query don't have column: user_id, facebook_id"), 500
+                return jsonify(error="based query don't have column: user_id, email"), 500
 
         elif query_rules:
 
-            data = UsersGrouping.get_user_id(query_rules, push_type=PROMOTION_PUSH_TYPES.EMAIL.value)
+            data = UsersGrouping.generate_recipients(query_rules, notification_type=PROMOTION_PUSH_TYPES.EMAIL.value)
 
             if app.config['ENV'] == 'prod':
 
