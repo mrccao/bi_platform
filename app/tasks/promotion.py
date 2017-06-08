@@ -8,9 +8,8 @@ from sqlalchemy import text
 from sqlalchemy.sql.expression import bindparam
 
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
-from app.extensions import db
-from app.extensions import sendgrid
-from app.models.promotion import PromotionPush, PromotionPushHistory
+from app.extensions import db, sendgrid
+from app.models.promotion import PromotionPush, PromotionPushHistory, UsersGrouping
 from app.tasks import celery, with_db_context
 from app.utils import current_time, error_msg_from_exception
 
@@ -25,13 +24,14 @@ def get_facebook_users():
 
 def get_email_users():
     # def collection(connection, transaction):
-    #     return connection.execute(
-    #         text('SELECT u_id AS user_id, pu_email AS platform_user_id FROM tb_platform_user_info'))
+    #     return connection.execute( text( """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id"""))
     #
-    # result_proxy = with_db_context(db, collection, 'orig_wpt')
+    # result_proxy = with_db_context(db, collection)
     #
-    # return [[row['user_id'], row['pu_email']] for row in result_proxy]
-    return [[1, 'fanhp@ourgame.com']]
+    # return [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
+    #          'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
+
+    return [{'user_id': 1, 'email': 'fanhaipeng0403@gmail.com','username':'fanhaipeng'}]
 
 
 def update_promotion_status(data, status_value):
@@ -46,8 +46,15 @@ def update_promotion_status(data, status_value):
 
 
 @celery.task
-def process_promotion_facebook_notification_items(push_id, scheduled_at, data=None):
+def process_promotion_facebook_notification_items(push_id, scheduled_at, query_rules, data=None):
     try:
+
+        if query_rules:
+
+            data = UsersGrouping.generate_recipients(query_rules, PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value)
+
+            if not data: return
+
         db.session.query(PromotionPush).filter_by(id=push_id).update(
             {PromotionPush.status: PROMOTION_PUSH_STATUSES.PREPARING.value}, synchronize_session=False)
         db.session.commit()
@@ -61,27 +68,35 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, data=No
         if data is None:
             data = get_facebook_users()
             max_minutes = int(len(data) / 1000) + 1
+
             for row in data:
+                user_id = row['user_id']
+                email_recipients = json.dumps(row)
+
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
-                    'user_id': row[0],
-                    'target': row[1],
+                    'user_id': user_id,
+                    'target': email_recipients,
                     'scheduled_at': scheduled_time,
                     'status': status_value
                 })
         else:
             max_minutes = int(len(data) / 1000) + 1
+
             for row in data:
+                user_id = row['user_id']
+                email_recipients = json.dumps(row)
+
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
-                    'user_id': row[0],
-                    'target': row[1],
+                    'user_id': user_id,
+                    'target': email_recipients,
                     'scheduled_at': scheduled_time,
                     'status': status_value
                 })
@@ -193,7 +208,7 @@ def process_promotion_facebook_notification():
 
 
 @celery.task
-def process_promotion_email_notification_items(push_id, scheduled_at, data=None):
+def process_promotion_email_notification_items(push_id, scheduled_at, query_rules=None, data=None):
     try:
         db.session.query(PromotionPush).filter_by(id=push_id).update(
             {PromotionPush.status: PROMOTION_PUSH_STATUSES.PREPARING.value}, synchronize_session=False)
@@ -205,29 +220,42 @@ def process_promotion_email_notification_items(push_id, scheduled_at, data=None)
         status_value = PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value
         push_type_value = PROMOTION_PUSH_TYPES.EMAIL.value
 
+        if query_rules:
+
+            data = UsersGrouping.generate_recipients(query_rules, PROMOTION_PUSH_TYPES.EMAIL.value)
+
+            if not data: return
+
         if data is None:
+
             data = get_email_users()
+
             max_minutes = int(len(data) / 1000) + 1
-            for row in data:
+            for recipients in data:
+                user_id = recipients['user_id']
+                recipients = json.dumps(recipients)
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({'push_id': push_id,
                              'push_type': push_type_value,
-                             'user_id': row[0],
-                             'target': row[1],
+                             'user_id': user_id,
+                             'target': recipients,
                              'scheduled_at': scheduled_time,
                              'status': status_value
                              })
         else:
             max_minutes = int(len(data) / 1000) + 1
-            for row in data:
+            for recipients in data:
+                user_id = recipients['user_id']
+                recipients = json.dumps(recipients)
+
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
-                    'user_id': row[0],
-                    'target': row[1],
+                    'user_id': user_id,
+                    'target': recipients,
                     'scheduled_at': scheduled_time,
                     'status': status_value
                 })
@@ -267,13 +295,16 @@ def process_promotion_email():
     print('process_promotion_email_notification: preparing')
 
     now = current_time().format('YYYY-MM-DD HH:mm:ss')
+    #
+    # push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
+    #                                                                   status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value).filter(
+    #     PromotionPushHistory.scheduled_at <= now).all()
 
-    push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
-                                                                      status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value).filter(
-        PromotionPushHistory.scheduled_at <= now).all()
+    push_histories = db.session.query(PromotionPushHistory).filter_by(push_id=50).all()
 
     if len(push_histories) == 0:
         print('process_promotion_email_notification: no data')
+
         return
 
     push_ids = [item.push_id for item in push_histories]
@@ -287,43 +318,46 @@ def process_promotion_email():
 
     push_ids = [item.push_id for item in push_histories]
 
-    pushes = db.session.query(PromotionPush).filter(PromotionPush.id.in_(list(set(push_ids)))).all()
-
-    id_to_email_mapping = {item.id: item.message for item in pushes}
-    id_to_email_title_mapping = {id: id_to_email_mapping[id].split('<--->')[0] for id in id_to_email_mapping}
-    id_to_email_body_mapping = {id: id_to_email_mapping[id].split('<--->')[1] for id in id_to_email_mapping}
+    id_to_email_campaign_mapping = {item.id: item.message for item in pushes}
 
     for item in push_histories:
 
-        data = {
-            "personalizations": [{"to": [{"email": item.target}], "subject": id_to_email_title_mapping[item.push_id]}],
-            "from": {"email": "test@example.com"},
-            "content": [{"type": "text/html", "value": id_to_email_body_mapping[item.push_id]}]}
+        email_campaign = id_to_email_campaign_mapping[item.push_id]
+        email_campaign = json.loads(email_campaign)
+        email_recipients = json.loads(item.target)
+        email_address = email_recipients['email']
+        # email_content = email_campaign["content"][0]["value"]
 
-        try:
+        substitutions = {"[%country%]": email_recipients.get('reg_country'),
+                         "[%email%]": email_recipients.get('email'),
+                         "[%Play_Username%]": email_recipients.get('username')}
 
-            response = sendgrid.client.mail.send.post(request_body=data)
 
-        except Exception as e:
 
-            print('process_promotion_email sendgrid request exception: ' + error_msg_from_exception(e))
+
+        email_campaign['personalizations'][0]['to'] = [{"email": email_address}]
+        email_campaign['personalizations'][0]['substitutions'] = substitutions
+
+        print(email_campaign)
+
+        response = sendgrid.client.mail.send.post(request_body=email_campaign)
+
+        if response.status_code != 202:
+
+            print(response.body)
+            print(response.headers)
+            print('process_promotion_email sendgrid request exception')
 
             update_promotion_status([{'_id': push_id} for push_id in push_ids],
                                     PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value)
 
         else:
 
-            print('process_promotion_facebook_notification: starting process response.')
+            print('process_promotion_email_notification: starting process response.')
+            update_promotion_status({'_id': item.id}, PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
 
-            if response.status_code != 202:
+        continue
 
-                print(response.body)
-                print(response.headers)
-                update_promotion_status({'_id': item.id}, PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
-
-                continue
-
-            update_promotion_status({'id_': item.id}, PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
 
     else:
         print('process_promotion_email_notification: done')

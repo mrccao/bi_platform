@@ -3,12 +3,21 @@
 {% block page_title %}Sending Email{% endblock %}
 
 {% block head_tail %}
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.css"
-          rel="stylesheet">
+          rel="stylesheet" xmlns:>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css" rel="stylesheet">
+
+    <style>
+
+
+
+    </style>
+
 {% endblock %}
 
 {% block main_content %}
+
     <section class="content-header">
         <h1>
             Sending Email
@@ -16,6 +25,7 @@
     </section>
 
     {% if based_query %}
+
         <div class="pad margin no-print">
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
@@ -23,7 +33,9 @@
                 <pre> <strong> {{ based_query.sql }}   </strong> </pre>
             </div>
         </div>
+
     {% else %}
+
         <div class="pad margin no-print">
             <div class="callout callout-danger"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
@@ -34,6 +46,7 @@
                 </div>
             </div>
         </div>
+
     {% endif %}
 
     <section class="content">
@@ -43,210 +56,317 @@
                     <div class="box-header" style="padding-bottom: 2px;">
                         <div class="row">
 
-                            <div class="col-md-2">
-                                <div class="form-group">
-
-                                    <label>Status</label>
-                                    <select class="form-control select2" style="width: 100%;" id="sendgrid-status">
-                                        <option value="All" selected="selected">All</option>
-                                        {% for status in statuses %}
-                                            <option>{{ status }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label>Campaign name</label>
-                                    <select class="form-control select2" style="width: 100%;" id="sendgrid-campaign">
-                                        {% for campaign in campaigns %}
-                                            <option value="{{ campaign['id'] }}">{{ campaign['title'] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label>Scheduled at (EST)</label>
-                                    <div class="input-group" style="width: 100%;">
-                                        <div class="input-group-addon">
-                                            <i class="fa fa-calendar"></i>
-                                        </div>
-                                        <input type="text" class="form-control" id="send-scheduled-at">
-                                    </div>
-                                </div>
-                            </div>
-
-                            {% if not  based_query %}
+                            <form class="form-horizontal" action="{{ url_for('promotion.email_notification') }}"
+                                  method="post" id="campaign_form">
+                                <div class="col-md-2 ">
 
 
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
-                                      rel="stylesheet">
-
-
-                                <div class="col-md-1">
                                     <div class="form-group">
-                                        <div style="margin-top: 24px;">
-                                            <button type="button" class="btn btn-default" style="margin-right: 5px;"
-                                                    id="btn-select-users" data-toggle="modal"
-                                                    data-target="#select-users"><i
-                                                    class="fa fa-indent"></i> Select Users
-                                            </button>
-                                        </div>
+
+
+                                        <label>Status</label>
+                                        <select name="Status" class="form-control select2" style="width: 100%;"
+                                                id="sendgrid-status">
+                                            <option value="All" selected="selected">All</option>
+                                            {% for status in statuses %}
+                                                <option>{{ status }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
 
-                                <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
-                                     aria-labelledby="myModalLabel" aria-hidden="true">
+                                <div class="col-md-5 ">
+                                    <div class="form-group">
+                                        <label>Campaign name</label>
+                                        <select name="campaign" class="form-control select2" style="width: 100%;"
+                                                id="sendgrid-campaign">
+                                            {% for campaign in campaigns %}
+                                                <option value="{{ campaign['id'] }}">{{ campaign['title'] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 ">
+
+                                    <div class="form-group">
+
+                                        <label>Categories</label>
+
+                                        <select name='category' class="form-control select2" id="sendgrid-category"
+                                                multiple="true">
+
+                                            {% for category  in categories %}
+                                                <option value="{{ category['category'] }}">{{ category['category'] }}</option>
+                                            {% endfor %}
+
+                                        </select>
+
+                                    </div>
+                                </div>
 
 
-                                    <style>
-
-                                        .slider.slider-horizontal {
-                                            width: 600px;
-                                        }
-
-                                        slider-selection {
-                                            background: #ffffff;
-                                        }
-
-                                        .slider {
-
-                                            margin-top: 15px;
-                                            margin-bottom: 20px;
-
-                                        }
-
-                                        .btn-primary.active, .btn-primary:hover {
-                                            color: #fff;
-                                            background-color: #0887c7;
-                                        }
-
-                                        .btn-primary {
-
-                                            background-color: #fff;
-                                        }
-
-                                        .query-builder .rules-group-container {
-                                            padding: 10px 10px 6px;
-                                            background-color: #fff;
-                                            border: 1px solid #d2d4d4;
-                                            font-weight: 600;
-                                        }
-
-
-                                    </style>
-
-                                    <div class="modal-dialog modal-lg" role="document">
-
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal"
-                                                        aria-hidden="true">
-                                                    &times;
-                                                </button>
-                                                <h4 class="modal-title" id="myModalLabel">
-                                                    Set User Properties
-                                                </h4>
+                                <div class="col-md-2 ">
+                                    <div class="form-group">
+                                        <label>Scheduled at (EST)</label>
+                                        <div class="input-group" style="width: 100%;">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
                                             </div>
-                                            <div class="modal-body">
+                                            <input name="scheduled" type="text" class="form-control"
+                                                   id="send-scheduled-at">
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if not  based_query %}
 
-                                                <div class="row">
 
-                                                    <div class="col-md-12">
+                                    <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
+                                          rel="stylesheet">
 
-                                                        <div id="builder-select-users"></div>
-                                                    </div>
+                                    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
+                                          rel="stylesheet">
+
+                                    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
+                                          rel="stylesheet">
+
+                                    <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
+                                          rel="stylesheet">
+
+
+                                    <div class="col-md-2">
+
+                                        <label>Select Recipients </label>
+                                        <button type="button" class="btn btn-default"
+                                                style="text-align: left;  background-color:#fff;width: 200px;"
+                                                id="btn-select-users" data-toggle="modal"
+                                                data-target="#select-users"><i class="fa fa-indent"
+                                                                               style="padding-top: 4px; margin-right: 10px"></i>
+                                            <div style="display: inline-block; border-color: darkblue">
+                                                User Grouping
+                                            </div>
+                                        </button>
+                                    </div>
+
+
+                                    <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
+                                         aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+                                        <style>
+
+                                            .slider.slider-horizontal {
+                                                width: 600px;
+                                            }
+
+                                            .slider-selection {
+                                                background: #ffffff;
+                                            }
+
+                                            .slider {
+
+                                                margin-top: 15px;
+                                                margin-bottom: 20px;
+
+                                            }
+
+                                            .btn-primary.active, .btn-primary:hover {
+                                                color: #fff;
+                                                background-color: #0887c7;
+                                            }
+
+                                            .btn-primary {
+
+                                                background-color: #fff;
+                                            }
+
+                                            .query-builder .rules-group-container {
+                                                padding: 10px 10px 6px;
+                                                background-color: #fff;
+                                                border: 1px solid #d2d4d4;
+                                                font-weight: 600;
+                                            }
+
+
+                                        </style>
+
+                                        <div class="modal-dialog modal-lg" role="document">
+
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-hidden="true">
+                                                        &times;
+                                                    </button>
+                                                    <h4 class="modal-title" id="myModalLabel">
+                                                        Set User Properties
+                                                    </h4>
                                                 </div>
+                                                <div class="modal-body">
 
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal"
-                                                        id="close">Close
-                                                </button>
-                                                <button class="btn btn-primary  parse-json" data-target="select-users"
-                                                        style="background-color: #00a65a;">Apply
-                                                </button>
+                                                    <div class="row">
+
+                                                        <div class="col-md-12">
+
+                                                            <div id="builder-select-users"></div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal"
+                                                            id="close">Close
+                                                    </button>
+                                                    <button class="btn btn-primary  parse-json"
+                                                            data-target="select-users"
+                                                            style="background-color: #00a65a;">Apply
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
+
+                                    </div>
+
+
+                                {% endif %}
+
+
+                                <div class="col-md-2 ">
+                                    <div class="form-group">
+                                        <label>From Senders</label>
+
+                                        <select name="sender" class="form-control select2" style="width: 100%;"
+                                                id="sendgrid-sender">
+
+                                            <option value="" disabled selected>Select Sender</option>
+
+                                            {% for sender  in senders %}
+
+                                                <option value="{{ sender['id'] }}">{{ sender['nickname'] }}</option>
+
+                                            {% endfor %}
+                                        </select>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 ">
+
+
+                                    <div class="form-group">
+
+                                        <label>Email Subject</label>
+                                        <input name="emailSubject" type="text" class="form-control"
+                                               id='sendgrid-email-subject'>
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="col-md-2">
+
+                                    <div class="form-group">
+
+                                        <label>Send Test Email </label>
+
+                                        <div class="input-group"><span class="input-group-addon"><i
+                                                class="glyphicon glyphicon-envelope"></i></span>
+
+                                            <input name="emailAddress" placeholder="E-Mail Address" class="form-control"
+                                                   type="text" id='sendgrid-test-email'>
+                                        </div>
+
+
                                     </div>
 
                                 </div>
 
 
-                            {% endif %}
+                            </form>
 
+                            <div class="col-md-1">
 
-                            <div class="col-md-2">
                                 <div class="form-group">
                                     <div style="margin-top: 24px;">
 
-                                        <button type="button" class="btn btn-success" id="btn-send">Apply</button>
+                                        <button type="submit" class="btn btn-success" id="btn-send-test-email">
+
+                                            <i class="fa"></i> Send
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
+                            <div class="col-md-2">
 
+                                <div class="form-group">
+                                    <div style="margin-top: 24px;">
+
+                                        <button type="submit" class="btn btn-success" id="btn-send-campaign">
+
+                                            <i class="fa fa-paper-plane"></i> Send Campaign
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="box-body">
+
+
+                    <div class="box-body" style="margin-top: 20px">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group" style="margin-bottom: 0px; overflow: hidden;"
+                                <div class="form-group" style="margin-bottom: 0; overflow: hidden;"
                                      id="message-editor">
-                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="500px"
+                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="590px"
                                             style="border: 1px solid #DDD;">{{ campaigns[0]['html_content'] | safe }}</iframe>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!--<div class="box-footer clearfix">
-                    </div>-->
                 </div>
 
-                <div class="nav-tabs-custom" id="tabs-box">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane active table-responsive" id="tab-history">
-                            <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
-                                <thead>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td colspan="999">
-                                        <div class="text-center">
-                                            There are no items in the history table.
+
+
+                                <div class="nav-tabs-custom" id="tabs-box">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div class="tab-pane active table-responsive" id="tab-history">
+                                            <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
+                                                <thead>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td colspan="999">
+                                                        <div class="text-center">
+                                                            There are no items in the history table.
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <!-- /.tab-content -->
-                </div>
+                                    </div>
+                                    <!-- /.tab-content -->
+                                </div>
             </div>
         </div>
     </section>
+
 {% endblock %}
 
 {% block body_tail %}
+
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.12.0/jquery.validate.js"></script>
 
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js'></script>
 
     {% if not  based_query %}
 
@@ -420,7 +540,7 @@
                             field: 'purchased',
                             label: 'Purchased',
                             type: 'integer',
-                            input: 'radio',
+                            nput: 'radio',
                             values: {
                                 0: 'Never Purchased',
                                 1: 'Purchased'
@@ -607,6 +727,7 @@
         </div>
 
     {% endif %}
+
     <script type="text/javascript">
 
         var campaigns = {{campaigns | safe}};
@@ -618,6 +739,7 @@
         $(document).ready(function () {
 
             $(".select2").select2();
+
 
             $('#send-scheduled-at').daterangepicker({
                 opens: 'right',
@@ -683,7 +805,9 @@
                 $('#sendgrid-campaign').trigger("change");
             });
 
+
             $('#sendgrid-campaign').on('change', function () {
+
                 currentCampaignId = $(this).find(":selected").val();
 
                 if (!!!currentCampaignId) {
@@ -707,93 +831,11 @@
                     }
                 });
             });
+
+
             $('#sendgrid-campaign').trigger("change");
 
             ////////////////////
-
-
-
-            {% if based_query %}
-                var basedQueryId = {{ based_query.id }};
-                var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';
-            {% else %}
-                var basedQueryId = null;
-                var submitConfirmAlert = 'Do you want to send email to ALL users?';
-            {% endif %}
-
-            var retryConfirmAlert = 'Do you want to retry?';
-
-            $('#btn-send').click(function () {
-
-                {% if  not based_query %}
-
-                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
-
-                {% else %}
-
-                    var query_rules = null;
-
-                {% endif %}
-
-                if (query_rules !== null) {
-
-                    submitConfirmAlert = 'Do you want to send email to users based rules in the screen?';
-
-                }
-
-                if (!!!currentCampaignId) return;
-
-
-                swal({
-
-                    title: "Are you sure?",
-                    text: submitConfirmAlert,
-                    type: "warning",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    showLoaderOnConfirm: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, send it!",
-
-                }, function () {
-
-                    {% if  based_query %}
-
-                        var data = {
-                            scheduled_at: $('#send-scheduled-at').val(),
-                            campaign_id: currentCampaignId,
-                            based_query_id: basedQueryId
-                        };
-
-                    {% else %}
-
-
-                        var data = {
-                            scheduled_at: $('#send-scheduled-at').val(),
-                            campaign_id: currentCampaignId,
-                            query_rules: JSON.stringify(query_rules)
-                        };
-
-                    {% endif %}
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '/promotion/email/sender',
-                        data: data,
-                        dataType: "json",
-                        success: function (result) {
-                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
-                            stopRequestLoading();
-                            getPushHistories();
-                        },
-                        error: function (xhr) {
-                            swal("Error", JSON.parse(xhr.responseText).error, "error");
-                            stopRequestLoading();
-                        }
-                    });
-
-                });
-            });
 
 
             function getPushHistories() {
@@ -850,6 +892,12 @@
                                             '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' +
                                             '</td>');
                                     }
+                                } else if (column === 'message') {
+                                    var emailTitle = JSON.parse(row[column]).personalizations[0].subject;
+
+                                    rows.push('<td>' + emailTitle + '</td>');
+
+
                                 } else {
                                     rows.push('<td>' + row[column] + '</td>');
                                 }
@@ -879,5 +927,227 @@
         });
 
     </script>
+
+    <script type="text/javascript">
+
+
+        $('#campaign_form').bootstrapValidator({
+
+            fields: {
+
+                emailSubject: {
+                    validators: {
+                        notEmpty: {
+                            message: "Subject can't be blank"
+
+                        }
+                    }
+                },
+                sender: {
+                    validators: {
+                        notEmpty: {
+                            message: "Sender identity can't be blank"
+                        }
+                    }
+                },
+                emailAddress: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please supply your email address'
+                        },
+                        emailAddress: {
+                            message: 'Please supply a valid email address'
+                        }
+                    }
+                }
+
+            }
+
+
+        });
+
+
+        var retryConfirmAlert = 'Do you want to retry?';
+
+        $("#campaign_form").submit(function (ev) {
+            ev.preventDefault();
+        });
+
+        $("#btn-send-campaign").on("click", function () {
+
+
+
+
+
+
+            var bootstrapValidator = $("#campaign_form").data('bootstrapValidator').updateElementStatus($('#sendgrid-test-email'), "VALID", null)
+
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+
+
+                var category = [];
+                var sender_id = $('#sendgrid-sender').find(":selected").val();
+
+                $('#sendgrid-category :selected').each(function (i, selected) {
+                    category[i] = $(selected).val();
+                });
+
+
+                var emailSubject = $('#sendgrid-email-subject').val();
+
+                var emailAddress = $('#sendgrid-test-email').val();
+
+
+
+                {% if  not based_query %}
+
+                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
+
+                    {#                    var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';#}
+
+                {% else %}
+
+                    {#                    var query_rules = null;#}
+                    var basedQueryId = {{ based_query.id }};
+
+                {% endif %}
+
+
+
+                {#                if (query_rules !== null) {#}
+
+                {#                     var submitConfirmAlert = 'Do you want to send email to users based rules in the screen?';#}
+
+                {#                }#}
+
+
+                {#                var submitConfirmAlert = 'Do you want to sending email to ALL users in this screen?';#}
+
+
+                swal({
+
+                    title: "Are you sure?",
+                    type: "warning",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, send it!",
+
+                }, function () {
+
+                    {% if  based_query %}
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            based_query_id: basedQueryId,
+                            sender_id: sender_id,
+                            category: category,
+                            test_email_address: emailAddress,
+                            email_subject: emailSubject
+
+                        };
+
+                    {% else %}
+
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            query_rules: JSON.stringify(query_rules),
+                            sender_id: sender_id,
+                            category: category,
+                            test_email_address: emailAddress,
+                            email_subject: emailSubject
+
+                        };
+
+                    {% endif %}
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/promotion/email/sender_campaign',
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
+                            stopRequestLoading();
+                            getPushHistories();
+                        },
+                        error: function (xhr) {
+                            swal("Error", JSON.parse(xhr.responseText).error, "error");
+                            stopRequestLoading();
+                        }
+                    });
+
+                });
+
+
+            }
+
+
+            else return;
+
+        });
+
+
+        $("#btn-send-test-email").on("click", function () {
+
+            var bootstrapValidator = $("#campaign_form").data('bootstrapValidator');
+
+
+
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+
+                var category = [];
+                var sender_id = $('#sendgrid-sender').find(":selected").val();
+
+                $('#sendgrid-category :selected').each(function (i, selected) {
+                    category[i] = $(selected).val();
+                });
+
+                var emailSubject = $('#sendgrid-email-subject').val();
+
+                var emailAddress = $('#sendgrid-test-email').val();
+
+                var data = {
+                    scheduled_at: $('#send-scheduled-at').val(),
+                    campaign_id: currentCampaignId,
+
+                    sender_id: sender_id,
+                    category: category,
+                    test_email_address: emailAddress,
+                    email_subject: emailSubject
+
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/promotion/email/sender_test_email',
+                    data: data,
+                    dataType: "json",
+                    success: function (result) {
+                        swal("Success!", "The test email has been sent!", "success");
+                        stopRequestLoading();
+                        getPushHistories();
+                    },
+                    error: function (xhr) {
+                        swal("Error", JSON.parse(xhr.responseText).error, "error");
+                        stopRequestLoading();
+                    }
+                });
+
+
+            }
+
+            else return;
+        });
+
+
+    </script>
+
 
 {% endblock %}

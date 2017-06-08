@@ -654,11 +654,11 @@
 
             {% if based_query %}
                 var basedQueryId = {{ based_query.id }};
-                var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
+{#                var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';#}
 
             {% else %}
                 var basedQueryId = null;
-                var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';
+{#                var submitConfirmAlert = 'Do you want to send Facebook notification to ALL users?';#}
 
             {% endif %}
 
@@ -674,16 +674,16 @@
 
                 {% else %}
 
-                    var query_rules = null;
+{#                    var query_rules = null;#}
 
                 {% endif %}
 
 
-                if (query_rules !== null) {
-
-                    submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
-
-                }
+{#                if (query_rules !== null) {#}
+{##}
+{#                    submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';#}
+{##}
+{#                }#}
 
 
                 if ($('#message-editor').val().length === 0) return;
@@ -692,7 +692,7 @@
                 swal({
 
                     title: "Are you sure?",
-                    text: submitConfirmAlert,
+{#                    text: submitConfirmAlert,#}
                     type: "warning",
                     showCancelButton: true,
                     closeOnConfirm: false,

@@ -1,9 +1,7 @@
-import json
-from functools import reduce
-from operator import iand, ior
-
 import arrow
 from flask import current_app as app
+from functools import reduce
+from operator import iand, ior
 from sqlalchemy import text
 from sqlalchemy.schema import Index
 
@@ -313,7 +311,6 @@ class UsersGrouping(PaidBehaviour):
     @classmethod
     def get_user_id(cls, query_rules):
 
-        query_rules = json.loads(query_rules)
         condition = query_rules["condition"]
         rules = query_rules["rules"]
 
@@ -341,6 +338,46 @@ class UsersGrouping(PaidBehaviour):
 
         return query_result
 
+    @classmethod
+    def generate_recipients(cls, query_rules, notification_type):
+
+        def get_user(connection, transaction, query_rules, notification_type):
+
+            user_ids = cls.get_user_id(query_rules)
+
+            if user_ids:
+                if notification_type == 'fb_notification':
+                    return connection.execute(
+                        text(
+                            """ SELECT u_id AS user_id  ,pu_id FROM  tb_platform_user_info WHERE u_id IN :user_ids """),
+                        user_ids=user_ids)
+
+                elif notification_type == 'email':
+                    connection.execute( text( """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id IN :user_ids """), user_ids=tuple(user_ids))
+                else:
+                    return []
+            else:
+                return []
+
+        if notification_type == 'fb_notification':
+            result_proxy = with_db_context(db, get_user, query_rules, db='orig_wpt')
+
+            recipients = [[row['user_id'], row['platform_user_id']] for row in result_proxy]
+
+            return recipients
+
+        if notification_type == 'email':
+            result_proxy = with_db_context(db, get_user, query_rules=query_rules, notification_type=notification_type)
+
+            recipients = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
+                           'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
+
+            # custom_field = {'xxxx': 2}.update({'query': 111})
+
+            # [recipient.update(custom_field) for recipient in recipients]
+
+            return recipients
+
 
 def sql_filter_option(connection, transaction, sql, field, operator, value):
     if operator == "less":
@@ -362,7 +399,3 @@ def sql_filter_option(connection, transaction, sql, field, operator, value):
 
     result_proxy = list(result_proxy)
     return result_proxy
-
-
-
-    # data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if (row['user_id'] is not None and row['facebook_id'] is not None)]
