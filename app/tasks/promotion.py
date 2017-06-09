@@ -275,7 +275,6 @@ def process_promotion_email_notification_items(push_id, scheduled_at, query_rule
 
 @celery.task
 def process_promotion_email_retrying(push_id):
-
     status_values = [PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value]
 
     db.session.query(PromotionPushHistory).filter_by(push_id=push_id).filter(
@@ -309,61 +308,67 @@ def process_promotion_email():
     update_promotion_status([{'_id': item.id} for item in push_histories],
                             PROMOTION_PUSH_HISTORY_STATUSES.RUNNING.value)
 
-    push_ids = [item.push_id for item in push_histories]
-
     id_to_email_campaign_mapping = {item.id: item.message for item in pushes}
 
-    for item in push_histories:
+    iter_step = 1000
 
-        email_campaign = id_to_email_campaign_mapping[item.push_id]
-        email_campaign = json.loads(email_campaign)
-        email_recipients = json.loads(item.target)
-        email_address = email_recipients['email']
+    for i in range(0, len(push_histories), iter_step):
+        partitions = push_histories[i:i + iter_step]
+        partition_ids = [item.id for item in partitions]
 
-        #  add the unsubscribe feature
+        for item in partitions:
 
+            email_campaign = id_to_email_campaign_mapping[item.push_id]
 
-        # 2157:Product Announcements
-        # 2161:Promotional Offers
-        # 2163"Account
+            #  add email address
+            email_address = []
+            email_recipients = json.loads(item.target)
+            email_address.append({'email': email_recipients['email']})
+            email_campaign['personalizations'][0]['to'] = email_address
 
-        email_content = email_campaign["content"][0]["value"]
-        email_content = email_content.replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-            replace("[Weblink]", "[%weblink%]"). \
-            replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+            #  add custom field
 
-        email_campaign["content"][0]["value"] = email_content
-        suppression = {"group_id": 2161, "groups_to_display": [2161]}
-        email_campaign["asm"] = suppression
+            substitutions = []
+            substitutions.append(
+                {"[%country%]": email_recipients.get('reg_country'), "[%email%]": email_recipients.get('email'),
+                 "[%Play_Username%]": email_recipients.get('username')})
 
-        #  add the custom  field feature
+            # 2157:Product Announcements
+            # 2161:Promotional Offers
+            # 2163"Account
 
-        substitutions = {"[%country%]": email_recipients.get('reg_country'),
-                         "[%email%]": email_recipients.get('email'),
-                         "[%Play_Username%]": email_recipients.get('username')}
+            # add email_content
 
-        email_campaign['personalizations'][0]['to'] = [{"email": email_address}]
-        email_campaign['personalizations'][0]['substitutions'] = substitutions
+            email_campaign = json.loads(email_campaign)
+            email_content = email_campaign["content"][0]["value"]
+            email_content = email_content.replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+                replace("[Weblink]", "[%weblink%]"). \
+                replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+            email_campaign["content"][0]["value"] = email_content
 
-        response = sendgrid.client.mail.send.post(request_body=email_campaign)
+            # add ubsubscribe
 
-        if response.status_code != 202:
+            suppression = {'asm': {"group_id": 2161, "groups_to_display": [2161]}}
+            email_campaign['personalizations'][0].update(suppression)
 
-            print('process_promotion_email sendgrid request exception')
+            response = sendgrid.client.mail.send.post(request_body=email_campaign)
 
-            update_promotion_status([{'_id': push_id} for push_id in push_ids],
-                                    PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
+            if response.status_code != 202:
+
+                print('process_promotion_email sendgrid request exception')
+
+                update_promotion_status([{'_id': partition_id} for partition_id in partition_ids],
+                                        PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
+
+            else:
+
+                print('process_promotion_email_notification: starting process response.')
+
+                update_promotion_status([{'_id': partition_id} for partition_id in partition_ids],
+                                        PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
+
+            continue
 
         else:
 
-            print('process_promotion_email_notification: starting process response.')
-
-            update_promotion_status({'_id': item.id}, PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
-
-        continue
-
-    else:
-
-        print('process_promotion_email_notification: done')
-
-
+            print('process_promotion_email_notification: done')
