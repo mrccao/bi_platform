@@ -127,7 +127,7 @@ def facebook_notification_sender():
                 return jsonify(error="based query don't have column: user_id, facebook_id"), 500
 
 
-        elif  query_rules is not  None:
+        elif query_rules is not None:
 
             if app.config['ENV'] == 'prod':
 
@@ -209,61 +209,65 @@ def email_retry():
     return jsonify(result='ok')
 
 
-@promotion.route("/promotion/email/sender_test_email", methods=["POST"])
-def test_email():
-    campaign_id = request.form.get('campaign_id')
-    sender_id = request.form.get('sender_id')
-    email_subject = request.form.get('email_subject')
-    test_email_address = request.form.get('test_email_address')
-
-    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
-    from_sender = [sender['from'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
-    reply_to = [sender['reply_to'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
-
-    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": email_subject, "to": [{"email": test_email_address}]}]}
-
-    response = sendgrid.client.mail.send.post(request_body=data)
-
-    if response.status_code == 202:
-
-        return jsonify('ok'), 202
-    else:
-        return jsonify('Sendgrid exception , Please try again later'), 500
+#
+#
+# @promotion.route("/promotion/email/sender_test_email", methods=["POST"])
+# def test_email():
+#     campaign_id = request.form.get('campaign_id')
+#     sender_id = request.form.get('sender_id')
+#     email_subject = request.form.get('email_subject')
+#     test_email_address = request.form.get('test_email_address')
+#
+#     email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
+#     from_sender = [sender['from'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
+#     reply_to = [sender['reply_to'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
+#
+#     data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
+#             "personalizations": [{"subject": email_subject, "to": [{"email": test_email_address}]}]}
+#
+#     response = sendgrid.client.mail.send.post(request_body=data)
+#
+#     if response.status_code == 202:
+#
+#         return jsonify('ok'), 202
+#     else:
+#         return jsonify('Sendgrid exception , Please try again later'), 500
 
 
 @promotion.route("/promotion/email/sender_campaign", methods=["POST"])
 def email_notification():
     based_query_id = request.form.get('based_query_id')
     query_rules = json.loads(request.form.get('query_rules', 'null'))
-
     scheduled_at = request.form.get('scheduled_at')
-
     campaign_id = request.form.get('campaign_id', type=int)
     sender_id = request.form.get('sender_id')
-
-    ##TODO
-
-    category = request.form.get('category')
-
     email_subject = request.form.get('email_subject')
-    test_email_address = request.form.get('test_email_address')
 
     email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == campaign_id][0]
     from_sender = [sender['from'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
     reply_to = [sender['reply_to'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
 
-    if test_email_address:
-        data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-                "personalizations": [{"subject": email_subject, "to": [{"email": test_email_address}]}]}
+    test_email_address = [{"name": "fanhaipeng", "email": "938376959@qq.com"},
+                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
+                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
+                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
+                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
+                          {"name": "fanhaipeng", "email": "938376959@qq.com"}]
 
-        sendgrid.client.mail.send.post(request_body=data)
+    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
+            "personalizations": [{"subject": email_subject, "to": test_email_address}]}
+
+    sendgrid.client.mail.send.post(request_body=data)
 
     if scheduled_at:
+
         # from est to utc
         scheduled_at = arrow.get(scheduled_at).replace(tzinfo=tz.gettz(app.config['APP_TIMEZONE'])).to('UTC')
+
     else:
+
         # utc
+
         scheduled_at = current_time()
 
     email_campaign = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender,
@@ -340,7 +344,7 @@ def email_notification():
                 return jsonify(error="based query don't have column: user_id, email"), 500
 
 
-        elif  query_rules is not None:
+        elif query_rules is not None:
 
             if app.config['ENV'] == 'prod':
 
