@@ -31,7 +31,7 @@ def get_email_users():
     # return [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
     #          'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
 
-    return [{'user_id': 1, 'email': 'fanhaipeng0403@gmail.com','username':'fanhaipeng'}]
+    return [{'user_id': 1, 'email': 'fanhaipeng0403@gmail.com', 'username': 'fanhaipeng'}]
 
 
 def update_promotion_status(data, status_value):
@@ -300,7 +300,7 @@ def process_promotion_email():
     #                                                                   status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value).filter(
     #     PromotionPushHistory.scheduled_at <= now).all()
 
-    push_histories = db.session.query(PromotionPushHistory).filter_by(push_id=50).all()
+    push_histories = db.session.query(PromotionPushHistory).filter_by(push_id=97).all()
 
     if len(push_histories) == 0:
         print('process_promotion_email_notification: no data')
@@ -326,17 +326,31 @@ def process_promotion_email():
         email_campaign = json.loads(email_campaign)
         email_recipients = json.loads(item.target)
         email_address = email_recipients['email']
-        # email_content = email_campaign["content"][0]["value"]
+        email_address = '938376959@qq.com'
+
+        email_content = email_campaign["content"][0]["value"]
+
+
+        email_content = email_content.replace("[Unsubscribe]",'<%asm_group_unsubscribe_raw_url%>').\
+                                      replace("[Weblink]","https://www.playwpt.com").\
+                                      replace( "[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+
+        email_campaign["content"][0]["value"] = email_content
 
         substitutions = {"[%country%]": email_recipients.get('reg_country'),
                          "[%email%]": email_recipients.get('email'),
                          "[%Play_Username%]": email_recipients.get('username')}
 
-
-
-
         email_campaign['personalizations'][0]['to'] = [{"email": email_address}]
         email_campaign['personalizations'][0]['substitutions'] = substitutions
+
+
+        # 2157:Product Announcements
+        # 2161:Promotional Offers
+        # 2163"Account
+
+        suppression = {"group_id": 2161, "groups_to_display": [ 2161 ] }
+        email_campaign["asm"] = suppression
 
         print(email_campaign)
 
@@ -361,5 +375,9 @@ def process_promotion_email():
 
     else:
         print('process_promotion_email_notification: done')
+
+
+process_promotion_email()
+
 
 
