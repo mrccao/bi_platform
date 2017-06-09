@@ -38,6 +38,15 @@ def set_config_value(connection, key, value):
     return
 
 
+def set_config_value_with_db_instance(db_instance, key, value):
+    """ Set import config with key. """
+    def func(connection, transation):
+        """ Nested func """
+        connection.execute(text('UPDATE bi_import_config SET value = :value, last_synced_at = :last_synced_at  WHERE var = :key'), key=key, value=value, last_synced_at=current_time().format('YYYY-MM-DD HH:mm:ss'))
+
+    return with_db_context(db_instance, func)
+
+
 def get_wpt_og_user_mapping(db, og_accounts):
     def func(connection, transaction):
         return connection.execute(text('SELECT user_id, og_account FROM bi_user WHERE og_account IN :og_accounts'),
