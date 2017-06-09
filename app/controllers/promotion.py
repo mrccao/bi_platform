@@ -156,7 +156,7 @@ def facebook_notification_sender():
 
 @promotion.route("/promotion/email", methods=["GET"])
 @login_required
-def email():
+def email_notification():
     campaigns = list(map(lambda x: {'id': x['id'], 'title': x['title'], 'status': x['status']}, get_campaigns()))
     statuses = list(set(map(lambda x: x['status'], campaigns)))
 
@@ -175,18 +175,6 @@ def email():
         return render_template(template_file, statuses=statuses, campaigns=campaigns)
     return render_template(template_file, based_query=based_query, statuses=statuses, campaigns=campaigns,
                            senders=senders, categories=categories)
-
-
-@promotion.route("/promotion/email/campaign_html_content", methods=["GET"])
-@login_required
-def email_campaign_html_content():
-    campaign_id = int(request.args.get('campaign_id'))
-    html_content = None
-    for campaign in get_campaigns():
-        if campaign_id == campaign['id']:
-            html_content = campaign['html_content']
-            break
-    return jsonify(html_content=html_content)
 
 
 @promotion.route("/promotion/email/histories", methods=["GET"])
@@ -210,37 +198,8 @@ def email_retry():
     return jsonify(result='ok')
 
 
-@promotion.route("/promotion/email/sender_test_email", methods=["POST"])
-def test_email():
-    campaign_id = request.form.get('campaign_id')
-    email_subject = request.form.get('email_subject')
-
-    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
-
-    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
-    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
-
-    email_content = email_content. \
-        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-        replace("[Weblink]", "[%weblink%]"). \
-        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
-
-    suppression = {"group_id": 2161, "groups_to_display": [2161]}
-
-    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
-
-    response = sendgrid.client.mail.send.post(request_body=data)
-
-    if response.status_code == 202:
-
-        return jsonify('ok'), 202
-    else:
-        return jsonify('Sendgrid exception , Please try again later'), 500
-
-
 @promotion.route("/promotion/email/sender_campaign", methods=["POST"])
-def email_notification():
+def email_sender():
     based_query_id = request.form.get('based_query_id')
     query_rules = json.loads(request.form.get('query_rules', 'null'))
     scheduled_at = request.form.get('scheduled_at')
@@ -282,8 +241,7 @@ def email_notification():
 
     email_campaign = json.dumps(email_campaign)
 
-    pending_digest = (str(current_user.id) + '_' + email_campaign + '_' + scheduled_at.format('YYYYMMDD')).encode(
-        'utf-8')
+    pending_digest = (str(current_user.id) + '_' + email_campaign + '_' + scheduled_at.format('YYYYMMDD')).encode( 'utf-8')
     message_key = hashlib.md5(pending_digest).hexdigest()
     push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
 
@@ -328,7 +286,7 @@ def email_notification():
                 user_ids = [i[0] for i in user_ids]
 
                 result_proxy = db.engine.execute(text(
-                    """ SELECT user_id,  username,email  FROM bi_user WHERE user_id IN :user_ids """),
+                    """ SELECT user_id,  username,email,reg_country  FROM bi_user WHERE user_id IN :user_ids """),
                     user_ids=tuple(user_ids))
 
                 data = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
@@ -374,3 +332,44 @@ def email_notification():
     except Exception as e:
 
         return jsonify(error=error_msg_from_exception(e)), 500
+
+
+@promotion.route("/promotion/email/campaign_html_content", methods=["GET"])
+@login_required
+def email_campaign_html_content():
+    campaign_id = int(request.args.get('campaign_id'))
+    html_content = None
+    for campaign in get_campaigns():
+        if campaign_id == campaign['id']:
+            html_content = campaign['html_content']
+            break
+    return jsonify(html_content=html_content)
+
+
+@promotion.route("/promotion/email/send_test_email", methods=["POST"])
+def test_email():
+    campaign_id = request.form.get('campaign_id')
+    email_subject = request.form.get('email_subject')
+
+    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
+
+    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
+    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
+
+    email_content = email_content. \
+        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+        replace("[Weblink]", "[%weblink%]"). \
+        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+
+    suppression = {"group_id": 2161, "groups_to_display": [2161]}
+
+    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
+            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
+
+    response = sendgrid.client.mail.send.post(request_body=data)
+
+    if response.status_code == 202:
+
+        return jsonify('ok'), 202
+    else:
+        return jsonify('Sendgrid exception , Please try again later'), 500

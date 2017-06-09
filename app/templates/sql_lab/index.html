@@ -124,7 +124,8 @@
                                        href="{{ url_for('promotion.facebook_notification') }}">Send FB notification to
                                     result</a></li>
                                 <li><a id="promoiton-tools-send-facebook-notification" target="_blank"
-                                       href="{{ url_for('promotion.email') }}">Send Email to result</a></li>
+                                       href="{{ url_for('promotion.email_notification') }}">Send Email to result</a>
+                                </li>
                             </ul>
                         </li>
                     </ul>
@@ -286,7 +287,7 @@
                                 '  </button>' +
                                 '  <ul class="dropdown-menu" role="menu" style="">' +
                                 '    <li><a target="_blank" href="{{ url_for("promotion.facebook_notification") }}?based_query_id=' + id + '">Send FB notification to result</a></li>' +
-                                '   <li><a target="_blank" href="{{ url_for("promotion.email") }}?based_query_id=' + id + '">Send Email to result</a></li>' +
+                                '   <li><a target="_blank" href="{{ url_for("promotion.email_notification") }}?based_query_id=' + id + '">Send Email to result</a></li>' +
                                 '  </ul>' +
                                 '</div>' +
                                 '</td>';

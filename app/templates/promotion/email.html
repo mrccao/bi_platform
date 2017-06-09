@@ -120,7 +120,7 @@
                                                 <i class="fa fa-indent"></i>
                                             </div>
 
-                                            <button  type="button" class="btn btn-default"
+                                            <button type="button" class="btn btn-default"
                                                     style="text-align: left;  background-color:#fff; width: 100% !important; border-radius: 0;"
                                                     id="btn-select-users" data-toggle="modal"
                                                     data-target="#select-users">
@@ -677,15 +677,7 @@
                 fontawesome: 'fa fa-spinner fa-spin',
                 maxSize: "26px",
                 minSize: "26px"
-            }
-
-            function startRequestLoading() {
-                $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
-            }
-
-            function stopRequestLoading() {
-                $('#editor-box').LoadingOverlay('hide', true);
-            }
+            };
 
             ////////////////////
 
@@ -760,19 +752,27 @@
                     url: '/promotion/email/histories',
                     dataType: "json",
                     success: function (result) {
-                        var headers = []
-                        headers.push('<tr>')
+
+                        var headers = [];
+
+                        headers.push('<tr>');
+
                         for (var i in historyTableColumns) {
+
                             var column = historyTableColumns[i];
                             if (column === 'based_query_id') {
                                 column = 'based query';
                             } else if (column === 'requested_by') {
                                 column = 'requested by';
                             }
+
                             headers.push('<th>' + column + '</th>')
                         }
+
                         headers.push('<th style="width: 128px;"></th>');
+
                         headers.push('</tr>');
+
                         $('#history-table thead').html(headers.join());
 
                         var rows = [];
@@ -803,16 +803,14 @@
                                     } else {
                                         rows.push('<td>' +
                                             '<span>Total: ' + row[column].total_count + '</span><br />' +
-                                            '<span class="text-green">Successed: ' + row[column].successed_count + '</span><br />' +
+                                            '<span class="text-green">Succeed: ' + row[column].succeed_count + '</span><br />' +
                                             '<span class="text-red">Request failed: ' + row[column].request_failed_count + '</span><br />' +
-                                            '<span class="text-muted">FB Failed(uninstall/permission): ' + row[column].failed_count + '</span><br />' +
                                             '</td>');
                                     }
                                 } else if (column === 'message') {
                                     var emailTitle = JSON.parse(row[column]).personalizations[0].subject;
 
                                     rows.push('<td>' + emailTitle + '</td>');
-
 
                                 } else {
                                     rows.push('<td>' + row[column] + '</td>');
@@ -840,88 +838,118 @@
             }
 
             getPushHistories();
-        });
 
 
-        $("#btn-send-campaign").on("click", function () {
+            $("#btn-send-campaign").on("click", function () {
 
 
-            if (!!!currentCampaignId)  return;
+                if (!!!currentCampaignId)  return;
 
-            var emailSubject = $('#sendgrid-email-subject').val();
-            if (emailSubject.length === 0) return;
-
-
-            {% if based_query %}
-                var basedQueryId = {{ based_query.id }};
-                var submitConfirmAlert = 'Do you want to send  email to users based query in the screen?';
-
-            {% else %}
-                var basedQueryId = null;
-                var submitConfirmAlert = 'Do you want to send email to ALL users?';
-
-            {% endif %}
+                var emailSubject = $('#sendgrid-email-subject').val();
+                if (emailSubject.length === 0) return;
 
 
-            {% if  not based_query %}
-
-                var query_rules = $('#builder-select-users').queryBuilder('getRules');
-
-            {% else %}
-
-                var query_rules = null;
-
-            {% endif %}
-
-
-            if (query_rules !== null) {
-
-                submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
-
-            }
-
-            swal({
-
-                title: "Are you sure?",
-                text: submitConfirmAlert,
-                type: "warning",
-                showCancelButton: true,
-                closeOnConfirm: false,
-                showLoaderOnConfirm: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Yes, send it!",
-
-            }, function () {
-
-                {% if  based_query %}
-
-                    var data = {
-                        scheduled_at: $('#send-scheduled-at').val(),
-                        campaign_id: currentCampaignId,
-                        based_query_id: basedQueryId,
-                        email_subject: emailSubject
-
-                    };
+                {% if based_query %}
+                    var basedQueryId = {{ based_query.id }};
+                    var submitConfirmAlert = 'Do you want to send  email to users based query in the screen?';
 
                 {% else %}
-
-                    var data = {
-                        scheduled_at: $('#send-scheduled-at').val(),
-                        campaign_id: currentCampaignId,
-                        query_rules: JSON.stringify(query_rules),
-                        email_subject: emailSubject
-
-                    };
+                    var basedQueryId = null;
+                    var submitConfirmAlert = 'Do you want to send email to ALL users?';
 
                 {% endif %}
 
+
+                {% if  not based_query %}
+
+                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
+
+                {% else %}
+
+                    var query_rules = null;
+
+                {% endif %}
+
+
+                if (query_rules !== null) {
+
+                    submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
+
+                }
+
+                swal({
+
+                    title: "Are you sure?",
+                    text: submitConfirmAlert,
+                    type: "warning",
+                    showCancelButton: true,
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, send it!",
+
+                }, function () {
+
+                    {% if  based_query %}
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            based_query_id: basedQueryId,
+                            email_subject: emailSubject
+
+                        };
+
+                    {% else %}
+
+                        var data = {
+                            scheduled_at: $('#send-scheduled-at').val(),
+                            campaign_id: currentCampaignId,
+                            query_rules: JSON.stringify(query_rules),
+                            email_subject: emailSubject
+
+                        };
+
+                    {% endif %}
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/promotion/email/sender_campaign',
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
+                            getPushHistories();
+                        },
+                        error: function (xhr) {
+                            swal("Error", JSON.parse(xhr.responseText).error, "error");
+                        }
+                    });
+
+                });
+
+
+            });
+
+            $("#btn-send-test-email").on("click", function () {
+
+                if (!!!currentCampaignId)  return;
+                var emailSubject = $('#sendgrid-email-subject').val();
+                if (emailSubject.length === 0) return;
+
+                var data = {
+                    campaign_id: currentCampaignId,
+                    email_subject: emailSubject
+
+                };
+
                 $.ajax({
                     type: 'POST',
-                    url: '/promotion/email/sender_campaign',
+                    url: '/promotion/email/send_test_email',
                     data: data,
                     dataType: "json",
                     success: function (result) {
-                        swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
+                        swal("Success!", "The test email has been sent!", "success");
                         getPushHistories();
                     },
                     error: function (xhr) {
@@ -929,39 +957,10 @@
                     }
                 });
 
+
             });
-
-
         });
 
-        $("#btn-send-test-email").on("click", function () {
-
-            if (!!!currentCampaignId)  return;
-            var emailSubject = $('#sendgrid-email-subject').val();
-            if (emailSubject.length === 0) return;
-
-            var data = {
-                campaign_id: currentCampaignId,
-                email_subject: emailSubject
-
-            };
-
-            $.ajax({
-                type: 'POST',
-                url: '/promotion/email/sender_test_email',
-                data: data,
-                dataType: "json",
-                success: function (result) {
-                    swal("Success!", "The test email has been sent!", "success");
-                    getPushHistories();
-                },
-                error: function (xhr) {
-                    swal("Error", JSON.parse(xhr.responseText).error, "error");
-                }
-            });
-
-
-        });
 
         var retryConfirmAlert = 'Do you want to retry?';
 

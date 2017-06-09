@@ -276,7 +276,7 @@ def process_promotion_email_notification_items(push_id, scheduled_at, query_rule
 @celery.task
 def process_promotion_email_retrying(push_id):
 
-    status_values = [PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value]
+    status_values = [PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value]
 
     db.session.query(PromotionPushHistory).filter_by(push_id=push_id).filter(
         PromotionPushHistory.status.in_(status_values)).update(
@@ -294,8 +294,6 @@ def process_promotion_email():
     push_histories = db.session.query(PromotionPushHistory).filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
                                                                       status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value).filter(
         PromotionPushHistory.scheduled_at <= now).all()
-
-    # push_histories = db.session.query(PromotionPushHistory).filter_by(push_id=97).all()
 
     if len(push_histories) == 0:
         print('process_promotion_email_notification: no data')
@@ -323,6 +321,7 @@ def process_promotion_email():
         email_address = email_recipients['email']
 
         #  add the unsubscribe feature
+
 
         # 2157:Product Announcements
         # 2161:Promotional Offers
@@ -353,7 +352,7 @@ def process_promotion_email():
             print('process_promotion_email sendgrid request exception')
 
             update_promotion_status([{'_id': push_id} for push_id in push_ids],
-                                    PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value)
+                                    PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
 
         else:
 
@@ -366,3 +365,5 @@ def process_promotion_email():
     else:
 
         print('process_promotion_email_notification: done')
+
+

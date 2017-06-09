@@ -52,7 +52,7 @@ class PromotionPush(db.Model):
             running_count = db.engine.execute(
                 text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='running'"),
                 push_id=self.id).scalar()
-            successed_count = db.engine.execute(
+            succeed_count = db.engine.execute(
                 text("SELECT COUNT(*) FROM promotion_push_history WHERE push_id = :push_id AND status='success'"),
                 push_id=self.id).scalar()
             request_failed_count = db.engine.execute(text(
@@ -72,7 +72,7 @@ class PromotionPush(db.Model):
             'status': self.status if self.status != PROMOTION_PUSH_STATUSES.SCHEDULED.value else {
                 'total_count': total_count,
                 'running_count': running_count,
-                'successed_count': successed_count,
+                'succeed_count': succeed_count,
                 'request_failed_count': request_failed_count,
                 'failed_count': failed_count
             },
