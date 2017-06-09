@@ -10,13 +10,13 @@ from flask import current_app as app
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
+from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES, TEST_EMAIL_ADDRESS
 from app.extensions import db, sendgrid
 from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
                                  process_promotion_facebook_notification_retrying,
-                                 process_promotion_email_notification_items)
+                                 process_promotion_email_notification_items, process_promotion_email_retrying)
 from app.tasks.sendgrid import get_campaigns, get_senders, get_categories
 from app.utils import error_msg_from_exception, current_time
 
@@ -118,9 +118,9 @@ def facebook_notification_sender():
                         (row['user_id'] is not None and row['facebook_id'] is not None)]
 
                 if app.config['ENV'] == 'prod':
-                    process_promotion_facebook_notification_items.delay(push_id, scheduled_at.format(), data)
+                    process_promotion_facebook_notification_items.delay(push_id, scheduled_at.format(), data=data)
                 else:
-                    process_promotion_facebook_notification_items(push_id, scheduled_at.format(), data)
+                    process_promotion_facebook_notification_items(push_id, scheduled_at.format(), data=data)
 
                 return jsonify(result='ok')
             else:
@@ -131,10 +131,11 @@ def facebook_notification_sender():
 
             if app.config['ENV'] == 'prod':
 
-                process_promotion_facebook_notification_items.delay(push_id, scheduled_at.format(), query_rules)
+                process_promotion_facebook_notification_items.delay(push_id, scheduled_at.format(),
+                                                                    query_rules=query_rules)
             else:
 
-                process_promotion_facebook_notification_items(push_id, scheduled_at.format(), query_rules)
+                process_promotion_facebook_notification_items(push_id, scheduled_at.format(), query_rules=query_rules)
 
             return jsonify(result='ok')
 
@@ -203,35 +204,39 @@ def email_retry():
     push_id = request.form.get('push_id')
     if push_id:
         if app.config['ENV'] == 'prod':
-            process_promotion_facebook_notification_retrying.delay(push_id)
+            process_promotion_email_retrying.delay(push_id)
         else:
-            process_promotion_facebook_notification_retrying(push_id)
+            process_promotion_email_retrying(push_id)
     return jsonify(result='ok')
 
 
-#
-#
-# @promotion.route("/promotion/email/sender_test_email", methods=["POST"])
-# def test_email():
-#     campaign_id = request.form.get('campaign_id')
-#     sender_id = request.form.get('sender_id')
-#     email_subject = request.form.get('email_subject')
-#     test_email_address = request.form.get('test_email_address')
-#
-#     email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
-#     from_sender = [sender['from'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
-#     reply_to = [sender['reply_to'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
-#
-#     data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-#             "personalizations": [{"subject": email_subject, "to": [{"email": test_email_address}]}]}
-#
-#     response = sendgrid.client.mail.send.post(request_body=data)
-#
-#     if response.status_code == 202:
-#
-#         return jsonify('ok'), 202
-#     else:
-#         return jsonify('Sendgrid exception , Please try again later'), 500
+@promotion.route("/promotion/email/sender_test_email", methods=["POST"])
+def test_email():
+    campaign_id = request.form.get('campaign_id')
+    email_subject = request.form.get('email_subject')
+
+    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
+
+    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
+    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
+
+    email_content = email_content. \
+        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+        replace("[Weblink]", "[%weblink%]"). \
+        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+
+    suppression = {"group_id": 2161, "groups_to_display": [2161]}
+
+    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
+            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
+
+    response = sendgrid.client.mail.send.post(request_body=data)
+
+    if response.status_code == 202:
+
+        return jsonify('ok'), 202
+    else:
+        return jsonify('Sendgrid exception , Please try again later'), 500
 
 
 @promotion.route("/promotion/email/sender_campaign", methods=["POST"])
@@ -240,24 +245,26 @@ def email_notification():
     query_rules = json.loads(request.form.get('query_rules', 'null'))
     scheduled_at = request.form.get('scheduled_at')
     campaign_id = request.form.get('campaign_id', type=int)
-    sender_id = request.form.get('sender_id')
     email_subject = request.form.get('email_subject')
+    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
 
-    email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == campaign_id][0]
-    from_sender = [sender['from'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
-    reply_to = [sender['reply_to'] for sender in get_senders() if sender['id'] == int(sender_id)][0]
+    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
+    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
 
-    test_email_address = [{"name": "fanhaipeng", "email": "938376959@qq.com"},
-                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
-                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
-                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
-                          {"name": "fanhaipeng", "email": "938376959@qq.com"},
-                          {"name": "fanhaipeng", "email": "938376959@qq.com"}]
+    email_content = email_content. \
+        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+        replace("[Weblink]", "[%weblink%]"). \
+        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+
+    suppression = {"group_id": 2161, "groups_to_display": [2161]}
 
     data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": email_subject, "to": test_email_address}]}
+            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
 
-    sendgrid.client.mail.send.post(request_body=data)
+    response = sendgrid.client.mail.send.post(request_body=data)
+
+    if response.status_code != 202:
+        return jsonify('Sendgrid exception , Please try again later'), 500
 
     if scheduled_at:
 
@@ -321,21 +328,19 @@ def email_notification():
                 user_ids = [i[0] for i in user_ids]
 
                 result_proxy = db.engine.execute(text(
-                    """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id IN :user_ids """),
+                    """ SELECT user_id,  username,email  FROM bi_user WHERE user_id IN :user_ids """),
                     user_ids=tuple(user_ids))
 
                 data = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-                         'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
-
-                # data = [{'user_id': row['user_id'], 'username': row['username'], 'email': row['email']} for row in result_proxy]
+                         'email': row['email']} for row in result_proxy]
 
                 if app.config['ENV'] == 'prod':
 
-                    process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), data)
+                    process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), data=data)
 
                 else:
 
-                    process_promotion_email_notification_items(push_id, scheduled_at.format(), data)
+                    process_promotion_email_notification_items(push_id, scheduled_at.format(), data=data)
 
                 return jsonify(result='ok')
 
@@ -348,11 +353,12 @@ def email_notification():
 
             if app.config['ENV'] == 'prod':
 
-                process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), query_rules)
+                process_promotion_email_notification_items.delay(push_id, scheduled_at.format(),
+                                                                 query_rules=query_rules)
 
             else:
 
-                process_promotion_email_notification_items(push_id, scheduled_at.format(), query_rules)
+                process_promotion_email_notification_items(push_id, scheduled_at.format(), query_rules=query_rules)
 
             return jsonify(result='ok')
 

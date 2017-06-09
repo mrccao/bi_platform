@@ -29,8 +29,9 @@ def get_email_users():
 
     result_proxy = with_db_context(db, collection)
 
-    return [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-             'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
+    return [
+        {'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'], 'email': row['email']}
+        for row in result_proxy]
 
     # return [{'user_id': 1, 'email': 'fanhaipeng0403@gmail.com', 'username': 'fanhaipeng'}]
 
@@ -69,35 +70,27 @@ def process_promotion_facebook_notification_items(push_id, scheduled_at, query_r
         if data is None:
             data = get_facebook_users()
             max_minutes = int(len(data) / 1000) + 1
-
             for row in data:
-                user_id = row['user_id']
-                email_recipients = json.dumps(row)
-
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
-                    'user_id': user_id,
-                    'target': email_recipients,
+                    'user_id': row[0],
+                    'target': row[1],
                     'scheduled_at': scheduled_time,
                     'status': status_value
                 })
         else:
             max_minutes = int(len(data) / 1000) + 1
-
             for row in data:
-                user_id = row['user_id']
-                email_recipients = json.dumps(row)
-
                 scheduled_time = scheduled_at.replace(minutes=+(randrange(0, max_minutes))).format(
                     'YYYY-MM-DD HH:mm:ss')
                 rows.append({
                     'push_id': push_id,
                     'push_type': push_type_value,
-                    'user_id': user_id,
-                    'target': email_recipients,
+                    'user_id': row[0],
+                    'target': row[1],
                     'scheduled_at': scheduled_time,
                     'status': status_value
                 })
@@ -282,6 +275,7 @@ def process_promotion_email_notification_items(push_id, scheduled_at, query_rule
 
 @celery.task
 def process_promotion_email_retrying(push_id):
+
     status_values = [PROMOTION_PUSH_HISTORY_STATUSES.REQUEST_FAILED.value]
 
     db.session.query(PromotionPushHistory).filter_by(push_id=push_id).filter(
@@ -327,8 +321,6 @@ def process_promotion_email():
         email_campaign = json.loads(email_campaign)
         email_recipients = json.loads(item.target)
         email_address = email_recipients['email']
-        # email_address = '515409351@qq.com'
-
 
         #  add the unsubscribe feature
 
@@ -337,7 +329,6 @@ def process_promotion_email():
         # 2163"Account
 
         email_content = email_campaign["content"][0]["value"]
-
         email_content = email_content.replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
             replace("[Weblink]", "[%weblink%]"). \
             replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')

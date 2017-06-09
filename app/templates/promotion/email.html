@@ -79,26 +79,6 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-2 ">
-                                <div class="form-group">
-                                    <label>Senders</label>
-
-                                    <select name="sender" class="form-control select2" style="width: 100%;"
-                                            id="sendgrid-sender">
-
-                                        <option value="" disabled selected>Select Sender</option>
-
-                                        {% for sender  in senders %}
-
-                                            <option value="{{ sender['id'] }}">{{ sender['nickname'] }}</option>
-
-                                        {% endfor %}
-                                    </select>
-
-                                </div>
-
-                            </div>
-
 
                             <div class="col-md-3 ">
                                 <div class="form-group">
@@ -130,7 +110,7 @@
                                       rel="stylesheet">
 
 
-                                <div class="col-md-2">
+                                <div class="col-md-2" hidden>
 
                                     <div class="form-group">
                                         <label>Recipients</label>
@@ -140,7 +120,7 @@
                                                 <i class="fa fa-indent"></i>
                                             </div>
 
-                                            <button type="button" class="btn btn-default"
+                                            <button  type="button" class="btn btn-default"
                                                     style="text-align: left;  background-color:#fff; width: 100% !important; border-radius: 0;"
                                                     id="btn-select-users" data-toggle="modal"
                                                     data-target="#select-users">
@@ -322,9 +302,7 @@
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.12.0/jquery.validate.js"></script>
 
-    <script src='http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js'></script>
 
     {% if not  based_query %}
 
@@ -667,7 +645,9 @@
     <script type="text/javascript">
 
         var campaigns = {{campaigns | safe}};
+
         var statuses = {{statuses | safe}};
+
         var currentCampaignId = null;
 
         var historyTableColumns = ['id', 'based_query_id', 'scheduled_at', 'requested_by', 'message', 'status', 'created_at'];
@@ -841,7 +821,7 @@
 
                             var btnGroup = '<td>' +
                                 '<div class="btn-group">' +
-                                '  <button type="button" class="btn btn-sm btn-success" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
+                                '  <button type="button" class="btn btn-sm btn-success btn-retry" data-push-id="' + row['id'] + '"><i class="fa fa-toggle-right"></i> Retry request failed</button>' +
                                 '</div>' +
                                 '</td>';
 
@@ -862,219 +842,163 @@
             getPushHistories();
         });
 
-    </script>
-
-    <script type="text/javascript">
-
-
-        $('#campaign_form').bootstrapValidator({
-
-            fields: {
-
-                emailSubject: {
-                    validators: {
-                        notEmpty: {
-                            message: "Subject can't be blank"
-
-                        }
-                    }
-                },
-                sender: {
-                    validators: {
-                        notEmpty: {
-                            message: "Sender identity can't be blank"
-                        }
-                    }
-                },
-                emailAddress: {
-                    validators: {
-                        notEmpty: {
-                            message: 'Please supply your email address'
-                        },
-                        emailAddress: {
-                            message: 'Please supply a valid email address'
-                        }
-                    }
-                }
-
-            }
-
-
-        });
-
-
-        var retryConfirmAlert = 'Do you want to retry?';
 
         $("#btn-send-campaign").on("click", function () {
 
 
-            var bootstrapValidator = $("#campaign_form").data('bootstrapValidator').updateElementStatus($('#sendgrid-test-email'), "VALID", null)
+            if (!!!currentCampaignId)  return;
 
-            bootstrapValidator.validate();
-            if (bootstrapValidator.isValid()) {
-
-
-                var category = [];
-                var sender_id = $('#sendgrid-sender').find(":selected").val();
-
-                $('#sendgrid-category :selected').each(function (i, selected) {
-                    category[i] = $(selected).val();
-                });
+            var emailSubject = $('#sendgrid-email-subject').val();
+            if (emailSubject.length === 0) return;
 
 
-                var emailSubject = $('#sendgrid-email-subject').val();
+            {% if based_query %}
+                var basedQueryId = {{ based_query.id }};
+                var submitConfirmAlert = 'Do you want to send  email to users based query in the screen?';
 
-                var emailAddress = $('#sendgrid-test-email').val();
+            {% else %}
+                var basedQueryId = null;
+                var submitConfirmAlert = 'Do you want to send email to ALL users?';
 
-
-
-                {% if  not based_query %}
-
-                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
-
-                    {#                    var submitConfirmAlert = 'Do you want to send email to users based query in the screen?';#}
-
-                {% else %}
-
-                    {#                    var query_rules = null;#}
-                    var basedQueryId = {{ based_query.id }};
-
-                {% endif %}
+            {% endif %}
 
 
+            {% if  not based_query %}
 
-                {#                if (query_rules !== null) {#}
+                var query_rules = $('#builder-select-users').queryBuilder('getRules');
 
-                {#                     var submitConfirmAlert = 'Do you want to send email to users based rules in the screen?';#}
+            {% else %}
 
-                {#                }#}
+                var query_rules = null;
 
-
-                {#                var submitConfirmAlert = 'Do you want to sending email to ALL users in this screen?';#}
-
-
-                swal({
-
-                    title: "Are you sure?",
-                    type: "warning",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    showLoaderOnConfirm: true,
-                    confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, send it!",
-
-                }, function () {
-
-                    {% if  based_query %}
-
-                        var data = {
-                            scheduled_at: $('#send-scheduled-at').val(),
-                            campaign_id: currentCampaignId,
-                            based_query_id: basedQueryId,
-                            sender_id: sender_id,
-                            category: category,
-                            test_email_address: emailAddress,
-                            email_subject: emailSubject
-
-                        };
-
-                    {% else %}
+            {% endif %}
 
 
-                        var data = {
-                            scheduled_at: $('#send-scheduled-at').val(),
-                            campaign_id: currentCampaignId,
-                            query_rules: JSON.stringify(query_rules),
-                            sender_id: sender_id,
-                            category: category,
-                            test_email_address: emailAddress,
-                            email_subject: emailSubject
+            if (query_rules !== null) {
 
-                        };
-
-                    {% endif %}
-
-                    $.ajax({
-                        type: 'POST',
-                        url: '/promotion/email/sender_campaign',
-                        data: data,
-                        dataType: "json",
-                        success: function (result) {
-                            swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
-                            stopRequestLoading();
-                            getPushHistories();
-                        },
-                        error: function (xhr) {
-                            swal("Error", JSON.parse(xhr.responseText).error, "error");
-                            stopRequestLoading();
-                        }
-                    });
-
-                });
-
+                submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
 
             }
 
+            swal({
 
-            else return;
+                title: "Are you sure?",
+                text: submitConfirmAlert,
+                type: "warning",
+                showCancelButton: true,
+                closeOnConfirm: false,
+                showLoaderOnConfirm: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, send it!",
 
-        });
+            }, function () {
 
+                {% if  based_query %}
 
-        $("#btn-send-test-email").on("click", function () {
+                    var data = {
+                        scheduled_at: $('#send-scheduled-at').val(),
+                        campaign_id: currentCampaignId,
+                        based_query_id: basedQueryId,
+                        email_subject: emailSubject
 
-            var bootstrapValidator = $("#campaign_form").data('bootstrapValidator');
+                    };
 
+                {% else %}
 
-            bootstrapValidator.validate();
-            if (bootstrapValidator.isValid()) {
+                    var data = {
+                        scheduled_at: $('#send-scheduled-at').val(),
+                        campaign_id: currentCampaignId,
+                        query_rules: JSON.stringify(query_rules),
+                        email_subject: emailSubject
 
-                var category = [];
-                var sender_id = $('#sendgrid-sender').find(":selected").val();
+                    };
 
-                $('#sendgrid-category :selected').each(function (i, selected) {
-                    category[i] = $(selected).val();
-                });
-
-                var emailSubject = $('#sendgrid-email-subject').val();
-
-                var emailAddress = $('#sendgrid-test-email').val();
-
-                var data = {
-                    scheduled_at: $('#send-scheduled-at').val(),
-                    campaign_id: currentCampaignId,
-
-                    sender_id: sender_id,
-                    category: category,
-                    test_email_address: emailAddress,
-                    email_subject: emailSubject
-
-                };
+                {% endif %}
 
                 $.ajax({
                     type: 'POST',
-                    url: '/promotion/email/sender_test_email',
+                    url: '/promotion/email/sender_campaign',
                     data: data,
                     dataType: "json",
                     success: function (result) {
-                        swal("Success!", "The test email has been sent!", "success");
-                        stopRequestLoading();
+                        swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
                         getPushHistories();
                     },
                     error: function (xhr) {
                         swal("Error", JSON.parse(xhr.responseText).error, "error");
-                        stopRequestLoading();
                     }
                 });
 
+            });
 
-            }
 
-            else return;
+        });
+
+        $("#btn-send-test-email").on("click", function () {
+
+            if (!!!currentCampaignId)  return;
+            var emailSubject = $('#sendgrid-email-subject').val();
+            if (emailSubject.length === 0) return;
+
+            var data = {
+                campaign_id: currentCampaignId,
+                email_subject: emailSubject
+
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/promotion/email/sender_test_email',
+                data: data,
+                dataType: "json",
+                success: function (result) {
+                    swal("Success!", "The test email has been sent!", "success");
+                    getPushHistories();
+                },
+                error: function (xhr) {
+                    swal("Error", JSON.parse(xhr.responseText).error, "error");
+                }
+            });
+
+
+        });
+
+        var retryConfirmAlert = 'Do you want to retry?';
+
+        $(document).on('click', '.btn-retry', function () {
+
+            swal({
+                title: retryConfirmAlert,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, retry it!",
+                closeOnConfirm: false
+
+            }, function () {
+
+                var pushId = $(this).attr('data-push-id');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/promotion/email/retry',
+                    data: {push_id: pushId},
+                    dataType: "json",
+                    success: function (result) {
+                        swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
+                        getPushHistories();
+                    },
+                    error: function (xhr) {
+                        swal("Error", JSON.parse(xhr.responseText).error, "error");
+                    }
+                })
+            })
         });
 
 
     </script>
+
+
 
 
 {% endblock %}

@@ -91,6 +91,7 @@ PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
     'avatar': [34, 24, 23, 33, 15, 28, 25, 11, 29, 27, 12, 26, 22, 32, 14, 31, 37, 38, 41, 39, 40, 42, 45, 44, 43, 46],
     'emoji': [36,0], 'gold': [1,0], 'silver': [2,0], 'spin_ticket': [16,0], 'lucky_spin': [-1,0]}
 
+TEST_EMAIL_ADDRESS= [{"name": "fanhaipeng", "email": "938376959@qq.com"}, {"name": "fanhaipeng", "email": "515409351@qq.com"}]
 
 class BaseEnum(Enum):
     def __str__(self):

@@ -353,8 +353,12 @@ class UsersGrouping(PaidBehaviour):
                         user_ids=user_ids)
 
                 elif notification_type == 'email':
-                    connection.execute( text( """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id IN :user_ids """), user_ids=tuple(user_ids))
+
+                    connection.execute(text(
+                        """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id IN :user_ids """),
+                        user_ids=tuple(user_ids))
                 else:
+
                     return []
             else:
                 return []
@@ -370,11 +374,7 @@ class UsersGrouping(PaidBehaviour):
             result_proxy = with_db_context(db, get_user, query_rules=query_rules, notification_type=notification_type)
 
             recipients = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-                           'state': row['reg_sate'], 'email': row['email']} for row in result_proxy]
-
-            # custom_field = {'xxxx': 2}.update({'query': 111})
-
-            # [recipient.update(custom_field) for recipient in recipients]
+                           'email': row['email']} for row in result_proxy]
 
             return recipients
 
