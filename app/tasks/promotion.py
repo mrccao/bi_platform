@@ -1,10 +1,10 @@
 import json
 import urllib.parse
-from random import randrange
 
 import arrow
 import requests
-from sqlalchemy import text
+from random import randrange
+from sqlalchemy import text, func
 from sqlalchemy.sql.expression import bindparam
 
 from app.constants import PROMOTION_PUSH_HISTORY_STATUSES, PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
@@ -288,45 +288,47 @@ def process_promotion_email_retrying(push_id):
 def process_promotion_email():
     print('process_promotion_email: preparing')
 
-    sendgrid.client.mail.send.post(request_body=1)
-
     now = current_time().format('YYYY-MM-DD HH:mm:ss')
 
-    push_histories = db.session.query(PromotionPushHistory). \
+    push_histories = db.session.query(PromotionPushHistory.push_id,func.count(PromotionPushHistory.push_id) ). \
         filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
-        .filter(PromotionPushHistory.scheduled_at <= now).all()
+        .filter(PromotionPushHistory.scheduled_at <= now).group_by(PromotionPushHistory.push_id).all()
 
-    if len(push_histories) == 0:
+    if  not any([ item[1]  for item in push_histories ]):
         print('process_promotion_email: no data')
         return
 
-    push_ids = [item.push_id for item in push_histories]
+    for item in push_histories:
 
-    pushes = db.session.query(PromotionPush).filter(PromotionPush.id.in_(list(set(push_ids)))).all()
+        push_id = item[0]
+        result_proxy = list( db.session.query(PromotionPushHistory.id,PromotionPushHistory.target).filter(PromotionPushHistory.push_id == push_id).all())
+        recipient_ids = [item[0] for item in result_proxy]
+        recipients = [json.loads(item[1]) for item in result_proxy]
 
-    print('process_promotion_email: start sending')
+        id_to_recipient_mapping=dict(zip(recipient_ids,recipients))
 
-    update_promotion_status([{'_id': item.id} for item in push_histories],
-                            PROMOTION_PUSH_HISTORY_STATUSES.RUNNING.value)
+        print('process_promotion_email: start sending')
 
-    id_to_email_campaign_mapping = {item.id: item.message for item in pushes}
+        update_promotion_status([{'_id': id} for id in recipient_ids], PROMOTION_PUSH_HISTORY_STATUSES.RUNNING.value)
 
-    iter_step = 500
+        email_campaign =json.loads( db.session.query(PromotionPush).get(push_id).message)
 
-    for i in range(0, len(push_histories), iter_step):
+        iter_step = 500
 
-        partitions = push_histories[i:i + iter_step]
-        partition_ids = [item.id for item in partitions]
+        for i in range(0, len(recipient_ids), iter_step):
 
-        for item in partitions:
+            partitions_recipient_ids = recipient_ids[i:i + iter_step]
 
             personalizations = []
-            email_campaign = json.loads(id_to_email_campaign_mapping[item.push_id])
-            email_recipients = json.loads(item.target)
-            personalizations.append({"to": [{'email': email_recipients.get('email')}],
-                                     "substitutions": {"-country-": email_recipients.get("reg_country"),
-                                                       "-email-": email_recipients.get("email"),
-                                                       "-Play_Username-": email_recipients.get("username")}})
+
+            for recipient_id in partitions_recipient_ids:
+
+                recipient =id_to_recipient_mapping[recipient_id]
+
+                personalizations.append({"to": [{'email': recipient.get('email')}],
+                                         "substitutions": {"-country-": recipient.get("country"),
+                                                           "-email-": recipient.get("email"),
+                                                           "-Play_Username-": recipient.get("username")}})
 
             def build_email_campaign(email_campaign, personalizations):
 
@@ -347,7 +349,7 @@ def process_promotion_email():
 
                 # ubsubscribe
                 suppression = {"group_id": 2161, "groups_to_display": [2161]}
-                email_campaign['asm'] =suppression
+                email_campaign['asm'] = suppression
 
                 return email_campaign
 
@@ -361,17 +363,19 @@ def process_promotion_email():
 
                 print('process_promotion_email: sendgrid request exception' + error_msg_from_exception(e))
 
-                update_promotion_status([{'_id': partition_id} for partition_id in partition_ids],
+                update_promotion_status([{'_id': recipient_id} for recipient_id in partitions_recipient_ids],
                                         PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
 
             else:
 
-                print('process_promotion_email: starting process response.')
+                print('process_promotion_email: sendgrid have accept the email campaign.')
 
-                update_promotion_status([{'_id': partition_id} for partition_id in partition_ids],
+                update_promotion_status([{'_id': recipient_id} for recipient_id in partitions_recipient_ids],
                                         PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
-        continue
 
-    else:
+            continue
 
-        print('process_promotion_email: done')
+        else:
+
+            print('process_promotion_email: done')
+

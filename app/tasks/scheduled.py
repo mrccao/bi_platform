@@ -33,7 +33,6 @@ def process_wpt_bi():
 @celery.task
 def process_promotion_push():
     process_promotion_facebook_notification()
-    # process_promotion_email()
 
 
 @celery.task
