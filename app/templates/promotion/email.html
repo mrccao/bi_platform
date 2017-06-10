@@ -20,6 +20,7 @@
     </section>
 
     {% if based_query %}
+
         <div class="pad margin no-print">
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
@@ -43,12 +44,12 @@
     {% endif %}
 
     <section class="content">
+
         <div class="row">
             <div class="col-xs-12">
                 <div class="box box-primary" id="editor-box">
                     <div class="box-header" style="padding-bottom: 2px;">
                         <div class="row" id="campaign_form">
-
 
                             <div class="col-md-2 ">
 
@@ -79,7 +80,6 @@
                                 </div>
                             </div>
 
-
                             <div class="col-md-3 ">
                                 <div class="form-group">
                                     <label>Scheduled at (EST)</label>
@@ -93,126 +93,12 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
+
+
                             {% if not  based_query %}
-
-
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
-                                      rel="stylesheet">
-
-                                <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
-                                      rel="stylesheet">
-
-
-                                <div class="col-md-2" hidden>
-
-                                    <div class="form-group">
-                                        <label>Recipients</label>
-                                        <div class="input-group" style="width: 100%;">
-
-                                            <div class="input-group-addon">
-                                                <i class="fa fa-indent"></i>
-                                            </div>
-
-                                            <button type="button" class="btn btn-default"
-                                                    style="text-align: left;  background-color:#fff; width: 100% !important; border-radius: 0;"
-                                                    id="btn-select-users" data-toggle="modal"
-                                                    data-target="#select-users">
-                                                <div style="display: inline-block; border-color: darkblue">
-                                                    User Grouping
-                                                </div>
-                                            </button>
-                                        </div>
-                                    </div>
-
-
-                                </div>
-
-
-                                <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
-                                     aria-labelledby="myModalLabel" aria-hidden="true">
-
-
-                                    <style>
-
-                                        .slider.slider-horizontal {
-                                            width: 600px;
-                                        }
-
-                                        .slider-selection {
-                                            background: #ffffff;
-                                        }
-
-                                        .slider {
-
-                                            margin-top: 15px;
-                                            margin-bottom: 20px;
-
-                                        }
-
-                                        .btn-primary.active, .btn-primary:hover {
-                                            color: #fff;
-                                            background-color: #0887c7;
-                                        }
-
-                                        .btn-primary {
-
-                                            background-color: #fff;
-                                        }
-
-                                        .query-builder .rules-group-container {
-                                            padding: 10px 10px 6px;
-                                            background-color: #fff;
-                                            border: 1px solid #d2d4d4;
-                                            font-weight: 600;
-                                        }
-
-
-                                    </style>
-
-                                    <div class="modal-dialog modal-lg" role="document">
-
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal"
-                                                        aria-hidden="true">
-                                                    &times;
-                                                </button>
-                                                <h4 class="modal-title" id="myModalLabel">
-                                                    Set User Properties
-                                                </h4>
-                                            </div>
-                                            <div class="modal-body">
-
-                                                <div class="row">
-
-                                                    <div class="col-md-12">
-
-                                                        <div id="builder-select-users"></div>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal"
-                                                        id="close">Close
-                                                </button>
-                                                <button class="btn btn-primary  parse-json"
-                                                        data-target="select-users"
-                                                        style="background-color: #00a65a;">Apply
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-
+                            {% include  "_user_clustering.html" %}
 
                             {% endif %}
 
@@ -221,8 +107,7 @@
                                 <div class="form-group">
 
                                     <label>Email Subject</label>
-                                    <input name="emailSubject" type="text" class="form-control"
-                                           id='sendgrid-email-subject'>
+                                    <input name="emailSubject" type="text" class="form-control" placeholder="Enter email subject" id='sendgrid-email-subject'>
                                 </div>
 
                             </div>
@@ -248,51 +133,57 @@
                                 </div>
                             </div>
 
-
                         </div>
+
+
                     </div>
 
-
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group" style="margin-bottom: 0; overflow: hidden;"
-                                     id="message-editor">
-                                    <iframe id="sendgrid-preview" src="about:blank" width="100%" height="590px"
-                                            style="border: 1px solid #DDD;">{{ campaigns[0]['html_content'] | safe }}</iframe>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group" style="margin-bottom: 0; overflow: hidden;"
+                             id="message-editor">
+                            <iframe id="sendgrid-preview" src="about:blank" width="100%" height="590px"
+                                    style="border: 1px solid #DDD;">
 
+                                {% if campaigns %}
 
-                <div class="nav-tabs-custom" id="tabs-box">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div class="tab-pane active table-responsive" id="tab-history">
-                            <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
-                                <thead>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td colspan="999">
-                                        <div class="text-center">
-                                            There are no items in the history table.
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                                    {{ campaigns[0]['html_content'] | safe }}
+
+                                {% endif %}
+
+                            </iframe>
                         </div>
                     </div>
-                    <!-- /.tab-content -->
                 </div>
             </div>
         </div>
+        <div class="nav-tabs-custom" id="tabs-box">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab-history" data-toggle="tab" aria-expanded="true"> History </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active table-responsive" id="tab-history">
+                    <table id="history-table" class="table table-bordered table-striped table-hover dataTable">
+                        <thead>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td colspan="999">
+                                <div class="text-center">
+                                    There are no items in the history table.
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </section>
 
 {% endblock %}
@@ -301,20 +192,16 @@
 
     <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.25/daterangepicker.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
 
-
     {% if not  based_query %}
-
-        <div id="user-grouping-scripts">
 
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
             <script src="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/js/query-builder.standalone.min.js"></script>
             <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
-
             <script>
-
 
                 var userRulesOption = {
                     condition: 'OR',
@@ -348,24 +235,6 @@
                         operators: ['less', 'equal', 'greater', 'between']
 
                     },
-                        {
-                            id: 'birthday',
-                            field: 'birthday',
-                            label: 'Birthday',
-                            type: 'date',
-                            validation: {
-                                format: 'YYYY-MM-DD'
-                            },
-                            plugin: 'datepicker',
-                            plugin_config: {
-                                format: 'yyyy-mm-dd',
-                                todayBtn: 'linked',
-                                todayHighlight: true,
-                                autoclose: true
-                            },
-
-                            operators: ['less', 'equal', 'greater', 'between']
-                        },
 
                         {
                             id: 'X_days_inactive',
@@ -454,7 +323,7 @@
                             field: 'purchased',
                             label: 'Purchased',
                             type: 'integer',
-                            nput: 'radio',
+                            input: 'radio',
                             values: {
                                 0: 'Never Purchased',
                                 1: 'Purchased'
@@ -630,15 +499,13 @@
                         $('#close').trigger('click')
                     }
 
-                    console.log(query_info.sql)
-                    $('#query_info').html("<h4>Sending Email to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>");
+                    $('#query_info').html("<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>");
 
-                    $('.callout').removeClass('callout-danger').addClass('callout-info');
+                    $('.callout-danger').addClass('callout-info')
 
                 });
 
             </script>
-        </div>
 
     {% endif %}
 
@@ -961,7 +828,6 @@
             });
         });
 
-
         var retryConfirmAlert = 'Do you want to retry?';
 
         $(document).on('click', '.btn-retry', function () {
@@ -996,8 +862,5 @@
 
 
     </script>
-
-
-
 
 {% endblock %}

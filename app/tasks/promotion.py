@@ -1,9 +1,9 @@
 import json
 import urllib.parse
+from random import randrange
 
 import arrow
 import requests
-from random import randrange
 from sqlalchemy import text, func
 from sqlalchemy.sql.expression import bindparam
 
@@ -290,30 +290,31 @@ def process_promotion_email():
 
     now = current_time().format('YYYY-MM-DD HH:mm:ss')
 
-    push_histories = db.session.query(PromotionPushHistory.push_id,func.count(PromotionPushHistory.push_id) ). \
+    push_histories = db.session.query(PromotionPushHistory.push_id, func.count(PromotionPushHistory.push_id)). \
         filter_by(push_type=PROMOTION_PUSH_TYPES.EMAIL.value, status=PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value) \
         .filter(PromotionPushHistory.scheduled_at <= now).group_by(PromotionPushHistory.push_id).all()
 
-    if  not any([ item[1]  for item in push_histories ]):
+    if not any([item[1] for item in push_histories]):
         print('process_promotion_email: no data')
         return
 
     for item in push_histories:
 
         push_id = item[0]
-        result_proxy = list( db.session.query(PromotionPushHistory.id,PromotionPushHistory.target).filter(PromotionPushHistory.push_id == push_id).all())
+        result_proxy = list(db.session.query(PromotionPushHistory.id, PromotionPushHistory.target).filter(
+            PromotionPushHistory.push_id == push_id).all())
         recipient_ids = [item[0] for item in result_proxy]
         recipients = [json.loads(item[1]) for item in result_proxy]
 
-        id_to_recipient_mapping=dict(zip(recipient_ids,recipients))
+        id_to_recipient_mapping = dict(zip(recipient_ids, recipients))
 
         print('process_promotion_email: start sending')
 
         update_promotion_status([{'_id': id} for id in recipient_ids], PROMOTION_PUSH_HISTORY_STATUSES.RUNNING.value)
 
-        email_campaign =json.loads( db.session.query(PromotionPush).get(push_id).message)
+        email_campaign = json.loads(db.session.query(PromotionPush).get(push_id).message)
 
-        iter_step = 500
+        iter_step = 800
 
         for i in range(0, len(recipient_ids), iter_step):
 
@@ -322,8 +323,7 @@ def process_promotion_email():
             personalizations = []
 
             for recipient_id in partitions_recipient_ids:
-
-                recipient =id_to_recipient_mapping[recipient_id]
+                recipient = id_to_recipient_mapping[recipient_id]
 
                 personalizations.append({"to": [{'email': recipient.get('email')}],
                                          "substitutions": {"-country-": recipient.get("country"),
@@ -378,4 +378,3 @@ def process_promotion_email():
         else:
 
             print('process_promotion_email: done')
-

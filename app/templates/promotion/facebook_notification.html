@@ -56,9 +56,8 @@
                         </div>
 
 
-                        {% if not  based_query %}
-                            <span id="user-grouping-button">
 
+                        {% if not  based_query %}
 
                             <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
                                   rel="stylesheet">
@@ -72,8 +71,9 @@
                             <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
                                   rel="stylesheet">
 
+
                             <button type="button" class="btn btn-default" style="margin-right: 5px;"
-                                    id="btn-select-users" data-toggle="modal" data-target="#select-users"> <i
+                                    id="btn-select-users" data-toggle="modal" data-target="#select-users"><i
                                     class="fa fa-indent"></i> Select Users
                             </button>
 
@@ -81,7 +81,7 @@
                                  aria-labelledby="myModalLabel" aria-hidden="true">
 
 
-                            <style>
+                                <style>
 
                                     .slider.slider-horizontal {
                                         width: 600px;
@@ -116,7 +116,7 @@
                                     }
 
 
-                            </style>
+                                </style>
 
                                 <div class="modal-dialog modal-lg" role="document">
 
@@ -135,23 +135,24 @@
 
                                                 <div class="col-md-12">
 
-                                                            <div id="builder-select-users"></div>
-                                                    </div>
+                                                    <div id="builder-select-users"></div>
+                                                </div>
                                             </div>
 
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal"
-                                                    id="close">Close </button>
+                                                    id="close">Close
+                                            </button>
                                             <button class="btn btn-primary  parse-json" data-target="select-users"
-                                                    style="background-color: #00a65a;">Apply </button>
+                                                    style="background-color: #00a65a;">Apply
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
 
                             </div>
 
-                        </span>
 
                         {% endif %}
 
@@ -254,36 +255,7 @@
                         },
                         operators: ['less', 'equal', 'greater', 'between']
 
-                    },
-                        {
-                            id: 'birthday',
-                            field: 'birthday',
-                            label: 'Birthday',
-                            type: 'date',
-                            validation: {
-                                format: 'YYYY-MM-DD'
-                            },
-                            plugin: 'datepicker',
-                            plugin_config: {
-                                format: 'yyyy-mm-dd',
-                                todayBtn: 'linked',
-                                todayHighlight: true,
-                                autoclose: true
-                            },
-
-                            operators: ['less', 'equal', 'greater', 'between']
                         },
-
-                        {
-                            id: 'Reg State',
-                            field: 'reg_state',
-                            label: 'Reg State',
-                            type: 'integer',
-                            input: 'select',
-                            values: ['Oregon', 'California', 'Illinois', 'Nevada', 'Texas', 'Missouri', 'Massachusetts', 'Georgia', 'Florida', 'Arizona', 'North Carolina', 'New Jersey', 'Tennessee', 'New York', 'Indiana', 'Kansas', 'Pennsylvania', 'Louisiana', 'South Dakota', 'Minnesota', 'Michigan', 'Colorado', 'Montana', 'Maryland', 'Virginia', 'Alabama', 'Alaska', 'Hawaii', 'Mississippi', 'Delaware', 'Maine', 'North Dakota', 'New Hampshire', 'Ohio', 'Oklahoma', 'South Carolina', 'Connecticut', 'Nebraska', 'Idaho', 'New Mexico', 'Arkansas', 'Kentucky', 'Iowa', 'Rhode Island', 'Washington', 'Wisconsin', 'Utah', 'Wyoming', 'Vermont', 'West Virginia', ' District of Columbia'],
-                            operators: ['equal']
-                        },
-
                         {
                             id: 'X_days_inactive',
                             field: 'X_days_inactive',

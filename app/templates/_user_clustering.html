@@ -1,0 +1,116 @@
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/awesome-bootstrap-checkbox/0.3.7/awesome-bootstrap-checkbox.min.css"
+          rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.css"
+          rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/css/bootstrap-slider.min.css"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/css/query-builder.default.min.css"
+          rel="stylesheet">
+
+    <div class="col-md-2">
+        <div class="form-group">
+            <label>Recipients</label>
+            <div class="input-group" style="width: 100%;">
+                <div class="input-group-addon">
+                    <i class="fa fa-indent"></i>
+                </div>
+
+                <button type="button" class="btn btn-default"
+                        style="text-align: left;  background-color:#fff; width: 100% !important; border-radius: 0;"
+                        id="btn-select-users" data-toggle="modal"
+                        data-target="#select-users">
+
+                    <div style="display: inline-block; border-color: darkblue">
+                        User Grouping
+                    </div>
+
+                </button>
+
+
+                <div class="modal fade" id="select-users" tabindex="-1" role="dialog"
+                     aria-labelledby="myModalLabel" aria-hidden="true">
+
+
+                    <style>
+
+                        .slider.slider-horizontal {
+                            width: 600px;
+                        }
+
+                        slider-selection {
+                            background: #ffffff;
+                        }
+
+                        .slider {
+
+                            margin-top: 15px;
+                            margin-bottom: 20px;
+
+                        }
+
+                        .btn-primary.active, .btn-primary:hover {
+                            color: #fff;
+                            background-color: #0887c7;
+                        }
+
+                        .btn-primary {
+
+                            background-color: #fff;
+                        }
+
+                        .query-builder .rules-group-container {
+                            padding: 10px 10px 6px;
+                            background-color: #fff;
+                            border: 1px solid #d2d4d4;
+                            font-weight: 600;
+                        }
+
+
+                    </style>
+
+                    <div class="modal-dialog modal-lg" role="document">
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"
+                                        aria-hidden="true">
+                                    &times;
+                                </button>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    Set User Properties
+                                </h4>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="row">
+
+                                    <div class="col-md-12">
+
+                                        <div id="builder-select-users"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default"
+                                        data-dismiss="modal"
+                                        id="close">Close
+                                </button>
+                                <button class="btn btn-primary  parse-json"
+                                        data-target="select-users"
+                                        style="background-color: #00a65a;">Apply
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
