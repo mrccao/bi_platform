@@ -17,7 +17,7 @@ from app.models.promotion import PromotionPush
 from app.tasks.promotion import (process_promotion_facebook_notification_items,
                                  process_promotion_facebook_notification_retrying,
                                  process_promotion_email_notification_items, process_promotion_email_retrying)
-from app.tasks.sendgrid import get_campaigns, get_senders, get_categories
+from app.tasks.sendgrid import get_campaigns
 from app.utils import error_msg_from_exception, current_time
 
 promotion = Blueprint('promotion', __name__)
@@ -167,21 +167,15 @@ def email_notification():
     campaigns = list(map(lambda x: {'id': x['id'], 'title': x['title'], 'status': x['status']}, get_campaigns()))
     statuses = list(set(map(lambda x: x['status'], campaigns)))
 
-    senders = list(map(lambda x: {'id': x['id'], 'nickname': x['nickname']}, get_senders()))
-
-    categories = list(map(lambda x: {'category': x['category']}, get_categories()))
-
     based_query_id = request.args.get('based_query_id')
     template_file = 'promotion/email.html'
     if based_query_id is None:
-        return render_template(template_file, statuses=statuses, campaigns=campaigns, senders=senders,
-                               categories=categories)
+        return render_template(template_file, statuses=statuses, campaigns=campaigns)
 
     based_query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
     if based_query is None:
         return render_template(template_file, statuses=statuses, campaigns=campaigns)
-    return render_template(template_file, based_query=based_query, statuses=statuses, campaigns=campaigns,
-                           senders=senders, categories=categories)
+    return render_template(template_file, based_query=based_query, statuses=statuses, campaigns=campaigns)
 
 
 @promotion.route("/promotion/email/histories", methods=["GET"])

@@ -86,11 +86,8 @@
                                </span>
                         </a>
                         <ul class="treeview-menu">
-                            <li><a href="{{ url_for('report.daily_summary') }}"><i class="fa fa-circle-o"></i>Daily
-                                Summary</a></li>
-                            <li><a href="{{ url_for('report.new_users') }}"><i class="fa fa-circle-o"></i>New
-                                Users</a></li>
-                                 <li><a href="{{ url_for('report.user_region') }}"><i class="fa fa-circle-o"></i>User Region</a></li>
+                            <li><a href="{{ url_for('report.daily_summary') }}"><i class="fa fa-circle-o"></i>Daily Summary</a></li>
+                             <li><a href="{{ url_for('report.user_region') }}"><i class="fa fa-circle-o"></i>User Region</a></li>
                         </ul>
                     </li>
                     <li class="treeview{{ ' active' if request.path.startswith('/promotion') else '' }}">

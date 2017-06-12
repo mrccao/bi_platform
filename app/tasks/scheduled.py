@@ -6,7 +6,7 @@ from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.promotion import process_promotion_facebook_notification
+from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.sync_wpt_bi import process_wpt_bi_user_statistic
 
 
@@ -33,6 +33,7 @@ def process_wpt_bi():
 @celery.task
 def process_promotion_push():
     process_promotion_facebook_notification()
+    process_promotion_email()
 
 
 @celery.task
