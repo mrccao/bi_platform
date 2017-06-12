@@ -390,5 +390,3 @@ def process_promotion_email():
 
 
 
-
-process_promotion_email()
