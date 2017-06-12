@@ -1,7 +1,7 @@
-import hashlib
 import json
 
 import arrow
+import hashlib
 import pandas as pd
 import sqlparse
 from dateutil import tz
@@ -60,7 +60,8 @@ def facebook_notification_retry():
 @login_required
 def facebook_notification_sender():
     based_query_id = request.form.get('based_query_id')
-    query_rules = request.form.get('query_rules')
+    query_rules = json.loads(request.form.get('query_rules', 'null'))
+    query_rules_sql = request.form.get("query_rules_sql")
     message = request.form.get('message')
 
     scheduled_at = request.form.get('scheduled_at')
@@ -81,6 +82,7 @@ def facebook_notification_sender():
         push = PromotionPush(
             admin_user_id=current_user.id,
             based_query_id=based_query_id,
+            based_query_rules=query_rules_sql,
             push_type=PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value,
             message=formatted_message,
             message_key=message_key,
@@ -111,6 +113,11 @@ def facebook_notification_sender():
 
             if 'facebook_id' in column_names:
                 data = result_proxy.fetchall()
+
+                facebook_ids = [item[1] for item in data]
+
+                if not any(facebook_ids):
+                    return jsonify(error='No users who meet your requirements'), 500
 
                 df = pd.DataFrame(data, columns=column_names)
 
@@ -214,6 +221,7 @@ def email_campaign_html_content():
 def email_sender():
     based_query_id = request.form.get('based_query_id')
     query_rules = json.loads(request.form.get('query_rules', 'null'))
+    query_rules_sql = request.form.get("query_rules_sql")
     scheduled_at = request.form.get('scheduled_at')
     campaign_id = request.form.get('campaign_id')
     email_subject = request.form.get('email_subject')
@@ -225,12 +233,18 @@ def email_sender():
     email_content = email_content. \
         replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
         replace("[Weblink]", "[%weblink%]"). \
-        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
+        replace("[Sender_Name]", "PlayWPT"). \
+        replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
+        replace("[Sender_State]", "CA"). \
+        replace("[Sender_City]", "Irvine"). \
+        replace("[Sender_Zip]", "92614")
 
     suppression = {"group_id": 2161, "groups_to_display": [2161]}
 
     data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
+            "personalizations": [{"subject": "Testing----" + email_subject, "to": TEST_EMAIL_ADDRESS}],
+            'asm': suppression}
 
     try:
         sendgrid.client.mail.send.post(request_body=data)
@@ -266,6 +280,7 @@ def email_sender():
             push = PromotionPush(
                 admin_user_id=current_user.id,
                 based_query_id=based_query_id,
+                based_query_rules=query_rules_sql,
                 push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
                 message=email_campaign,
                 message_key=message_key,
@@ -289,7 +304,7 @@ def email_sender():
 
                 stmt = sqlparse.parse(query.sql)[0]
                 tokens = [str(item) for item in stmt.tokens]
-                tokens[2] = 'user_id'
+                tokens[2] = 'user_id, email'
                 slim_sql = ''.join(tokens)
 
                 result_proxy = db.engine.execute(text(slim_sql))
@@ -298,6 +313,10 @@ def email_sender():
                 if 'user_id' in column_names:
 
                     user_ids = list(result_proxy.fetchall())
+                    user_emails = [item[1] for item in user_ids]
+
+                    if not any(user_emails):
+                        return jsonify(error='No users who meet your requirements'), 500
 
                     user_ids = [i[0] for i in user_ids]
 
@@ -359,15 +378,21 @@ def test_email():
     from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
     reply_to = {"email": "no-reply@playwpt.com", "name": ""}
 
-    email_content = email_content. \
-        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-        replace("[Weblink]", "[%weblink%]"). \
-        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>')
+    if __name__ == '__main__':
+        email_content = email_content. \
+            replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+            replace("[Weblink]", "[%weblink%]"). \
+            replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
+            replace("[Sender_Name]", "PlayWPT"). \
+            replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
+            replace("[Sender_State]", "CA"). \
+            replace("[Sender_City]", "Irvine"). \
+            replace("[Sender_Zip]", "92614")
 
     suppression = {"group_id": 2161, "groups_to_display": [2161]}
 
     data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
+            "personalizations": [{"subject": 'Testing' + email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
 
     try:
         sendgrid.client.mail.send.post(request_body=data)

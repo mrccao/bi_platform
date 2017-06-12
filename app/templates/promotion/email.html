@@ -98,7 +98,7 @@
 
 
                             {% if not  based_query %}
-                            {% include  "_user_clustering.html" %}
+                                {% include  "_user_clustering.html" %}
 
                             {% endif %}
 
@@ -107,7 +107,8 @@
                                 <div class="form-group">
 
                                     <label>Email Subject</label>
-                                    <input name="emailSubject" type="text" class="form-control" placeholder="Enter email subject" id='sendgrid-email-subject'>
+                                    <input name="emailSubject" type="text" class="form-control"
+                                           placeholder="Enter email subject" id='sendgrid-email-subject'>
                                 </div>
 
                             </div>
@@ -197,315 +198,315 @@
 
     {% if not  based_query %}
 
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/js/query-builder.standalone.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
-            <script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.8.0/bootstrap-slider.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/jquery.query-builder/2.4.3/js/query-builder.standalone.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/sql-parser/0.4.1/sql-parser.js"></script>
+        <script>
 
-                var userRulesOption = {
-                    condition: 'OR',
-                    rules: [{
-                        id: 'Registered'
-                    }]
-                };
+            var userRulesOption = {
+                condition: 'OR',
+                rules: [{
+                    id: 'Registered'
+                }]
+            };
 
-                $('#builder-select-users').queryBuilder({
+            $('#builder-select-users').queryBuilder({
 
-                    plugins: [
-                        'bt-tooltip-errors',
-                        'bt-checkbox'
-                    ],
+                plugins: [
+                    'bt-tooltip-errors',
+                    'bt-checkbox'
+                ],
 
-                    filters: [{
-                        id: 'Registered',
-                        field: 'reg_time',
-                        label: 'Registered',
-                        type: 'date',
+                filters: [{
+                    id: 'Registered',
+                    field: 'reg_time',
+                    label: 'Registered',
+                    type: 'date',
+                    validation: {
+                        format: 'YYYY-MM-DD'
+                    },
+                    plugin: 'datepicker',
+                    plugin_config: {
+                        format: 'yyyy-mm-dd',
+                        todayBtn: 'linked',
+                        todayHighlight: true,
+                        autoclose: true
+                    },
+                    operators: ['less', 'equal', 'greater', 'between']
+
+                },
+
+                    {
+                        id: 'X_days_inactive',
+                        field: 'x_days_inactive',
+                        label: 'X Days Inactive',
+                        type: 'integer',
+                        input: 'number',
+                        operators: ['equal']
+                    },
+
+                    {
+                        id: 'average_active_days_weekly',
+                        field: 'average_active_days_weekly',
+                        label: 'Average Active Days Weekly',
+                        type: 'integer',
+                        operators: ['less', 'equal', 'greater', 'between'],
                         validation: {
-                            format: 'YYYY-MM-DD'
+                            min: 0,
+                            max: 7
                         },
-                        plugin: 'datepicker',
+                        plugin: 'slider',
+
                         plugin_config: {
-                            format: 'yyyy-mm-dd',
-                            todayBtn: 'linked',
-                            todayHighlight: true,
-                            autoclose: true
+                            min: 1,
+                            max: 7,
+                            value: 0,
+                            tooltip_position: 'bottom',
+                            tooltip: 'always'
+
+
                         },
-                        operators: ['less', 'equal', 'greater', 'between']
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
+                        },
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
+                        }
+                    },
+
+                    {
+                        id: 'average_active_days_monthly',
+                        field: 'average_active_days_monthly',
+                        label: 'Average Active Days Monthly',
+                        type: 'integer',
+                        operators: ['less', 'equal', 'greater', 'between'],
+
+                        validation: {
+                            min: 0,
+                            max: 30
+                        },
+                        plugin: 'slider',
+                        plugin_config: {
+                            min: 1,
+                            max: 30,
+                            value: 0,
+
+                            tooltip_position: 'bottom',
+                            tooltip: 'always'
+
+                        },
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
+                        },
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
+                        }
 
                     },
 
-                        {
-                            id: 'X_days_inactive',
-                            field: 'X_days_inactive',
-                            label: 'X Days Inactive',
-                            type: 'integer',
-                            input: 'number',
-                            operators: ['equal']
+                    {
+                        id: 'purchased',
+                        field: 'purchased',
+                        label: 'Purchased',
+                        type: 'integer',
+                        input: 'radio',
+                        values: {
+                            0: 'Never Purchased',
+                            1: 'Purchased'
+                        },
+                        colors: {
+                            1: 'success',
+                            0: 'danger'
                         },
 
-                        {
-                            id: 'average_active_days_weekly',
-                            field: 'average_active_days_weekly',
-                            label: 'Average Active Days Weekly',
-                            type: 'integer',
-                            operators: ['less', 'equal', 'greater', 'between'],
-                            validation: {
-                                min: 0,
-                                max: 7
-                            },
-                            plugin: 'slider',
-
-                            plugin_config: {
-                                min: 1,
-                                max: 7,
-                                value: 0,
-                                tooltip_position: 'bottom',
-                                tooltip: 'always'
+                        operators: ['equal'],
+                    },
 
 
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
+                    {
+                        id: 'average_purchase_amount_weekly',
+                        field: 'average_purchase_amount_weekly',
+                        label: 'Average Purchase Amount Weekly',
+                        type: 'double',
+
+                        operators: ['less', 'equal', 'greater', 'between'],
+                        validation: {
+                            min: 0,
+                            max: 1000000
                         },
+                        plugin: 'slider',
+                        plugin_config: {
 
-                        {
-                            id: 'average_active_days_monthly',
-                            field: 'average_active_days_monthly',
-                            label: 'Average Active Days Monthly',
-                            type: 'integer',
-                            operators: ['less', 'equal', 'greater', 'between'],
+                            min: 1,
+                            max: 10000,
+                            value: 0,
+                            tooltip_position: 'bottom',
+                            tooltip: 'always'
 
-                            validation: {
-                                min: 0,
-                                max: 30
-                            },
-                            plugin: 'slider',
-                            plugin_config: {
-                                min: 1,
-                                max: 30,
-                                value: 0,
-
-                                tooltip_position: 'bottom',
-                                tooltip: 'always'
-
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
 
                         },
-
-                        {
-                            id: 'purchased',
-                            field: 'purchased',
-                            label: 'Purchased',
-                            type: 'integer',
-                            input: 'radio',
-                            values: {
-                                0: 'Never Purchased',
-                                1: 'Purchased'
-                            },
-                            colors: {
-                                1: 'success',
-                                0: 'danger'
-                            },
-
-                            operators: ['equal'],
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
                         },
-
-
-                        {
-                            id: 'average_purchase_amount_weekly',
-                            field: 'average_purchase_amount_weekly',
-                            label: 'Average Purchase Amount Weekly',
-                            type: 'double',
-
-                            operators: ['less', 'equal', 'greater', 'between'],
-                            validation: {
-                                min: 0,
-                                max: 1000000
-                            },
-                            plugin: 'slider',
-                            plugin_config: {
-
-                                min: 1,
-                                max: 10000,
-                                value: 0,
-                                tooltip_position: 'bottom',
-                                tooltip: 'always'
-
-
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
-                        },
-
-                        {
-                            id: 'average_purchase_amount_monthly',
-                            field: 'average_purchase_amount_monthly',
-                            label: 'Average Purchase Amount Monthly',
-                            type: 'double',
-
-                            operators: ['less', 'equal', 'greater', 'between'],
-                            validation: {
-                                min: 0,
-                                max: 1000000
-                            },
-                            plugin: 'slider',
-                            plugin_config: {
-
-                                min: 1,
-                                max: 10000,
-                                value: 0,
-                                tooltip_position: 'bottom',
-                                tooltip: 'always'
-
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
-                        },
-
-
-                        {
-                            id: 'average_purchase_count_monthly',
-                            field: 'average_purchase_count_monthly',
-                            label: 'Average Purchase Count Monthly',
-                            type: 'double',
-
-                            operators: ['less', 'equal', 'greater', 'between'],
-                            validation: {
-                                min: 0,
-                                max: 1000000
-                            },
-                            plugin: 'slider',
-                            plugin_config: {
-
-                                min: 1,
-                                max: 7,
-                                value: 0,
-
-                                tooltip_position: 'bottom',
-
-                                tooltip: 'always'
-
-
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
-                        },
-
-                        {
-                            id: 'average_purchase_count_weekly',
-                            field: 'average_purchase_count_weekly',
-                            label: 'Average Purchase Count Weekly',
-                            operators: ['less', 'equal', 'greater', 'between'],
-                            validation: {
-                                min: 0,
-                                max: 1000000
-                            },
-                            plugin: 'slider',
-                            plugin_config: {
-                                min: 1,
-                                max: 7,
-                                value: 0,
-                                tooltip_position: 'bottom',
-                                tooltip: 'always'
-
-                            },
-                            valueSetter: function (rule, value) {
-                                if (rule.operator.nb_inputs == 1) value = [value];
-                                rule.$el.find('.rule-value-container input').each(function (i) {
-                                    $(this).slider('setValue', value[i] || 0);
-                                });
-                            },
-                            valueGetter: function (rule) {
-                                var value = [];
-                                rule.$el.find('.rule-value-container input').each(function () {
-                                    value.push($(this).slider('getValue'));
-                                });
-                                return rule.operator.nb_inputs == 1 ? value[0] : value;
-                            }
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
                         }
+                    },
 
-                    ],
+                    {
+                        id: 'average_purchase_amount_monthly',
+                        field: 'average_purchase_amount_monthly',
+                        label: 'Average Purchase Amount Monthly',
+                        type: 'double',
 
-                    rules: userRulesOption
-                });
+                        operators: ['less', 'equal', 'greater', 'between'],
+                        validation: {
+                            min: 0,
+                            max: 1000000
+                        },
+                        plugin: 'slider',
+                        plugin_config: {
 
-                $('.parse-json').on('click', function () {
+                            min: 1,
+                            max: 10000,
+                            value: 0,
+                            tooltip_position: 'bottom',
+                            tooltip: 'always'
+
+                        },
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
+                        },
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
+                        }
+                    },
 
 
-                    var usersRules = $('#builder-select-users').queryBuilder('getRules');
-                    var query_info = $('#builder-select-users').queryBuilder('getSQL');
+                    {
+                        id: 'average_purchase_count_monthly',
+                        field: 'average_purchase_count_monthly',
+                        label: 'Average Purchase Count Monthly',
+                        type: 'double',
+
+                        operators: ['less', 'equal', 'greater', 'between'],
+                        validation: {
+                            min: 0,
+                            max: 1000000
+                        },
+                        plugin: 'slider',
+                        plugin_config: {
+
+                            min: 1,
+                            max: 30,
+                            value: 0,
+
+                            tooltip_position: 'bottom',
+
+                            tooltip: 'always'
 
 
-                    if (!$.isEmptyObject(usersRules)) {
-                        $('#close').trigger('click')
+                        },
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
+                        },
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
+                        }
+                    },
+
+                    {
+                        id: 'average_purchase_count_weekly',
+                        field: 'average_purchase_count_weekly',
+                        label: 'Average Purchase Count Weekly',
+                        operators: ['less', 'equal', 'greater', 'between'],
+                        validation: {
+                            min: 0,
+                            max: 1000000
+                        },
+                        plugin: 'slider',
+                        plugin_config: {
+                            min: 1,
+                            max: 7,
+                            value: 0,
+                            tooltip_position: 'bottom',
+                            tooltip: 'always'
+
+                        },
+                        valueSetter: function (rule, value) {
+                            if (rule.operator.nb_inputs == 1) value = [value];
+                            rule.$el.find('.rule-value-container input').each(function (i) {
+                                $(this).slider('setValue', value[i] || 0);
+                            });
+                        },
+                        valueGetter: function (rule) {
+                            var value = [];
+                            rule.$el.find('.rule-value-container input').each(function () {
+                                value.push($(this).slider('getValue'));
+                            });
+                            return rule.operator.nb_inputs == 1 ? value[0] : value;
+                        }
                     }
 
-                    $('#query_info').html("<h4>Sending Facebook notification to users based rules blew:</h4> <pre>" + "<strong>" + query_info.sql + "</strong>" + "</pre>");
+                ],
 
-                    $('.callout-danger').addClass('callout-info')
+                rules: userRulesOption
+            });
 
-                });
+            $('.parse-json').on('click', function () {
 
-            </script>
+
+                var usersRules = $('#builder-select-users').queryBuilder('getRules');
+                var queryInfo = $('#builder-select-users').queryBuilder('getSQL');
+
+
+                if (!$.isEmptyObject(usersRules)) {
+                    $('#close').trigger('click')
+                }
+
+                $('#query_info').html("<h4>Sending Email to users based rules blew:</h4> <pre>" + "<strong>" + queryInfo.sql + "</strong>" + "</pre>");
+
+                $('.callout-danger').addClass('callout-info')
+
+            });
+
+        </script>
 
     {% endif %}
 
@@ -536,15 +537,6 @@
                 },
                 minDate: moment()
             });
-
-            ////////////////////
-
-            var loadingOverlayConfig = {
-                image: '',
-                fontawesome: 'fa fa-spinner fa-spin',
-                maxSize: "26px",
-                minSize: "26px"
-            };
 
             ////////////////////
 
@@ -640,19 +632,25 @@
 
                         headers.push('</tr>');
 
+
                         $('#history-table thead').html(headers.join());
 
                         var rows = [];
                         for (var j in result.data) {
                             var row = result.data[j];
-                            rows.push('<tr>')
+                            rows.push('<tr>');
                             for (var i in historyTableColumns) {
                                 var column = historyTableColumns[i];
                                 if (column === 'based_query_id') {
-                                    if (row[column] === null) {
-                                        rows.push('<td></td>');
-                                    } else {
+                                    if (row["based_query_sql"] !== null) {
                                         rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
+                                    }
+                                    else if (row["based_query_rules"] !== null) {
+                                        rows.push('<td>' + row['based_query_rules'] + '</td>');
+                                    }
+                                    else {
+                                        rows.push('<td></td>');
+
                                     }
                                 } else if (column === 'status') {
                                     if (row[column] === 'failed') {
@@ -675,7 +673,7 @@
                                             '</td>');
                                     }
                                 } else if (column === 'message') {
-                                    var emailTitle = JSON.parse(row[column]).personalizations[0].subject;
+                                    var emailTitle = JSON.parse(row[column]).subject;
 
                                     rows.push('<td>' + emailTitle + '</td>');
 
@@ -714,6 +712,7 @@
 
                 var emailSubject = $('#sendgrid-email-subject').val();
                 if (emailSubject.length === 0) return;
+                var sqlQueryRules = null;
 
 
                 {% if based_query %}
@@ -729,18 +728,19 @@
 
                 {% if  not based_query %}
 
-                    var query_rules = $('#builder-select-users').queryBuilder('getRules');
+                    var queryRules = $('#builder-select-users').queryBuilder('getRules');
 
                 {% else %}
 
-                    var query_rules = null;
+                    var queryRules = null;
 
                 {% endif %}
 
 
-                if (query_rules !== null) {
+                if (queryRules !== null) {
 
-                    submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
+                    submitConfirmAlert = 'Do you want to send Email to users based rules in the screen?';
+                    sqlQueryRules = $('#builder-select-users').queryBuilder('getSQL').sql;
 
                 }
 
@@ -769,10 +769,12 @@
 
                     {% else %}
 
+
                         var data = {
                             scheduled_at: $('#send-scheduled-at').val(),
                             campaign_id: currentCampaignId,
-                            query_rules: JSON.stringify(query_rules),
+                            query_rules: JSON.stringify(queryRules),
+                            query_rules_sql: sqlQueryRules,
                             email_subject: emailSubject
 
                         };

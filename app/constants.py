@@ -86,13 +86,17 @@ GOLD_FREE_TRANSACTION_TYPES_TUPLE = tuple(SILVER_FREE_TRANSACTION_TYPES)
 
 FREE_TRANSACTION_TYPES_TUPLE = tuple(GOLD_FREE_TRANSACTION_TYPES + SILVER_FREE_TRANSACTION_TYPES)
 
-
 PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
     'charms': [17, 18, 21, 20, 10],
     'avatar': [34, 24, 23, 33, 15, 28, 25, 11, 29, 27, 12, 26, 22, 32, 14, 31, 37, 38, 41, 39, 40, 42, 45, 44, 43, 46],
-    'emoji': [36,0], 'gold': [1,0], 'silver': [2,0], 'spin_ticket': [16,0], 'lucky_spin': [-1,0]}
+    'emoji': [36, 0], 'gold': [1, 0], 'silver': [2, 0], 'spin_ticket': [16, 0], 'lucky_spin': [-1, 0]}
 
-TEST_EMAIL_ADDRESS= [{"name": "fanhaipeng", "email": "938376959@qq.com"}, {"name": "fanhaipeng", "email": "515409351@qq.com"}]
+# TEST_EMAIL_ADDRESS= [{"name": "Hong Kaing", "email": "hong.kaing@wpt.com"}, {"name": "Zheng Lei", "email": "zhenglei@ourgame.com"},
+#                      {"name": "Ozzie Yildiz", "email": "ozzie.yildiz@wpt.com"}, {"name": "Flora", "email": "Flora.wang@wpt.com"}
+#                      {"name": "Jerry", "email": "Jerry.lao@wpt.com"}
+#                      ]
+TEST_EMAIL_ADDRESS = [{"name": 'fanhaieng', "email": "938376959@qq.com"}]
+
 
 class BaseEnum(Enum):
     def __str__(self):

@@ -5,7 +5,7 @@ from operator import iand, ior
 from sqlalchemy import text
 from sqlalchemy.schema import Index
 
-from app.constants import PROMOTION_PUSH_STATUSES
+from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES
 from app.extensions import db
 from app.libs.datetime_type import AwareDateTime
 from app.models.main import AdminUser, AdminUserQuery
@@ -17,6 +17,7 @@ class PromotionPush(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin_user_id = db.Column(db.Integer, nullable=False, index=True)
     based_query_id = db.Column(db.Integer)
+    based_query_rules = db.Column(db.String(50))
     push_type = db.Column(db.String(50), nullable=False, index=True)
     status = db.Column(db.String(50))
     message = db.Column(db.Text, nullable=False)
@@ -26,7 +27,7 @@ class PromotionPush(db.Model):
     created_at = db.Column(AwareDateTime, default=current_time, nullable=False, index=True)
 
     def based_query_sql(self):
-        if self.based_query_id is None:
+        if not self.based_query_id:
             return None
 
         query = db.session.query(AdminUserQuery).filter_by(id=self.based_query_id).first()
@@ -67,6 +68,7 @@ class PromotionPush(db.Model):
             'requested_by': self.admin_user_name(),
             'based_query_id': self.based_query_id,
             'based_query_sql': self.based_query_sql(),
+            'based_query_rules': self.based_query_rules,
             'push_type': self.push_type,
             'scheduled_at': arrow.get(self.scheduled_at).to(app.config['APP_TIMEZONE']).format(),
             'status': self.status if self.status != PROMOTION_PUSH_STATUSES.SCHEDULED.value else {
@@ -126,25 +128,28 @@ class GameBehaviour(BasicProperty):
     @classmethod
     def x_days_inactive(cls, field, operator, value):
         sql = """
-                SELECT DISTINCT ( user_id )
+                SELECT DISTINCT  user_id 
                 FROM   bi_user
                 WHERE  user_id NOT IN (SELECT DISTINCT user_id
                                        FROM   bi_user_currency
                                        WHERE  DATE(created_at)> DATE_ADD(CURDATE(), INTERVAL - :value DAY)
-                                              AND transaction_type != 20132001) 
+                                              AND transaction_type NOT IN (20132001, 999998301, 925011306, 
+                                              925011307, 925011410, 925011411, 30007777, 925011311, 923118301, 
+                                              923118302, 923118303, 923118304, 923118311, 923118312, 923118313, 
+                                              923118314))
               """
-        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
+
+        result_proxy = list(db.engine.execute(text(sql), value=value))
+        user_id = [item[0] for item in result_proxy]
 
         return user_id
 
     @classmethod
     def average_active_days_weekly(cls, field, operator, value):
-        # if value ==7
-        # ??
         sql = """
 
-                SELECT average_active_days_weekly FROM (
-                SELECT c.user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                SELECT user_id,  average_active_days_weekly FROM (
+                SELECT c.user_id AS user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
                 (u.reg_time)) / 7) AS average_active_days_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_currency c
@@ -159,8 +164,8 @@ class GameBehaviour(BasicProperty):
     @classmethod
     def average_active_days_monthly(cls, field, operator, value):
         sql = """
-                SELECT average_active_days_monthly FROM (
-                SELECT c.user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                SELECT user_id , average_active_days_monthly FROM (
+                SELECT c.user_id AS user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
                 (u.reg_time)) / 30) AS average_active_days_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_currency c
@@ -184,7 +189,8 @@ class PaidBehaviour(GameBehaviour):
                                        FROM   bi_user_bill) 
               """
 
-        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
+        result_proxy = list(db.engine.execute(text(sql)))
+        user_id = [item[0] for item in result_proxy]
 
         return set(user_id)
 
@@ -192,14 +198,15 @@ class PaidBehaviour(GameBehaviour):
     def purchased_users(cls, field, operator, value):
         sql = """ SELECT DISTINCT user_id FROM bi_user_bill """
 
-        user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
+        result_proxy = db.engine.execute(text(sql))
+        user_id = [item[0] for item in result_proxy]
 
         return user_id
 
     @classmethod
     def x_days_not_purchase(cls, field, operator, value):
         sql = """
-                SELECT DISTINCT ( user_id )
+                SELECT DISTINCT  user_id 
                 FROM   bi_user_bill
                 WHERE  user_id NOT IN (SELECT DISTINCT user_id
                                        FROM   bi_user_bill
@@ -213,10 +220,9 @@ class PaidBehaviour(GameBehaviour):
 
     @classmethod
     def average_purchase_amount_monthly(cls, field, operator, value):
-        # 8000
         sql = """ 
-                SELECT average_purchase_amount_monthly FROM(
-                SELECT b.user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                SELECT user_id , average_purchase_amount_monthly FROM(
+                SELECT b.user_id AS user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
                 (u.reg_time)) / 30) AS average_purchase_amount_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
@@ -233,11 +239,9 @@ class PaidBehaviour(GameBehaviour):
 
     @classmethod
     def average_purchase_amount_weekly(cls, field, operator, value):
-        # 25000
-
         sql = """
-                SELECT average_purchase_amount_weekly FROM(
-                SELECT b.user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                SELECT user_id ,average_purchase_amount_weekly FROM(
+                SELECT b.user_id AS user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
                 (u.reg_time)) / 7) AS average_purchase_amount_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
@@ -253,9 +257,9 @@ class PaidBehaviour(GameBehaviour):
     @classmethod
     def average_purchase_count_monthly(cls, field, operator, value):
         sql = """
-                SELECT average_purchase_amount_monthly FROM (
-                SELECT b.user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 30) AS average_purchase_amount_monthly
+                SELECT user_id, average_purchase_count_monthly FROM (
+                SELECT b.user_id AS user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30) AS average_purchase_count_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
@@ -270,13 +274,14 @@ class PaidBehaviour(GameBehaviour):
     @classmethod
     def average_purchase_count_weekly(cls, field, operator, value):
         sql = """
+                SELECT  average_purchase_count_weekly FROM (
                 SELECT b.user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
                 (u.reg_time)) / 7) AS average_purchase_count_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
                 WHERE b.currency_type = 'Dollar'
-                GROUP BY b.user_id 
+                GROUP BY b.user_id ) t
          """
         user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
 
@@ -291,6 +296,11 @@ class UsersGrouping(PaidBehaviour):
         operator = rules["operator"]
         value = rules["value"]
 
+        if field == 'purchased' and value == '1':
+            field = "purchased_users"
+        if field == 'purchased' and value == '0':
+            field = "never_purchased_users"
+
         fields = {"reg_time": super(UsersGrouping, cls).reg_time, "reg_state": super(UsersGrouping, cls).reg_state,
                   "birthday": super(UsersGrouping, cls).birthday,
                   "x_days_inactive": super(UsersGrouping, cls).x_days_inactive,
@@ -298,7 +308,7 @@ class UsersGrouping(PaidBehaviour):
                   "average_active_days_monthly": super(UsersGrouping, cls).average_active_days_monthly,
                   "purchased_users": super(UsersGrouping, cls).purchased_users,
                   "never_purchased_users": super(UsersGrouping, cls).never_purchased_users,
-                  "x_days_not_purchase": super(UsersGrouping, cls).x_days_inactive,
+                  "X_days_not_purchase": super(UsersGrouping, cls).x_days_inactive,
                   "average_purchase_count_monthly": super(UsersGrouping, cls).average_purchase_count_monthly,
                   "average_purchase_count_weekly": super(UsersGrouping, cls).average_purchase_count_weekly,
                   "average_purchase_amount_monthly": super(UsersGrouping, cls).average_purchase_amount_monthly,
@@ -341,37 +351,40 @@ class UsersGrouping(PaidBehaviour):
     @classmethod
     def generate_recipients(cls, query_rules, notification_type):
 
-        def get_user(connection, transaction, query_rules, notification_type):
+        def get_user(query_rules, notification_type):
 
             user_ids = cls.get_user_id(query_rules)
 
             if user_ids:
-                if notification_type == 'fb_notification':
-                    return connection.execute(
-                        text(
-                            """ SELECT u_id AS user_id  ,pu_id FROM  tb_platform_user_info WHERE u_id IN :user_ids """),
-                        user_ids=user_ids)
 
-                elif notification_type == 'email':
+                if notification_type == PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value:
+                    result_proxy = db.get_engine(app, bind='orig_wpt').execute(text(
+                        """ SELECT u_id AS user_id  ,pu_id  AS platform_user_id FROM  tb_platform_user_info WHERE u_id IN :user_ids """),
+                        user_ids=tuple(user_ids))
 
-                    connection.execute(text(
+                    return result_proxy
+
+                elif notification_type == PROMOTION_PUSH_TYPES.EMAIL.value:
+                    result_proxy = db.engine.execute(text(
                         """ SELECT user_id,  username,reg_country,reg_state,email  FROM bi_user WHERE user_id IN :user_ids """),
                         user_ids=tuple(user_ids))
+                    return result_proxy
+
                 else:
 
                     return []
             else:
                 return []
 
-        if notification_type == 'fb_notification':
-            result_proxy = with_db_context(db, get_user, query_rules, db='orig_wpt')
+        if notification_type == PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value:
+            result_proxy = get_user(query_rules=query_rules, notification_type=notification_type)
 
             recipients = [[row['user_id'], row['platform_user_id']] for row in result_proxy]
 
             return recipients
 
-        if notification_type == 'email':
-            result_proxy = with_db_context(db, get_user, query_rules=query_rules, notification_type=notification_type)
+        if notification_type == PROMOTION_PUSH_TYPES.EMAIL.value:
+            result_proxy = get_user(query_rules=query_rules, notification_type=notification_type)
 
             recipients = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
                            'email': row['email']} for row in result_proxy]
@@ -397,5 +410,6 @@ def sql_filter_option(connection, transaction, sql, field, operator, value):
         result_proxy = connection.execute(text(sql + 'WHERE ' + field + ' BETWEEN :value1 AND :value2'),
                                           value1=value[0], value2=value[1])
 
-    result_proxy = list(result_proxy)
-    return result_proxy
+    user_ids = list([item[0] for item in result_proxy])
+
+    return user_ids

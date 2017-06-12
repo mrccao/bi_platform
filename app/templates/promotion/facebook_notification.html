@@ -255,9 +255,9 @@
                         },
                         operators: ['less', 'equal', 'greater', 'between']
 
-                        },
+                    },
                         {
-                            id: 'X_days_inactive',
+                            id: 'x_days_inactive',
                             field: 'X_days_inactive',
                             label: 'X Days Inactive',
                             type: 'integer',
@@ -446,7 +446,7 @@
                             plugin_config: {
 
                                 min: 1,
-                                max: 7,
+                                max: 30,
                                 value: 0,
 
                                 tooltip_position: 'bottom',
@@ -611,6 +611,9 @@
                 insertAtCaret('message-editor', ' @[fb_name] ');
             });
 
+
+            var sqlQueryRules = null;
+
             {% if based_query %}
                 var basedQueryId = {{ based_query.id }};
                 var submitConfirmAlert = 'Do you want to send Facebook notification to users based query in the screen?';
@@ -641,6 +644,7 @@
                 if (query_rules !== null) {
 
                     submitConfirmAlert = 'Do you want to send Facebook notification to users based rules in the screen?';
+                    sqlQueryRules = $('#builder-select-users').queryBuilder('getSQL').sql;
 
                 }
 
@@ -677,6 +681,7 @@
                         var data = {
                             'scheduled_at': $('#send-scheduled-at').val(),
                             message: $('#message-editor').val(),
+                            query_rules_sql: sqlQueryRules,
                             query_rules: JSON.stringify(query_rules)
                         };
 
@@ -761,11 +766,16 @@
                             for (var i in historyTableColumns) {
                                 var column = historyTableColumns[i];
                                 if (column === 'based_query_id') {
-                                    if (row[column] === null) {
-                                        rows.push('<td></td>');
-                                    } else {
+                                    if (row["based_query_sql"] !== null) {
                                         rows.push('<td><pre>' + row['based_query_sql'] + '</pre></td>');
                                     }
+                                    else if (row["based_query_rules"] !== null) {
+                                        rows.push('<td>' + row['based_query_rules'] + '</td>');
+                                    }
+                                    else {
+                                        rows.push('<td>  </td>');
+                                    }
+
                                 } else if (column === 'status') {
                                     if (row[column] === 'failed') {
                                         rows.push('<td>' +
