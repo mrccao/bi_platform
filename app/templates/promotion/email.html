@@ -25,7 +25,7 @@
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
                 <h4>Sending email to users based query blew:</h4>
-                <pre> <strong> {{ based_query.sql }}  </strong> </pre>
+                <pre><strong>{{based_query.sql}}</strong></pre>
             </div>
         </div>
 
@@ -538,6 +538,23 @@
                 minDate: moment()
             });
 
+
+
+            var loadingOverlayConfig = {
+                image: '',
+                fontawesome: 'fa fa-spinner fa-spin',
+                maxSize: "26px",
+                minSize: "26px"
+            }
+
+            function startRequestLoading() {
+                $('#editor-box').LoadingOverlay('show', loadingOverlayConfig);
+            }
+
+            function stopRequestLoading() {
+                $('#editor-box').LoadingOverlay('hide', true);
+            }
+
             ////////////////////
 
             function reloadEmailPreview(html_content) {
@@ -592,6 +609,7 @@
                     },
                     dataType: 'json',
                     success: function (result) {
+                        stopRequestLoading();
                         reloadEmailPreview(result.html_content);
                     },
                     error: function (xhr) {
@@ -781,6 +799,7 @@
 
                     {% endif %}
 
+                    startRequestLoading();
                     $.ajax({
                         type: 'POST',
                         url: '/promotion/email/sender_campaign',
@@ -788,6 +807,7 @@
                         dataType: "json",
                         success: function (result) {
                             swal("Success!", "Your request has submitted successfully. Please wait background job to processing your campaign.", "success");
+                            stopRequestLoading();
                             getPushHistories();
                         },
                         error: function (xhr) {
@@ -812,6 +832,7 @@
 
                 };
 
+                startRequestLoading();
                 $.ajax({
                     type: 'POST',
                     url: '/promotion/email/send_test_email',
@@ -819,6 +840,7 @@
                     dataType: "json",
                     success: function (result) {
                         swal("Success!", "The test email has been sent!", "success");
+                        stopRequestLoading();
                         getPushHistories();
                     },
                     error: function (xhr) {
@@ -846,6 +868,7 @@
 
                 var pushId = $(this).attr('data-push-id');
 
+                startRequestLoading();
                 $.ajax({
                     type: 'POST',
                     url: '/promotion/email/retry',
@@ -853,6 +876,7 @@
                     dataType: "json",
                     success: function (result) {
                         swal("Success!", "Your request has submitted successfully. Please wait background job to processing your request.", "success");
+                        stopRequestLoading();
                         getPushHistories();
                     },
                     error: function (xhr) {

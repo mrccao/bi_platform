@@ -23,7 +23,7 @@
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
                 <h4>Sending Facebook notification to users based query blew:</h4>
-                <pre> <strong> {{ based_query.sql }}   </strong> </pre>
+                <pre><strong>{{ based_query.sql }}</strong></pre>
             </div>
         </div>
 
@@ -72,7 +72,7 @@
                                   rel="stylesheet">
 
 
-                            <button type="button" class="btn btn-default" style="margin-right: 5px;"
+                            <button type="button" class="btn btn-default" style="margin-right: 5px; display: none"
                                     id="btn-select-users" data-toggle="modal" data-target="#select-users"><i
                                     class="fa fa-indent"></i> Select Users
                             </button>
@@ -687,7 +687,7 @@
 
                     {% endif %}
 
-
+                    startRequestLoading();
                     $.ajax({
                         type: 'POST',
                         url: '/promotion/facebook_notification/sender',

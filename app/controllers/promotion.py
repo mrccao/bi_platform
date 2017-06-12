@@ -114,11 +114,6 @@ def facebook_notification_sender():
             if 'facebook_id' in column_names:
                 data = result_proxy.fetchall()
 
-                facebook_ids = [item[1] for item in data]
-
-                if not any(facebook_ids):
-                    return jsonify(error='No users who meet your requirements'), 500
-
                 df = pd.DataFrame(data, columns=column_names)
 
                 data = [[row['user_id'], row['facebook_id']] for _, row in df.iterrows() if
@@ -226,7 +221,7 @@ def email_sender():
 
     email_content = email_content. \
         replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-        replace("[Weblink]", "[%weblink%]"). \
+        replace("[weblink]", "https://www.playwpt.com"). \
         replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
         replace("[Sender_Name]", "PlayWPT"). \
         replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
@@ -293,33 +288,22 @@ def email_sender():
 
         try:
             if based_query_id:
-                # based some query
-                query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
 
+                query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
                 stmt = sqlparse.parse(query.sql)[0]
                 tokens = [str(item) for item in stmt.tokens]
-                tokens[2] = 'user_id, email'
+                tokens[2] = 'user_id, username, reg_country, email'
                 slim_sql = ''.join(tokens)
 
                 result_proxy = db.engine.execute(text(slim_sql))
                 column_names = [col[0] for col in result_proxy.cursor.description]
 
-                if 'user_id' in column_names:
-
-                    user_ids = list(result_proxy.fetchall())
-                    user_emails = [item[1] for item in user_ids]
-
-                    if not any(user_emails):
-                        return jsonify(error='No users who meet your requirements'), 500
-
-                    user_ids = [i[0] for i in user_ids]
-
-                    result_proxy = db.engine.execute(text(
-                        """ SELECT user_id,  username,email,reg_country  FROM bi_user WHERE user_id IN :user_ids """),
-                        user_ids=tuple(user_ids))
-
+                if 'email' in column_names:
+                    data = result_proxy.fetchall()
+                    df = pd.DataFrame(data, columns=column_names)
                     data = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-                             'email': row['email']} for row in result_proxy]
+                             'email': row['email']} for _, row in df.iterrows() if
+                            (row['user_id'] is not None and row['email'] is not None)]
 
                     if app.config['ENV'] == 'prod':
 
@@ -372,16 +356,15 @@ def test_email():
     from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
     reply_to = {"email": "no-reply@playwpt.com", "name": ""}
 
-    if __name__ == '__main__':
-        email_content = email_content. \
-            replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-            replace("[Weblink]", "[%weblink%]"). \
-            replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
-            replace("[Sender_Name]", "PlayWPT"). \
-            replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
-            replace("[Sender_State]", "CA"). \
-            replace("[Sender_City]", "Irvine"). \
-            replace("[Sender_Zip]", "92614")
+    email_content = email_content. \
+        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+        replace("[weblink]", "https://www.playwpt.com"). \
+        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
+        replace("[Sender_Name]", "PlayWPT"). \
+        replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
+        replace("[Sender_State]", "CA"). \
+        replace("[Sender_City]", "Irvine"). \
+        replace("[Sender_Zip]", "92614")
 
     suppression = {"group_id": 2161, "groups_to_display": [2161]}
 

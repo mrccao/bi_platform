@@ -123,7 +123,7 @@
                                 <li><a id="promoiton-tools-send-facebook-notification" target="_blank"
                                        href="{{ url_for('promotion.facebook_notification') }}">Send FB notification to
                                     result</a></li>
-                                <li><a id="promoiton-tools-send-facebook-notification" target="_blank"
+                                <li><a id="promoiton-tools-send-email-notification" target="_blank"
                                        href="{{ url_for('promotion.email_notification') }}">Send Email to result</a>
                                 </li>
                             </ul>
@@ -401,6 +401,8 @@
                         stopRequestLoading(true);
 
                         $('#promoiton-tools-send-facebook-notification').attr('href', '{{ url_for("promotion.facebook_notification") }}?based_query_id=' + result.query_id);
+
+                        $('#promoiton-tools-send-email-notification').attr('href', '{{ url_for("promotion.email_notification") }}?based_query_id=' + result.query_id);
 
                         $('.nav-tabs a[href="#tab-result"]').tab('show')
 
