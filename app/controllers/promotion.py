@@ -129,7 +129,7 @@ def facebook_notification_sender():
                 return jsonify(error="based query don't have column: user_id, facebook_id"), 500
 
 
-        elif query_rules:
+        elif query_rules is not None:
 
             if app.config['ENV'] == 'prod':
 
@@ -319,7 +319,7 @@ def email_sender():
 
                     return jsonify(error="Based query don't have column: user_id, email"), 500
 
-            elif query_rules:
+            elif query_rules is not None:
 
                 if app.config['ENV'] == 'prod':
 

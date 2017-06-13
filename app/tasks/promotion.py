@@ -51,7 +51,7 @@ def update_promotion_status(data, status_value):
 def process_promotion_facebook_notification_items(push_id, scheduled_at, query_rules=None, data=None):
     try:
 
-        if query_rules:
+        if query_rules is not None:
 
             data = UsersGrouping.generate_recipients(query_rules, PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value)
 
@@ -213,7 +213,7 @@ def process_promotion_email_notification_items(push_id, scheduled_at, query_rule
         status_value = PROMOTION_PUSH_HISTORY_STATUSES.SCHEDULED.value
         push_type_value = PROMOTION_PUSH_TYPES.EMAIL.value
 
-        if query_rules:
+        if query_rules is not None:
 
             data = UsersGrouping.generate_recipients(query_rules, PROMOTION_PUSH_TYPES.EMAIL.value)
 
@@ -370,7 +370,7 @@ def process_promotion_email():
 
             except Exception as e:
 
-                print('process_promotion_email: sendgrid request exception' + error_msg_from_exception(e))
+                print('process_promotion_email: sendgrid request exception: ' + error_msg_from_exception(e))
 
                 update_promotion_status([{'_id': recipient_id , 'error_message': error_msg_from_exception(e)
                                           } for recipient_id in partitions_recipient_ids], PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
@@ -387,6 +387,5 @@ def process_promotion_email():
         else:
 
             print('process_promotion_email: done')
-
 
 

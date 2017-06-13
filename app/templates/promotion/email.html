@@ -25,7 +25,7 @@
             <div class="callout callout-info"
                  style="margin-left: -5px; margin-right: -5px; margin-bottom: 0!important;">
                 <h4>Sending email to users based query blew:</h4>
-                <pre><strong>{{based_query.sql}}</strong></pre>
+                <pre><strong>{{ based_query.sql }}</strong></pre>
             </div>
         </div>
 
@@ -539,7 +539,6 @@
             });
 
 
-
             var loadingOverlayConfig = {
                 image: '',
                 fontawesome: 'fa fa-spinner fa-spin',
@@ -613,6 +612,7 @@
                         reloadEmailPreview(result.html_content);
                     },
                     error: function (xhr) {
+                        stopRequestLoading();
                     }
                 });
             });
@@ -811,6 +811,7 @@
                             getPushHistories();
                         },
                         error: function (xhr) {
+                            stopRequestLoading();
                             swal("Error", JSON.parse(xhr.responseText).error, "error");
                         }
                     });
@@ -856,6 +857,7 @@
 
         $(document).on('click', '.btn-retry', function () {
 
+
             swal({
                 title: retryConfirmAlert,
                 type: "warning",
@@ -868,7 +870,6 @@
 
                 var pushId = $(this).attr('data-push-id');
 
-                startRequestLoading();
                 $.ajax({
                     type: 'POST',
                     url: '/promotion/email/retry',

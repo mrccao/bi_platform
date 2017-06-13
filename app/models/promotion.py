@@ -328,13 +328,13 @@ class UsersGrouping(PaidBehaviour):
 
             if "condition" in rules:
 
-                cls.get_user_id(rules)
+                return set(cls.get_user_id(rules))
 
             else:
 
-                every_child_query_user_id = cls.parse_query_rules(rules)
+                child_query_user_id = cls.parse_query_rules(rules)
 
-                return every_child_query_user_id
+                return child_query_user_id
 
         user_id = list(map(get_child_query_rules, rules))
 
@@ -379,7 +379,8 @@ class UsersGrouping(PaidBehaviour):
         if notification_type == PROMOTION_PUSH_TYPES.FB_NOTIFICATION.value:
             result_proxy = get_user(query_rules=query_rules, notification_type=notification_type)
 
-            recipients = [[row['user_id'], row['platform_user_id']] for row in result_proxy if row['platform_user_id'] is not None]
+            recipients = [[row['user_id'], row['platform_user_id']] for row in result_proxy if
+                          row['platform_user_id'] is not None]
 
             return recipients
 
@@ -387,7 +388,7 @@ class UsersGrouping(PaidBehaviour):
             result_proxy = get_user(query_rules=query_rules, notification_type=notification_type)
 
             recipients = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-                           'email': row['email']} for row in result_proxy if  row['email'] is not None]
+                           'email': row['email']} for row in result_proxy if row['email'] is not None]
 
             return recipients
 
