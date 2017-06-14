@@ -10,7 +10,7 @@ from flask import current_app as app
 from flask_login import login_required, current_user
 from sqlalchemy import text
 
-from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES, TEST_EMAIL_ADDRESS
+from app.constants import PROMOTION_PUSH_STATUSES, PROMOTION_PUSH_TYPES, TEST_EMAIL_RECIPIENTS, REPLY_TO, FROM_SENDER
 from app.extensions import db, sendgrid
 from app.models.main import AdminUserQuery
 from app.models.promotion import PromotionPush
@@ -216,160 +216,153 @@ def email_sender():
     email_subject = request.form.get('email_subject')
     email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
 
-    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
-    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
+    if scheduled_at:
+        # from est to utc
+        scheduled_at = arrow.get(scheduled_at).replace(tzinfo=tz.gettz(app.config['APP_TIMEZONE'])).to('UTC')
 
-    email_content = email_content. \
-        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-        replace("[weblink]", "https://www.playwpt.com"). \
-        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
-        replace("[Sender_Name]", "PlayWPT"). \
-        replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
-        replace("[Sender_State]", "CA"). \
-        replace("[Sender_City]", "Irvine"). \
-        replace("[Sender_Zip]", "92614")
+    else:
+        # utc
+        scheduled_at = current_time()
 
-    suppression = {"group_id": 2161, "groups_to_display": [2161]}
+    email_campaign = {"content": [{"type": "text/html", "value": email_content}], "from": FROM_SENDER,
+                      "reply_to": REPLY_TO, "subject": email_subject}
 
-    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": "Testing----" + email_subject, "to": TEST_EMAIL_ADDRESS}],
-            'asm': suppression}
+    email_campaign = json.dumps(email_campaign)
+
+    pending_digest = (str(current_user.id) + '_' + email_campaign + '_' + scheduled_at.format('YYYYMMDD')).encode(
+        'utf-8')
+    message_key = hashlib.md5(pending_digest).hexdigest()
+    push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
+
+    if push is None:
+
+        push = PromotionPush(
+            admin_user_id=current_user.id,
+            based_query_id=based_query_id,
+            based_query_rules=query_rules_sql,
+            push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
+            message=email_campaign,
+            message_key=message_key,
+            status=PROMOTION_PUSH_STATUSES.PENDING.value,
+            scheduled_at=scheduled_at.format('YYYY-MM-DD HH:mm:ss'))
+
+        db.session.add(push)
+        db.session.commit()
+
+    else:
+
+        return jsonify(
+            error="You have been sent this email before, please change message if you don't need to send the same email."), 500
+
+    push_id = push.id
 
     try:
-        sendgrid.client.mail.send.post(request_body=data)
+        if based_query_id:
+
+            query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
+            stmt = sqlparse.parse(query.sql)[0]
+            tokens = [str(item) for item in stmt.tokens]
+            tokens[2] = 'user_id, username, reg_country, email'
+            slim_sql = ''.join(tokens)
+
+            result_proxy = db.engine.execute(text(slim_sql))
+            column_names = [col[0] for col in result_proxy.cursor.description]
+
+            if 'email' in column_names:
+                data = result_proxy.fetchall()
+                df = pd.DataFrame(data, columns=column_names)
+                data = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
+                         'email': row['email']} for _, row in df.iterrows() if
+                        (row['user_id'] is not None and row['email'] is not None)]
+
+                if app.config['ENV'] == 'prod':
+
+                    process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), data=data)
+
+                else:
+
+                    process_promotion_email_notification_items(push_id, scheduled_at.format(), data=data)
+
+                return jsonify(result='ok'), 202
+
+            else:
+
+                return jsonify(error="Based query don't have column: user_id, email"), 500
+
+        elif query_rules is not None:
+
+            if app.config['ENV'] == 'prod':
+
+                process_promotion_email_notification_items.delay(push_id, scheduled_at.format(),
+                                                                 query_rules=query_rules)
+
+            else:
+
+                process_promotion_email_notification_items(push_id, scheduled_at.format(), query_rules=query_rules)
+
+            return jsonify(result='ok'), 202
+
+        else:
+
+            if app.config['ENV'] == 'prod':
+                process_promotion_email_notification_items.delay(push_id, scheduled_at.format())
+            else:
+                process_promotion_email_notification_items(push_id, scheduled_at.format())
+
+            return jsonify(result='ok')
 
     except Exception as e:
 
         return jsonify(error=error_msg_from_exception(e)), 500
-    else:
-
-        if scheduled_at:
-
-            # from est to utc
-            scheduled_at = arrow.get(scheduled_at).replace(tzinfo=tz.gettz(app.config['APP_TIMEZONE'])).to('UTC')
-
-        else:
-
-            # utc
-
-            scheduled_at = current_time()
-
-        email_campaign = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender,
-                          "reply_to": reply_to, "subject": email_subject}
-
-        email_campaign = json.dumps(email_campaign)
-
-        pending_digest = (str(current_user.id) + '_' + email_campaign + '_' + scheduled_at.format('YYYYMMDD')).encode(
-            'utf-8')
-        message_key = hashlib.md5(pending_digest).hexdigest()
-        push = db.session.query(PromotionPush).filter_by(message_key=message_key).first()
-
-        if push is None:
-
-            push = PromotionPush(
-                admin_user_id=current_user.id,
-                based_query_id=based_query_id,
-                based_query_rules=query_rules_sql,
-                push_type=PROMOTION_PUSH_TYPES.EMAIL.value,
-                message=email_campaign,
-                message_key=message_key,
-                status=PROMOTION_PUSH_STATUSES.PENDING.value,
-                scheduled_at=scheduled_at.format('YYYY-MM-DD HH:mm:ss'))
-
-            db.session.add(push)
-            db.session.commit()
-
-        else:
-
-            return jsonify(
-                error="You have been sent this email before, please change message if you don't need to send the same email."), 500
-
-        push_id = push.id
-
-        try:
-            if based_query_id:
-
-                query = db.session.query(AdminUserQuery).filter_by(id=based_query_id).first()
-                stmt = sqlparse.parse(query.sql)[0]
-                tokens = [str(item) for item in stmt.tokens]
-                tokens[2] = 'user_id, username, reg_country, email'
-                slim_sql = ''.join(tokens)
-
-                result_proxy = db.engine.execute(text(slim_sql))
-                column_names = [col[0] for col in result_proxy.cursor.description]
-
-                if 'email' in column_names:
-                    data = result_proxy.fetchall()
-                    df = pd.DataFrame(data, columns=column_names)
-                    data = [{'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'],
-                             'email': row['email']} for _, row in df.iterrows() if
-                            (row['user_id'] is not None and row['email'] is not None)]
-
-                    if app.config['ENV'] == 'prod':
-
-                        process_promotion_email_notification_items.delay(push_id, scheduled_at.format(), data=data)
-
-                    else:
-
-                        process_promotion_email_notification_items(push_id, scheduled_at.format(), data=data)
-
-                    return jsonify(result='ok')
-
-                else:
-
-                    return jsonify(error="Based query don't have column: user_id, email"), 500
-
-            elif query_rules is not None:
-
-                if app.config['ENV'] == 'prod':
-
-                    process_promotion_email_notification_items.delay(push_id, scheduled_at.format(),
-                                                                     query_rules=query_rules)
-
-                else:
-
-                    process_promotion_email_notification_items(push_id, scheduled_at.format(), query_rules=query_rules)
-
-                return jsonify(result='ok')
-
-            else:
-
-                if app.config['ENV'] == 'prod':
-                    process_promotion_email_notification_items.delay(push_id, scheduled_at.format())
-                else:
-                    process_promotion_email_notification_items(push_id, scheduled_at.format())
-
-                return jsonify(result='ok')
-
-        except Exception as e:
-
-            return jsonify(error=error_msg_from_exception(e)), 500
 
 
 @promotion.route("/promotion/email/send_test_email", methods=["POST"])
 def test_email():
     campaign_id = request.form.get('campaign_id')
     email_subject = request.form.get('email_subject')
-
     email_content = [campaign['html_content'] for campaign in get_campaigns() if campaign['id'] == int(campaign_id)][0]
 
-    from_sender = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
-    reply_to = {"email": "no-reply@playwpt.com", "name": ""}
+    email_campaign = {"content": [{"type": "text/html", "value": email_content}], "from": FROM_SENDER,
+                      "reply_to": REPLY_TO, "subject": "TESTING: " + email_subject}
 
-    email_content = email_content. \
-        replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-        replace("[weblink]", "https://www.playwpt.com"). \
-        replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
-        replace("[Sender_Name]", "PlayWPT"). \
-        replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
-        replace("[Sender_State]", "CA"). \
-        replace("[Sender_City]", "Irvine"). \
-        replace("[Sender_Zip]", "92614")
+    personalizations = []
+    for recipient in TEST_EMAIL_RECIPIENTS:
+        personalizations.append({"to": [{'email': recipient.get('email')}],
+                                 "substitutions": {"-country-": recipient.get("country"),
+                                                   "-email-": recipient.get("email"),
+                                                   "-Play_Username-": recipient.get("username")}})
 
-    suppression = {"group_id": 2161, "groups_to_display": [2161]}
+    def build_email_campaign(email_campaign, personalizations):
 
-    data = {"content": [{"type": "text/html", "value": email_content}], "from": from_sender, "reply_to": reply_to,
-            "personalizations": [{"subject": 'Testing' + email_subject, "to": TEST_EMAIL_ADDRESS}], 'asm': suppression}
+        email_campaign['personalizations'] = personalizations
+
+        #  ubsubscribe
+        email_content = email_campaign["content"][0]["value"]
+
+        # custom field
+        email_content = email_content. \
+            replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
+            replace("[weblink]", "https://www.playwpt.com"). \
+            replace("[Sender_Name]", "PlayWPT"). \
+            replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
+            replace("[Sender_State]", "CA"). \
+            replace("[Sender_City]", "Irvine"). \
+            replace("[Sender_Zip]", "92614"). \
+            replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
+            replace("[%country%]", "-country-"). \
+            replace('[%Play_Username | %]', "-Play_Username-"). \
+            replace("[%Play_Username%]", "-Play_Username-"). \
+            replace("[%email%]", "-email-")
+
+        email_campaign["content"][0]["value"] = email_content
+
+        # ubsubscribe
+        suppression = {"group_id": 2161, "groups_to_display": [2161]}
+        email_campaign['asm'] = suppression
+
+        return email_campaign
+
+    data = build_email_campaign(email_campaign, personalizations)
 
     try:
         sendgrid.client.mail.send.post(request_body=data)
@@ -380,4 +373,4 @@ def test_email():
 
     else:
 
-        return jsonify('ok'), 202
+        return jsonify(result='ok'), 202
