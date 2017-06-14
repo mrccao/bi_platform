@@ -11,7 +11,7 @@ from wtforms import TextField, PasswordField, SelectField
 from wtforms import validators
 
 from app.constants import ADMIN_USER_ROLES
-from app.models.bi import BIUser, BIUserCurrency, BIUserBill
+from app.models.bi import BIUser, BIUserCurrency, BIUserBill, BIUserBillDetail
 from app.models.orig_wpt import WPTUserLoginLog
 
 
@@ -187,6 +187,41 @@ class AdminBIUserCurrencyModelView(AdminBaseModelView):
 
 
 class AdminBIUserBillModelView(AdminBaseModelView):
+    def user_id_formatter(v, c, m, p):
+        return Markup('<a href="/data/bi_user/details/?user_id=%s" target="_blank">%s</a>' % (m.user_id, m.user_id))
+
+    def products_formatter(v, c, m, p):
+        return Markup('<br />'.join(['%s: %s' % (row.category, row.goods)for row in m.bill_detail_products()]))
+
+    column_formatters = dict(user_id=user_id_formatter, products=products_formatter)
+
+    column_default_sort = ('created_at', True)
+    column_list = ['user_id', 'platform', 'currency_type', 'currency_amount', 'goods', 'products', 'quantity', 'created_at']
+    column_sortable_list = ['currency_amount', 'quantity', 'created_at']
+
+    currency_type_options = (
+        ('Gold', 'Gold'),
+        ('MasterPoints', 'MasterPoints'),
+        ('Dollar', 'Dollar'),
+        ('Silver Coins', 'Silver Coins')
+    )
+
+    platform_options = (
+        ('Web', 'Web'),
+        ('iOS', 'iOS'),
+        ('Android', 'Android'),
+        ('Facebook Game', 'Facebook Game'),
+        ('Unknown', 'Unknown')
+    )
+
+    column_filters = [
+        FilterEqual(column=BIUserBill.user_id, name='User Id'),
+        FilterEqual(column=BIUserBill.currency_type, name='Paid Currency', options=currency_type_options),
+        FilterEqual(column=BIUserBill.platform, name='Platform', options=platform_options),
+    ]
+
+
+class AdminBIUserBillDetailModelView(AdminBaseModelView):
     def product_formatter(v, c, m, p):
         return '%s: %s' % (m.category, m.goods)
 
@@ -225,11 +260,14 @@ class AdminBIUserBillModelView(AdminBaseModelView):
     )
 
     column_filters = [
-        FilterEqual(column=BIUserBill.user_id, name='User Id'),
-        FilterEqual(column=BIUserBill.currency_type, name='Paid Currency', options=currency_type_options),
-        FilterEqual(column=BIUserBill.category, name='Product Category', options=category_options),
-        FilterEqual(column=BIUserBill.platform, name='Platform', options=platform_options),
+        FilterEqual(column=BIUserBillDetail.user_id, name='User Id'),
+        FilterEqual(column=BIUserBillDetail.currency_type, name='Paid Currency', options=currency_type_options),
+        FilterEqual(column=BIUserBillDetail.category, name='Product Category', options=category_options),
+        FilterEqual(column=BIUserBillDetail.platform, name='Platform', options=platform_options),
     ]
+
+    def is_visible(self):
+        return False
 
 
 class AdminBIClubWPTUserModelView(AdminBaseModelView):

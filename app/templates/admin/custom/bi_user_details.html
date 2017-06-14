@@ -32,11 +32,11 @@
                         <tr>
                           <td>
                             {% if item[0] == 'Count Of Dollar Exchanged For Gold' %}
-                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Gold" target="_blank">{{ item[0] }}</a>
+                              <a href="/data/bi_user_bill_detail/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Gold" target="_blank">{{ item[0] }}</a>
                             {% elif item[0] == 'Count Of Dollar Exchanged For Silver' %}
-                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Silver+Coins" target="_blank">{{ item[0] }}</a>
+                              <a href="/data/bi_user_bill_detail/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Silver+Coins" target="_blank">{{ item[0] }}</a>
                             {% elif item[0] == 'Count Of Dollar Exchanged For Lucky Spin' or item[0] == 'Count Of Dollar Exchanged For Spin Purchase' or item[0] == 'Count Of Dollar Exchanged For Spin Ticket' or item[0] == 'Count Of Dollar Exchanged For Spin Booster' %}
-                              <a href="/data/bi_user_bill/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Lucky+Spin+Set" target="_blank">{{ item[0] }}</a>
+                              <a href="/data/bi_user_bill_detail/?flt0_0={{ model.user_id }}&flt1_1=Dollar&flt2_2=Lucky+Spin+Set" target="_blank">{{ item[0] }}</a>
                             {% else %}
                               {{ item[0] }}
                             {% endif %}

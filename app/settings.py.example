@@ -45,6 +45,7 @@ class ProdConfig(Config):
     CELERY_IMPORTS = (
         'app.tasks.bi_user',
         'app.tasks.bi_user_bill',
+        'app.tasks.bi_user_bill_detail',
         'app.tasks.bi_user_currency',
         'app.tasks.bi_statistic',
         'app.tasks.bi_clubwpt_user',
@@ -145,6 +146,7 @@ class DevConfig(Config):
     CELERY_IMPORTS = (
         'app.tasks.bi_user',
         'app.tasks.bi_user_bill',
+        'app.tasks.bi_user_bill_detail',
         'app.tasks.bi_user_currency',
         'app.tasks.bi_statistic',
         'app.tasks.bi_clubwpt_user',
@@ -225,6 +227,7 @@ class TestConfig(Config):
     CELERY_IMPORTS = (
         'app.tasks.bi_user',
         'app.tasks.bi_user_bill',
+        'app.tasks.bi_user_bill_detail',
         'app.tasks.bi_user_currency',
         'app.tasks.bi_statistic',
         'app.tasks.bi_clubwpt_user',

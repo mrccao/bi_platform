@@ -2,7 +2,7 @@ from sqlalchemy import text, and_
 from sqlalchemy.sql.expression import bindparam
 
 from app.extensions import db
-from app.models.bi import BIUser, BIUserBill
+from app.models.bi import BIUser, BIUserBillDetail
 from app.tasks import celery, get_config_value, set_config_value, with_db_context
 
 
@@ -39,8 +39,8 @@ def parse_user_mall_platform_from_reg_source(reg_source):
     return 'Unknown'
 
 
-def process_user_mall_bill_newly_added_records():
-    config_value = get_config_value(db, 'last_imported_user_mall_bill_order_id')
+def process_user_mall_bill_detail_newly_added_records():
+    config_value = get_config_value(db, 'last_imported_user_mall_bill_detail_order_id')
 
     def collection(connection, transaction):
         """ Get newly added. """
@@ -54,21 +54,27 @@ def process_user_mall_bill_newly_added_records():
                                                   c.CurrencyCode,
                                                   c.CurrencyName,
                                                   o.TotalPrice,
-                                                  o.GoodsCount,
+                                                  p.ParentId,
                                                   g.GoodsName,
                                                   g.IsPromotion,
-                                                  og.GoodsId,
+                                                  p.ProductName,
+                                                  op.GoodsId,
+                                                  op.ProductId,
+                                                  op.Quantity,
                                                   o.CDate,
-                                                  o.UDate
+                                                  o.UDate,
+                                                  (CASE WHEN p.ParentId IS NULL THEN p.ProductName ELSE (SELECT ProductName FROM Mall_tProduct WHERE Id = p.ParentId) END) AS Category
                                            FROM   Mall_tOrder o
-                                                  LEFT JOIN Mall_tOrderGoods og
-                                                         ON og.OrderId = o.OrderId
+                                                  LEFT JOIN Mall_tOrderProductLog op
+                                                         ON op.OrderId = o.OrderId
+                                                  LEFT JOIN Mall_tProduct p
+                                                         ON op.ProductId = p.Id
                                                   LEFT JOIN Mall_tCurrency c
                                                          ON o.CurrencyCode = c.CurrencyCode
                                                   LEFT JOIN Mall_tPlatform s
                                                          ON s.PlatformId = o.PlatformId
                                                   LEFT JOIN Mall_tGoods g
-                                                         ON g.Id = og.GoodsId
+                                                         ON g.Id = op.GoodsId
                                            WHERE  o.OrderStatus != 1
                                                   AND o.OrderStatus != 41
                                                   AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
@@ -83,21 +89,27 @@ def process_user_mall_bill_newly_added_records():
                                               c.CurrencyCode,
                                               c.CurrencyName,
                                               o.TotalPrice,
-                                              o.GoodsCount,
+                                              p.ParentId,
                                               g.GoodsName,
                                               g.IsPromotion,
-                                              og.GoodsId,
+                                              p.ProductName,
+                                              op.GoodsId,
+                                              op.ProductId,
+                                              op.Quantity,
                                               o.CDate,
-                                              o.UDate
+                                              o.UDate,
+                                              (CASE WHEN p.ParentId IS NULL THEN p.ProductName ELSE (SELECT ProductName FROM Mall_tProduct WHERE Id = p.ParentId) END) AS Category
                                        FROM   Mall_tOrder o
-                                              LEFT JOIN Mall_tOrderGoods og
-                                                     ON og.OrderId = o.OrderId
+                                              LEFT JOIN Mall_tOrderProductLog op
+                                                     ON op.OrderId = o.OrderId
+                                              LEFT JOIN Mall_tProduct p
+                                                     ON op.ProductId = p.Id
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
                                               LEFT JOIN Mall_tPlatform s
-                                                     ON s.PlatformId = o.PlatformId
+                                                         ON s.PlatformId = o.PlatformId
                                               LEFT JOIN Mall_tGoods g
-                                                     ON g.Id = og.GoodsId
+                                                         ON g.Id = op.GoodsId
                                        WHERE  o.OrderStatus != 1
                                               AND o.OrderStatus != 41
                                               AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
@@ -114,7 +126,7 @@ def process_user_mall_bill_newly_added_records():
         orig_result_proxy.append(row)
 
     def existed_collection(connection, transaction):
-        return connection.execute(text("SELECT orig_id FROM bi_user_bill WHERE orig_db = 'WPT_MALL'"))
+        return connection.execute(text("SELECT orig_id FROM bi_user_bill_detail WHERE orig_db = 'WPT_MALL'"))
     existed_result_proxy = with_db_context(db, existed_collection)
     existed_data = [row['orig_id'] for row in existed_result_proxy]
 
@@ -130,10 +142,14 @@ def process_user_mall_bill_newly_added_records():
         'currency_type': row['CurrencyName'],
         'currency_type_orig': row['CurrencyCode'],
         'currency_amount': row['TotalPrice'],
+        'category': row['Category'],
+        'category_orig': row['ParentId'],
+        'product': row['ProductName'],
+        'product_orig': row['ProductId'],
         'goods': row['GoodsName'],
         'goods_orig': row['GoodsId'],
         'is_promotion': row['IsPromotion'],
-        'quantity': row['GoodsCount'],
+        'quantity': row['Quantity'],
         'created_at': row['CDate']
     } for row in orig_result_proxy if row['OrderId'] not in existed_data]
 
@@ -143,14 +159,14 @@ def process_user_mall_bill_newly_added_records():
         def sync_collection(connection, transaction):
             """ Sync newly added. """
             try:
-                connection.execute(BIUserBill.__table__.insert(), rows)
-                set_config_value(connection, 'last_imported_user_mall_bill_order_id', new_config_value)
+                connection.execute(BIUserBillDetail.__table__.insert(), rows)
+                set_config_value(connection, 'last_imported_user_mall_bill_detail_order_id', new_config_value)
             except:
-                print('process_user_mall_bill_newly_added_records transaction.rollback()')
+                print('process_user_mall_bill_detail_newly_added_records transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_user_mall_bill_newly_added_records transaction.commit()')
+                print('process_user_mall_bill_detail_newly_added_records transaction.commit()')
                 transaction.commit()
             return
 
@@ -159,8 +175,8 @@ def process_user_mall_bill_newly_added_records():
     return
 
 
-def process_user_mall_bill_newly_updated_records():
-    config_value = get_config_value(db, 'last_imported_user_mall_bill_order_update_time')
+def process_user_mall_bill_detail_newly_updated_records():
+    config_value = get_config_value(db, 'last_imported_user_mall_bill_detail_order_update_time')
 
     def collection(connection, transaction):
         """ Get newly added. """
@@ -174,25 +190,30 @@ def process_user_mall_bill_newly_updated_records():
                                                   c.CurrencyCode,
                                                   c.CurrencyName,
                                                   o.TotalPrice,
-                                                  o.GoodsCount,
+                                                  p.ParentId,
                                                   g.GoodsName,
                                                   g.IsPromotion,
-                                                  og.GoodsId,
+                                                  p.ProductName,
+                                                  op.GoodsId,
+                                                  op.ProductId,
+                                                  op.Quantity,
                                                   o.CDate,
-                                                  o.UDate
+                                                  o.UDate,
+                                                  (CASE WHEN p.ParentId IS NULL THEN p.ProductName ELSE (SELECT ProductName FROM Mall_tProduct WHERE Id = p.ParentId) END) AS Category
                                            FROM   Mall_tOrder o
-                                                  LEFT JOIN Mall_tOrderGoods og
-                                                         ON og.OrderId = o.OrderId
+                                                  LEFT JOIN Mall_tOrderProductLog op
+                                                         ON op.OrderId = o.OrderId
+                                                  LEFT JOIN Mall_tProduct p
+                                                         ON op.ProductId = p.Id
                                                   LEFT JOIN Mall_tCurrency c
                                                          ON o.CurrencyCode = c.CurrencyCode
                                                   LEFT JOIN Mall_tPlatform s
                                                          ON s.PlatformId = o.PlatformId
                                                   LEFT JOIN Mall_tGoods g
-                                                         ON g.Id = og.GoodsId
+                                                         ON g.Id = op.GoodsId
                                            WHERE  o.OrderStatus != 1
                                                   AND o.OrderStatus != 41
                                                   AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
-                                                  AND o.UDate IS NOT NULL
                                            ORDER BY o.UDate ASC
                                            """))
         return connection.execute(text("""
@@ -204,21 +225,27 @@ def process_user_mall_bill_newly_updated_records():
                                               c.CurrencyCode,
                                               c.CurrencyName,
                                               o.TotalPrice,
-                                              o.GoodsCount,
+                                              p.ParentId,
                                               g.GoodsName,
                                               g.IsPromotion,
-                                              og.GoodsId,
+                                              p.ProductName,
+                                              op.GoodsId,
+                                              op.ProductId,
+                                              op.Quantity,
                                               o.CDate,
-                                              o.UDate
+                                              o.UDate,
+                                              (CASE WHEN p.ParentId IS NULL THEN p.ProductName ELSE (SELECT ProductName FROM Mall_tProduct WHERE Id = p.ParentId) END) AS Category
                                        FROM   Mall_tOrder o
-                                              LEFT JOIN Mall_tOrderGoods og
-                                                     ON og.OrderId = o.OrderId
+                                              LEFT JOIN Mall_tOrderProductLog op
+                                                     ON op.OrderId = o.OrderId
+                                              LEFT JOIN Mall_tProduct p
+                                                     ON op.ProductId = p.Id
                                               LEFT JOIN Mall_tCurrency c
                                                      ON o.CurrencyCode = c.CurrencyCode
                                               LEFT JOIN Mall_tPlatform s
-                                                     ON s.PlatformId = o.PlatformId
+                                                         ON s.PlatformId = o.PlatformId
                                               LEFT JOIN Mall_tGoods g
-                                                     ON g.Id = og.GoodsId
+                                                         ON g.Id = op.GoodsId
                                        WHERE  o.OrderStatus != 1
                                               AND o.OrderStatus != 41
                                               AND (o.PaymentMode IS NULL OR o.PaymentMode = 1)
@@ -235,7 +262,7 @@ def process_user_mall_bill_newly_updated_records():
         orig_result_proxy.append(row)
 
     def existed_collection(connection, transaction):
-        return connection.execute(text("SELECT orig_id FROM bi_user_bill WHERE orig_db = 'WPT_MALL'"))
+        return connection.execute(text("SELECT orig_id FROM bi_user_bill_detail WHERE orig_db = 'WPT_MALL'"))
     existed_result_proxy = with_db_context(db, existed_collection)
     existed_data = [row['orig_id'] for row in existed_result_proxy]
 
@@ -251,10 +278,14 @@ def process_user_mall_bill_newly_updated_records():
         'currency_type': row['CurrencyName'],
         'currency_type_orig': row['CurrencyCode'],
         'currency_amount': row['TotalPrice'],
+        'category': row['Category'],
+        'category_orig': row['ParentId'],
+        'product': row['ProductName'],
+        'product_orig': row['ProductId'],
         'goods': row['GoodsName'],
         'goods_orig': row['GoodsId'],
         'is_promotion': row['IsPromotion'],
-        'quantity': row['GoodsCount'],
+        'quantity': row['Quantity'],
         'created_at': row['CDate'],
         'updated_at': row['UDate']
     } for row in orig_result_proxy if row['OrderId'] not in existed_data]
@@ -267,14 +298,14 @@ def process_user_mall_bill_newly_updated_records():
         def sync_collection(connection, transaction):
             """ Sync newly added. """
             try:
-                connection.execute(BIUserBill.__table__.insert(), rows)
-                set_config_value(connection, 'last_imported_user_mall_bill_order_update_time', new_config_value)
+                connection.execute(BIUserBillDetail.__table__.insert(), rows)
+                set_config_value(connection, 'last_imported_user_mall_bill_detail_order_update_time', new_config_value)
             except:
-                print('process_user_mall_bill_newly_updated_records transaction.rollback()')
+                print('process_user_mall_bill_detail_newly_updated_records transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_user_mall_bill_newly_updated_records transaction.commit()')
+                print('process_user_mall_bill_detail_newly_updated_records transaction.commit()')
                 transaction.commit()
             return
 
@@ -302,7 +333,7 @@ def process_user_payment_bill_newly_added_records():
         orig_result_proxy.append(row)
 
     def existed_collection(connection, transaction):
-        return connection.execute(text("SELECT orig_id FROM bi_user_bill WHERE orig_db = 'WPT_PAYMENT'"))
+        return connection.execute(text("SELECT orig_id FROM bi_user_bill_detail WHERE orig_db = 'WPT_PAYMENT'"))
     existed_result_proxy = with_db_context(db, existed_collection)
     existed_data = [row['orig_id'] for row in existed_result_proxy]
 
@@ -318,9 +349,12 @@ def process_user_payment_bill_newly_added_records():
         'currency_type': 'Dollar',
         'currency_type_orig': 201,
         'currency_amount': row['total_price'],
+        'category': 'Lucky Spin Set',
+        'category_orig': 3,
+        'product': 'Lucky Spin($0.99)',
+        'product_orig': -1,
         'goods': 'Lucky Spin($0.99)',
         'goods_orig': -1,
-        'is_promotion': False,
         'quantity': 1,
         'created_at': row['createtime']
     } for row in orig_result_proxy if str(row['user_paylog_id']) not in existed_data]
@@ -330,7 +364,7 @@ def process_user_payment_bill_newly_added_records():
         def sync_collection(connection, transaction):
             """ Sync newly added. """
             try:
-                connection.execute(BIUserBill.__table__.insert(), rows)
+                connection.execute(BIUserBillDetail.__table__.insert(), rows)
             except:
                 print('process_user_payment_bill_newly_added_records transaction.rollback()')
                 transaction.rollback()
@@ -345,9 +379,9 @@ def process_user_payment_bill_newly_added_records():
     return
 
 
-def process_user_mall_bill_fix_platform():
+def process_user_mall_bill_detail_fix_platform():
     def collection(connection, transaction):
-        return connection.execute(text("SELECT user_id, reg_source FROM bi_user WHERE user_id IN (SELECT DISTINCT user_id FROM bi_user_bill WHERE platform = 'Undetected')"))
+        return connection.execute(text("SELECT user_id, reg_source FROM bi_user WHERE user_id IN (SELECT DISTINCT user_id FROM bi_user_bill_detail WHERE platform = 'Undetected')"))
 
     result_proxy = with_db_context(db, collection)
 
@@ -360,88 +394,21 @@ def process_user_mall_bill_fix_platform():
 
         def sync_collection(connection, transaction):
             where = and_(
-                BIUserBill.__table__.c.user_id == bindparam('_user_id'),
-                BIUserBill.__table__.c.platform == 'Undetected'
+                BIUserBillDetail.__table__.c.user_id == bindparam('_user_id'),
+                BIUserBillDetail.__table__.c.platform == 'Undetected'
                 )
             values = {
                 'platform': bindparam('platform')
                 }
 
             try:
-                connection.execute(BIUserBill.__table__.update().where(where).values(values), rows)
+                connection.execute(BIUserBillDetail.__table__.update().where(where).values(values), rows)
             except:
-                print('process_user_mall_bill_fix_platform transaction.rollback()')
+                print('process_user_mall_bill_detail_fix_platform transaction.rollback()')
                 transaction.rollback()
                 raise
             else:
-                print('process_user_mall_bill_fix_platform transaction.commit()')
-                transaction.commit()
-            return
-
-        with_db_context(db, sync_collection)
-
-    return
-
-
-def process_user_dollar_paid_total():
-    config_value = get_config_value(db, 'last_imported_user_bill_dollar_paid_total_add_time')
-
-    def collection(connection, transaction):
-        """ Get newly added. """
-        if config_value is None:
-            return connection.execute(text("""
-                                           SELECT user_id,
-                                                  COUNT(*) AS dollar_paid_count,
-                                                  ROUND(SUM(currency_amount), 2) AS dollar_paid_amount,
-                                                  MAX(created_at) AS max_createtime
-                                           FROM bi_user_bill
-                                           WHERE currency_type = 'Dollar'
-                                           GROUP BY user_id
-                                           ORDER BY max_createtime ASC
-                                           """))
-        return connection.execute(text("""
-                                       SELECT user_id,
-                                              COUNT(*) AS dollar_paid_count,
-                                              ROUND(SUM(currency_amount), 2) AS dollar_paid_amount,
-                                              MAX(created_at) AS max_createtime
-                                       FROM bi_user_bill
-                                       WHERE currency_type = 'Dollar'
-                                             AND user_id IN (SELECT DISTINCT user_id
-                                                             FROM   bi_user_bill
-                                                             WHERE  created_at >= :add_time)
-                                       GROUP BY user_id
-                                       ORDER BY max_createtime ASC
-                                       """), add_time=config_value)
-
-    result_proxy = with_db_context(db, collection)
-
-    rows = [{
-        '_user_id': row['user_id'],
-        'dollar_paid_count': row['dollar_paid_count'],
-        'dollar_paid_amount': row['dollar_paid_amount'],
-        'max_createtime': row['max_createtime']
-    } for row in result_proxy]
-
-    if rows:
-        new_config_value = rows[-1]['max_createtime']
-
-        def sync_collection(connection, transaction):
-            """ Sync newly added. """
-            where = BIUser.__table__.c.user_id == bindparam('_user_id')
-            values = {
-                'dollar_paid_count': bindparam('dollar_paid_count'),
-                'dollar_paid_amount': bindparam('dollar_paid_amount'),
-                }
-
-            try:
-                connection.execute(BIUser.__table__.update().where(where).values(values), rows)
-                set_config_value(connection, 'last_imported_user_bill_dollar_paid_total_add_time', new_config_value)
-            except:
-                print('process_user_dollar_paid_total transaction.rollback()')
-                transaction.rollback()
-                raise
-            else:
-                print('process_user_dollar_paid_total transaction.commit()')
+                print('process_user_mall_bill_detail_fix_platform transaction.commit()')
                 transaction.commit()
             return
 
@@ -451,19 +418,16 @@ def process_user_dollar_paid_total():
 
 
 @celery.task
-def process_bi_user_bill():
+def process_bi_user_bill_detail():
 
-    process_user_mall_bill_newly_added_records()
-    print('process_user_mall_bill_newly_added_records() done.')
+    process_user_mall_bill_detail_newly_added_records()
+    print('process_user_mall_bill_detail_newly_added_records() done.')
 
-    process_user_mall_bill_newly_updated_records()
-    print('process_user_mall_bill_newly_updated_records() done.')
+    process_user_mall_bill_detail_newly_updated_records()
+    print('process_user_mall_bill_detail_newly_updated_records() done.')
 
     process_user_payment_bill_newly_added_records()
     print('process_user_payment_bill_newly_added_records() done.')
 
-    process_user_mall_bill_fix_platform()
-    print('process_user_mall_bill_fix_platform() done.')
-
-    process_user_dollar_paid_total()
-    print('process_user_dollar_paid_total() done.')
+    process_user_mall_bill_detail_fix_platform()
+    print('process_user_mall_bill_detail_fix_platform() done.')

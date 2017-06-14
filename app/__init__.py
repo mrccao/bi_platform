@@ -7,6 +7,7 @@ from app.libs.json_encoder import FlaskJSONEncoder
 from app.models.bi import (BIUser,
                            BIUserCurrency,
                            BIUserBill,
+                           BIUserBillDetail,
                            BIClubWPTUser,
                            WPTUserLoginLog)
 from app.models.main import AdminUser, AdminUserActivity
@@ -17,6 +18,7 @@ from app.views import (AdminBaseIndexView,
                        AdminBIUserModelView,
                        AdminBIUserCurrencyModelView,
                        AdminBIUserBillModelView,
+                       AdminBIUserBillDetailModelView,
                        AdminBIClubWPTUserModelView,
                        AdminWPTUserLoginLogModelView)
 
@@ -76,6 +78,8 @@ def register_extensions(app):
                                          menu_icon_value='fa-circle-o', endpoint='bi_user_currency'))
         admin.add_view(AdminBIUserBillModelView(BIUserBill, db.session, name='BI User Bill', menu_icon_type='fa',
                                                 menu_icon_value='fa-circle-o', endpoint='bi_user_bill'))
+        admin.add_view(AdminBIUserBillDetailModelView(BIUserBillDetail, db.session, name='BI User Bill Detail', menu_icon_type='fa',
+                                                menu_icon_value='fa-circle-o', endpoint='bi_user_bill_detail'))
         admin.add_view(
             AdminBIClubWPTUserModelView(BIClubWPTUser, db.session, name='BI ClubWPT User', menu_icon_type='fa',
                                         menu_icon_value='fa-circle-o', endpoint='bi_clubwpt_user'))

@@ -298,6 +298,47 @@ class BIUserBill(db.Model):
 
     currency_amount = db.Column(db.Float, nullable=False, default=0)
 
+    # category = db.Column(db.String(255), nullable=False)
+    # category_orig = db.Column(db.Integer)
+
+    # product = db.Column(db.String(255), nullable=False)
+    # product_orig = db.Column(db.Integer, nullable=False)
+
+    goods = db.Column(db.String(255))
+    goods_orig = db.Column(db.Integer, nullable=False)
+
+    is_promotion = db.Column(db.Boolean)
+
+    quantity = db.Column(db.Integer, nullable=False)
+
+    created_at = db.Column(OGInsertableAwareDateTime, nullable=False, default=current_time, index=True)
+
+    __table_args__ = (
+        UniqueConstraint('orig_db', 'orig_id', 'goods_orig', name='ix_uniq_orig_db_and_orig_id_and_goods_orig'),)
+
+    def bill_detail_products(self):
+        return BIUserBillDetail.query.filter_by(orig_db=self.orig_db, orig_id=self.orig_id).all()
+
+
+class BIUserBillDetail(db.Model):
+    __tablename__ = 'bi_user_bill_detail'
+
+    id = db.Column(db.BIGINT, primary_key=True)
+
+    orig_id = db.Column(db.String(255), nullable=False, index=True)
+    orig_db = db.Column(db.String(50), nullable=False, index=True)
+
+    user_id = db.Column(db.BIGINT, nullable=False, index=True)
+    game_id = db.Column(db.Integer, nullable=False, index=True)
+
+    platform = db.Column(db.String(255), nullable=False, index=True)
+    platform_orig = db.Column(db.Integer, nullable=False, index=True)
+
+    currency_type = db.Column(db.String(255), nullable=False, index=True)
+    currency_type_orig = db.Column(db.Integer, nullable=False, index=True)
+
+    currency_amount = db.Column(db.Float, nullable=False, default=0)
+
     category = db.Column(db.String(255), nullable=False)
     category_orig = db.Column(db.Integer)
 
@@ -306,6 +347,8 @@ class BIUserBill(db.Model):
 
     goods = db.Column(db.String(255))
     goods_orig = db.Column(db.Integer, nullable=False)
+
+    is_promotion = db.Column(db.Boolean)
 
     quantity = db.Column(db.Integer, nullable=False)
 

@@ -8,7 +8,7 @@ from sqlalchemy import and_
 
 from app import create_app
 from app.extensions import db
-from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIClubWPTUser, \
+from app.models.bi import BIImportConfig, BIStatistic, BIUser, BIUserCurrency, BIUserBill, BIUserBillDetail, BIClubWPTUser, \
     BIUserStatistic
 from app.models.orig_wpt_bi import WPTBIUserStatistic
 from app.models.main import AdminUser, AdminUserActivity, AdminUserQuery
@@ -17,6 +17,7 @@ from app.tasks.bi_clubwpt_user import process_bi_clubwpt_user
 from app.tasks.bi_statistic import process_bi_statistic
 from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
+from app.tasks.bi_user_bill_detail import process_bi_user_bill_detail
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi, process_wpt_bi
@@ -91,10 +92,14 @@ def init_bi_user_bill_import_config():
 
     BIImportConfig.__table__.create(db.engine, checkfirst=True)
 
-    variables = ['last_imported_user_bill_dollar_paid_add_time',
+    variables = [# for bi_user_bill
                  'last_imported_user_mall_bill_order_id',
                  'last_imported_user_mall_bill_order_update_time',
-                 'last_imported_user_payment_bill_order_id']
+                 'last_imported_user_bill_dollar_paid_total_add_time',
+
+                 # for bi_user_bill_detail
+                 'last_imported_user_mall_bill_detail_order_id',
+                 'last_imported_user_mall_bill_detail_order_update_time']
 
     for v in variables:
         db.session.query(BIImportConfig).filter_by(var=v).delete()
@@ -217,8 +222,10 @@ def reset_bi_user_bill():
     answer = input("Do you want? (yes/no) ")
     if answer == 'yes':
         BIUserBill.__table__.drop(db.engine, checkfirst=True)
-
         BIUserBill.__table__.create(db.engine, checkfirst=True)
+
+        BIUserBillDetail.__table__.drop(db.engine, checkfirst=True)
+        BIUserBillDetail.__table__.create(db.engine, checkfirst=True)
 
         init_bi_user_bill_import_config()
 
@@ -368,8 +375,10 @@ def sync_bi_user():
 def sync_bi_user_bill():
     if app.config['ENV'] == 'prod':
         process_bi_user_bill.delay()
+        process_bi_user_bill_detail.delay()
     else:
         process_bi_user_bill()
+        process_bi_user_bill_detail()
 
 
 @manager.command
