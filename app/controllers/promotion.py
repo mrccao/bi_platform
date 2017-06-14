@@ -350,7 +350,7 @@ def test_email():
 
         email_content = email_content. \
             replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
-            replace("[weblink]", "https://www.playwpt.com"). \
+            replace("[Weblink]", "https://www.playwpt.com"). \
             replace("[Sender_Name]", "PlayWPT"). \
             replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
             replace("[Sender_State]", "CA"). \

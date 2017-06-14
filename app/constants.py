@@ -93,6 +93,7 @@ PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
 
 TEST_EMAIL_RECIPIENTS = [{"username": "Hong Kaing", "email": "hong.kaing@wpt.com", "country": "United States"},
                          {"username": "Zheng Lei", "email": "zhenglei@ourgame.com", "country": "China"},
+                         {"username": "fanhaipeng", "email": "fanhaipeng0403@gmail.com", "country": "United States"},
                          {"username": "Ozzie Yildiz", "email": "ozzie.yildiz@wpt.com", "country": "United States"},
                          {"username": "Flora", "email": "Flora.wang@wpt.com", "country": "United States"},
                          {"username": "Jerry", "email": "Jerry.lao@wpt.com", "country": "United States"}]
