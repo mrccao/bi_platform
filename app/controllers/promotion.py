@@ -3,6 +3,7 @@ import json
 import arrow
 import hashlib
 import pandas as pd
+import re
 import sqlparse
 from dateutil import tz
 from flask import Blueprint, render_template, request, jsonify
@@ -340,6 +341,13 @@ def test_email():
         email_content = email_campaign["content"][0]["value"]
 
         # custom field
+
+        pattern = re.compile(r'\[%.*?%\]')
+        custom_fields = re.findall(pattern, email_content)
+        custom_fields_format = ['[%' + (field.split('%')[1]).split(' ')[0] + '%]' for field in custom_fields]
+        for i in range(0, len(custom_fields)):
+            email_content = email_content.replace(custom_fields[i], custom_fields_format[i])
+
         email_content = email_content. \
             replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
             replace("[weblink]", "https://www.playwpt.com"). \
@@ -350,7 +358,6 @@ def test_email():
             replace("[Sender_Zip]", "92614"). \
             replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
             replace("[%country%]", "-country-"). \
-            replace('[%Play_Username | %]', "-Play_Username-"). \
             replace("[%Play_Username%]", "-Play_Username-"). \
             replace("[%email%]", "-email-")
 

@@ -2,6 +2,7 @@ import json
 import urllib.parse
 
 import arrow
+import re
 import requests
 from random import randrange
 from sqlalchemy import text, func
@@ -340,6 +341,12 @@ def process_promotion_email():
 
                 # custom field
 
+                pattern = re.compile(r'\[%.*?%\]')
+                custom_fields = re.findall(pattern, email_content)
+                custom_fields_format = ['[%' + (field.split('%')[1]).split(' ')[0] + '%]' for field in custom_fields]
+                for i in range(0, len(custom_fields)):
+                    email_content = email_content.replace(custom_fields[i], custom_fields_format[i])
+
                 email_content = email_content. \
                     replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
                     replace("[weblink]", "https://www.playwpt.com"). \
@@ -350,7 +357,6 @@ def process_promotion_email():
                     replace("[Sender_Zip]", "92614"). \
                     replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
                     replace("[%country%]", "-country-"). \
-                    replace('[%Play_Username | %]', "-Play_Username-"). \
                     replace("[%Play_Username%]", "-Play_Username-"). \
                     replace("[%email%]", "-email-")
 
@@ -387,4 +393,3 @@ def process_promotion_email():
 
     else:
         print('process_promotion_email: All done')
-
