@@ -149,8 +149,8 @@ class GameBehaviour(BasicProperty):
         sql = """
 
                 SELECT user_id,  average_active_days_weekly FROM (
-                SELECT c.user_id AS user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 7) AS average_active_days_weekly
+                SELECT c.user_id AS user_id,FLOOR(Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7)) AS average_active_days_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_currency c
                                ON u.user_id = c.user_id
@@ -165,8 +165,8 @@ class GameBehaviour(BasicProperty):
     def average_active_days_monthly(cls, field, operator, value):
         sql = """
                 SELECT user_id , average_active_days_monthly FROM (
-                SELECT c.user_id AS user_id, Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 30) AS average_active_days_monthly
+                SELECT c.user_id AS user_id,FLOOR(Count(DISTINCT DATE(c.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30)) AS average_active_days_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_currency c
                                ON u.user_id = c.user_id
@@ -222,15 +222,14 @@ class PaidBehaviour(GameBehaviour):
     def average_purchase_amount_monthly(cls, field, operator, value):
         sql = """ 
                 SELECT user_id , average_purchase_amount_monthly FROM(
-                SELECT b.user_id AS user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 30) AS average_purchase_amount_monthly
+                SELECT b.user_id AS user_id,FLOOR(  SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30)) AS average_purchase_amount_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
                 WHERE b.currency_type = 'Dollar'
                 GROUP BY b.user_id 
                 ) t
-                
                """
 
         user_id = with_db_context(db, sql_filter_option, sql=sql, field=field, operator=operator, value=value)
@@ -241,8 +240,8 @@ class PaidBehaviour(GameBehaviour):
     def average_purchase_amount_weekly(cls, field, operator, value):
         sql = """
                 SELECT user_id ,average_purchase_amount_weekly FROM(
-                SELECT b.user_id AS user_id, SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 7) AS average_purchase_amount_weekly
+                SELECT b.user_id AS user_id, FLOOR(SUM(currency_amount) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7)) AS average_purchase_amount_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
@@ -258,8 +257,8 @@ class PaidBehaviour(GameBehaviour):
     def average_purchase_count_monthly(cls, field, operator, value):
         sql = """
                 SELECT user_id, average_purchase_count_monthly FROM (
-                SELECT b.user_id AS user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 30) AS average_purchase_count_monthly
+                SELECT b.user_id AS user_id, FLOOR(Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 30)) AS average_purchase_count_monthly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
@@ -275,8 +274,8 @@ class PaidBehaviour(GameBehaviour):
     def average_purchase_count_weekly(cls, field, operator, value):
         sql = """
                 SELECT  average_purchase_count_weekly FROM (
-                SELECT b.user_id, Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
-                (u.reg_time)) / 7) AS average_purchase_count_weekly
+                SELECT b.user_id,FLOOR(Count(DISTINCT DATE(b.created_at)) / (DATEDIFF(CURDATE(), DATE
+                (u.reg_time)) / 7)) AS average_purchase_count_weekly
                 FROM   bi_user u
                        INNER JOIN bi_user_bill b
                                ON u.user_id = b.user_id
@@ -294,11 +293,14 @@ class UsersGrouping(PaidBehaviour):
 
         field = rules["field"]
         operator = rules["operator"]
-        value = rules["value"]
+        try:
+            value = int(rules["value"])
+        except:
+            value = rules["value"]
 
-        if field == 'purchased' and value == '1':
+        if field == 'purchased' and value == 1:
             field = "purchased_users"
-        if field == 'purchased' and value == '0':
+        if field == 'purchased' and value == 0:
             field = "never_purchased_users"
 
         fields = {"reg_time": super(UsersGrouping, cls).reg_time, "reg_state": super(UsersGrouping, cls).reg_state,
