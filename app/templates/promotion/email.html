@@ -811,6 +811,7 @@
                             getPushHistories();
                         },
                         error: function (xhr) {
+                            stopRequestLoading();
                             swal("Error", JSON.parse(xhr.responseText).error, "error");
                         }
                     });
