@@ -91,16 +91,16 @@ PRODUCT_AND_PRODUCT_ORIG_MAPPING = {
     'avatar': [34, 24, 23, 33, 15, 28, 25, 11, 29, 27, 12, 26, 22, 32, 14, 31, 37, 38, 41, 39, 40, 42, 45, 44, 43, 46],
     'emoji': [36, 0], 'gold': [1, 0], 'silver': [2, 0], 'spin_ticket': [16, 0], 'lucky_spin': [-1, 0]}
 
-TEST_EMAIL_RECIPIENTS = [{"username": "Hong Kaing", "email": "hong.kaing@wpt.com", "country": "United States"},
-                         {"username": "Zheng Lei", "email": "zhenglei@ourgame.com", "country": "China"},
-                         {"username": "Ozzie Yildiz", "email": "ozzie.yildiz@wpt.com", "country": "United States"},
-                         {"username": "Flora", "email": "Flora.wang@wpt.com", "country": "United States"},
-                         {"username": "Jerry", "email": "Jerry.lao@wpt.com", "country": "United States"}]
+# TEST_EMAIL_RECIPIENTS = [{"username": "Hong Kaing", "email": "hong.kaing@wpt.com", "country": "United States"},
+#                          {"username": "Zheng Lei", "email": "zhenglei@ourgame.com", "country": "China"},
+#                          {"username": "Ozzie Yildiz", "email": "ozzie.yildiz@wpt.com", "country": "United States"},
+#                          {"username": "Flora", "email": "Flora.wang@wpt.com", "country": "United States"},
+#                          {"username": "Jerry", "email": "Jerry.lao@wpt.com", "country": "United States"}]
 
 FROM_SENDER = {"email": "no-reply@playwpt.com", "name": "PlayWPT"}
 REPLY_TO = {"email": "no-reply@playwpt.com", "name": ""}
 
-# TEST_EMAIL_RECIPIENTS = [{"username": 'fanhaieng', "email": "938376959@qq.com", "country": "United States"}]
+TEST_EMAIL_RECIPIENTS = [{"username": 'fanhaieng', "email": "938376959@qq.com", "country": "United States"}]
 
 
 class BaseEnum(Enum):

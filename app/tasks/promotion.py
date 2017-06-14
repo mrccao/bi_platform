@@ -1,9 +1,9 @@
 import json
 import urllib.parse
-from random import randrange
 
 import arrow
 import requests
+from random import randrange
 from sqlalchemy import text, func
 from sqlalchemy.sql.expression import bindparam
 
@@ -178,7 +178,8 @@ def process_promotion_facebook_notification():
                     push_history_id = str(partition_ids[idx])
                     resp_body = json.loads(response['body'])
                     if 'error' in resp_body:
-                        failed_partition_data.append( {'_id': push_history_id, 'error_message': resp_body['error']['message'].split('.')[0]})
+                        failed_partition_data.append(
+                            {'_id': push_history_id, 'error_message': resp_body['error']['message'].split('.')[0]})
                     else:
                         succeeded_partition_data.append({'_id': push_history_id})
 
@@ -263,7 +264,6 @@ def process_promotion_email_notification_items(push_id, scheduled_at, query_rule
 
     except Exception as e:
 
-
         print('process_promotion_email_items exception: ' + error_msg_from_exception(e))
 
         db.session.rollback()
@@ -344,9 +344,9 @@ def process_promotion_email():
                     replace("[Unsubscribe]", '<%asm_group_unsubscribe_raw_url%>'). \
                     replace("[weblink]", "https://www.playwpt.com"). \
                     replace("[Sender_Name]", "PlayWPT"). \
-                    replace("[Sender_Address]", "1920 Main Street, Suite 1150").\
+                    replace("[Sender_Address]", "1920 Main Street, Suite 1150"). \
                     replace("[Sender_State]", "CA"). \
-                    replace("[Sender_City]", "Irvine").\
+                    replace("[Sender_City]", "Irvine"). \
                     replace("[Sender_Zip]", "92614"). \
                     replace("[Unsubscribe_Preferences]", '<%asm_preferences_raw_url%>'). \
                     replace("[%country%]", "-country-"). \
@@ -372,8 +372,9 @@ def process_promotion_email():
 
                 print('process_promotion_email: sendgrid request exception: ' + error_msg_from_exception(e))
 
-                update_promotion_status([{'_id': recipient_id , 'error_message': error_msg_from_exception(e)
-                                          } for recipient_id in partitions_recipient_ids], PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
+                update_promotion_status([{'_id': recipient_id, 'error_message': error_msg_from_exception(e)
+                                          } for recipient_id in partitions_recipient_ids],
+                                        PROMOTION_PUSH_HISTORY_STATUSES.FAILED.value)
 
             else:
 
@@ -382,10 +383,8 @@ def process_promotion_email():
                 update_promotion_status([{'_id': recipient_id} for recipient_id in partitions_recipient_ids],
                                         PROMOTION_PUSH_HISTORY_STATUSES.SUCCESS.value)
 
-            continue
+        print('process_promotion_email: push_id = ' + str(push_id) + ' done')
 
-        else:
-
-            print('process_promotion_email: done')
-
+    else:
+        print('process_promotion_email: All done')
 
