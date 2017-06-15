@@ -1,0 +1,58 @@
+<br/>
+<br/>
+<div style="text-align: center;">
+    <b style="font-family: helvetica, arial, sans-serif; font-size: 20px; font-style: normal; font-variant-caps: normal; text-align: center;"> {{ title }}</b>
+</div>
+<br/>
+<table style="width: 100%; padding: 0; margin: 0;" cellspacing="0">
+    <tr>
+        {% for column_name in column_names %}
+            <th style=" color: #4f6b72; border-right: 1px solid #C1DAD7;
+            border-bottom: 1px solid #C1DAD7; border-top: 1px solid #C1DAD7;font-weight: 600;
+             letter-spacing: 2px;  text-align: left;
+             padding: 6px 6px 6px 12px; background: #CAE8EA no-repeat;">{{ column_name }}</th>
+        {% endfor %}
+    </tr>
+
+    {{ yesterday_data_style | safe }}
+
+    {% for each_day_data in report_data %}
+        <tr> {% for metric in  each_day_data %}
+            <td style=" border-right: 1px solid #C1DAD7; border-bottom: 1px solid #C1DAD7; background: #fff; font-size:15px;font-weight: 400; padding: 6px 6px 6px 12px; color: #0e0e0e;">{{ metric }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+
+<br/>
+
+<p style="font-size: 16px">For more details , Please check the <b style="font-size: 14px">{{ filename }} </b> attached .
+    <br/>
+    <br/>
+    Report generated on {{ generated_at }}.
+</p>
+<td style="padding: 10px 10px 10px 10px;" bgcolor="#ffffff">
+    <table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" height="2"
+           style="font-size: 2px; line-height: 2px;">
+        <tbody>
+        <tr>
+            <td bgcolor="#0070CD">&nbsp;</td>
+        </tr>
+        </tbody>
+    </table>
+</td>
+
+
+<br/>
+<div style="text-align: right;">
+    <p style="font-size: 10px; font-family: helvetica, arial, sans-serif;font-style: normal; font-variant-caps: normal; ">
+        WPT BI System
+        <br/>
+        1920 Main Street, Suite 1150
+        <br/>
+        Irvine, CA 92614
+        <br/>
+        © 2017 WPT Enterprises,Inc. All Rights Reserved.​
+    </p>
+</div>
+

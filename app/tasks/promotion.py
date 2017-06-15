@@ -32,7 +32,7 @@ def get_email_users():
 
     return [
         {'user_id': row['user_id'], 'username': row['username'], 'country': row['reg_country'], 'email': row['email']}
-        for row in result_proxy]
+        for row in result_proxy if row['email'] is not None]
 
     # return [{'user_id': 1, 'email': 'fanhaipeng0403@gmail.com', 'username': 'fanhaipeng'}]
 
@@ -342,7 +342,7 @@ def process_promotion_email():
                 # custom field
 
                 pattern = re.compile(r'\[%.*?%\]')
-                custom_fields =list(re.findall(pattern, email_content))
+                custom_fields = list(re.findall(pattern, email_content))
                 custom_fields_format = ['[%' + (field.split('%')[1]).split(' ')[0] + '%]' for field in custom_fields]
                 for i in range(0, len(custom_fields)):
                     email_content = email_content.replace(custom_fields[i], custom_fields_format[i])
