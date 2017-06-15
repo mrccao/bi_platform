@@ -109,12 +109,13 @@ REPLY_TO = {"email": "no-reply@playwpt.com", "name": ""}
 
 DAILY_DAU_REPORT_RECIPIENTS = ["jerry.lao@wpt.com", "Hong.Kaing@wpt.com", "Andrew.Song@wpt.com",
                                "wangjc.Jason@ourgame.com", "zhudan@ourgame.com", "fujie@ourgame.com",
-                               'fanhp@ourgame.com', 'zhenglei@ourgame.com']
+                               "xuqi@ourgame.com", 'fanhp@ourgame.com', 'zhenglei@ourgame.com']
 
 # DAILY_DAU_REPORT_RECIPIENTS = ['fanhp@ourgame.com']
 
 DAILY_CCU_REPORT_RECIPIENTS = ["mclean.karr@wpt.com", "Andrew.Song@wpt.com", "Hong.Kaing@wpt.com", "jerry.lao@wpt.com",
                                "zhenglei@ourgame.com", "fanhp@ourgame.com"]
+
 
 # DAILY_CCU_REPORT_RECIPIENTS = ['fanhp@ourgame.com']
 

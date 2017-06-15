@@ -9,7 +9,7 @@ from app.tasks import celery
 @celery.task
 def send_mail(to, subject, template, attachment=None, attachment_content_type=None, **kwargs):
     msg = Message(app.config['MAIL_SUBJECT_PREFIX'] + subject)
-    if isinstance(to,list):
+    if isinstance(to, list):
         msg.recipients = to
     else:
         msg.add_recipient(to)
