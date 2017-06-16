@@ -106,7 +106,8 @@ def daily_report_game_table_statistic():
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
 
     sql = """
-                SELECT
+          SELECT
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d %H') AS on_hour,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN 'Beginner1'
                           WHEN 'WPT-2-4' THEN 'Beginner2'
@@ -126,7 +127,7 @@ def daily_report_game_table_statistic():
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
                  END AS template_name,
-                 CASE mi.blindname ​
+                 CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'
                           WHEN 'WPT-3-6' THEN '3/6'
@@ -145,22 +146,18 @@ def daily_report_game_table_statistic():
                           WHEN 'cgz_10w/20w' THEN '100000/200000'
                           ELSE mi.blindname
                  END                                                                         AS stakes_level,
-                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d %H') AS on_hour,
                  COUNT(DISTINCT cgz.username)                                                AS uniq_players,
                  COUNT(DISTINCT cgz.pan_id)                                                  AS uniq_hands_played,
                  COUNT(cgz.pan_id)                                                           AS total_hands_played
-        FROM     tj_matchinfo mi
-        JOIN     tj_cgz_flow_userpaninfo cgz
-        ON       cgz.matchid=mi.matchid
-        WHERE    DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
-        GROUP BY stakes_level,
-                 on_hour; 
-            """
+          FROM    tj_matchinfo mi
+          JOIN    tj_cgz_flow_userpaninfo cgz
+          ON      cgz.matchid=mi.matchid
+          WHERE   DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
+          GROUP BY stakes_level,
+                   on_hour; 
+        """
 
-
-    sql = sql.encode('utf-8')
-
-    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
+    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(str(sql)), yesterday=yesterday)
 
     column_names_attached = dedup([col[0] for col in result_proxy.cursor.description])
 
@@ -173,12 +170,12 @@ def daily_report_game_table_statistic():
     path = os.path.join(app.config["REPORT_FILE_FOLDER"], filename)
     result = pd.DataFrame(pd.DataFrame(last_24_hours_data, columns=column_names_attached))
 
-    with open(path, 'w+') as f:
-        result.to_csv(f, sep='\t', encoding='utf-8')
+    with open(path, 'w+', encoding='utf-8') as f:
+        result.to_csv(f, encoding='utf-8')
 
     sql = """
-    
           SELECT
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d')    AS on_day,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN 'Beginner1'
                           WHEN 'WPT-2-4' THEN 'Beginner2'
@@ -198,7 +195,7 @@ def daily_report_game_table_statistic():
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
                  END AS template_name,
-                 CASE mi.blindname ​
+                 CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'
                           WHEN 'WPT-3-6' THEN '3/6'
@@ -217,20 +214,18 @@ def daily_report_game_table_statistic():
                           WHEN 'cgz_10w/20w' THEN '100000/200000'
                           ELSE mi.blindname
                  END                                                                         AS stakes_level,
-                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d')    AS on_day,
                  COUNT(DISTINCT cgz.username)                                                AS uniq_players,
                  COUNT(DISTINCT cgz.pan_id)                                                  AS uniq_hands_played,
                  COUNT(cgz.pan_id)                                                           AS total_hands_played
-        FROM     tj_matchinfo mi
-        JOIN     tj_cgz_flow_userpaninfo cgz
-        ON       cgz.matchid=mi.matchid
-        WHERE    DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
-        GROUP BY stakes_level,
-                 on_day; 
+          FROM    tj_matchinfo mi
+          JOIN    tj_cgz_flow_userpaninfo cgz
+          ON      cgz.matchid=mi.matchid
+          WHERE   DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
+          GROUP BY stakes_level,
+                   on_day;
     """
-    sql = sql.encode('utf-8')
 
-    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
+    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(str(sql)), yesterday=yesterday)
     column_names = dedup([col[0] for col in result_proxy.cursor.description])
     yesterday_data = result_proxy.fetchall()
 
