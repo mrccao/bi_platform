@@ -9,7 +9,7 @@ from app.tasks.bi_user_bill_detail import process_bi_user_bill_detail
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.sync_wpt_bi import process_wpt_bi_user_statistic
-from app.tasks.cron_daily_report import daily_report_dau
+from app.tasks.cron_daily_report import daily_report_dau, daily_report_game_table_statistic
 
 
 @celery.task
@@ -52,3 +52,7 @@ def process_bi_statistic_for_today():
 @celery.task
 def daily_report():
     daily_report_dau()
+    daily_report_game_table_statistic()
+
+
+

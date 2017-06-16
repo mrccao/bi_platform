@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 from flask_migrate import MigrateCommand
 from flask_script import Manager, Server
@@ -21,6 +22,7 @@ from app.tasks.bi_user_bill_detail import process_bi_user_bill_detail
 from app.tasks.bi_user_currency import process_bi_user_currency
 from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
 from app.tasks.scheduled import process_bi, process_wpt_bi
+from app.tasks.cron_daily_report import daily_report_dau, daily_report_game_table_statistic
 
 # default to dev config because no one should use this in
 # production anyway
@@ -489,6 +491,16 @@ def process_promotion_push():
     else:
         process_promotion_facebook_notification()
         process_promotion_email()
+
+@manager.command
+def send_daily_report():
+    if app.config['ENV'] == 'prod':
+        daily_report_dau.delay()
+        daily_report_game_table_statistic.delay()
+    else:
+        daily_report_dau()
+        daily_report_game_table_statistic()
+
 
 
 if __name__ == "__main__":
