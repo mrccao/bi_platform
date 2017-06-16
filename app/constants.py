@@ -106,12 +106,12 @@ REPLY_TO = {"email": "no-reply@playwpt.com", "name": ""}
 # TEST_EMAIL_RECIPIENTS = [{"username": 'fanhaieng', "email": "fanhaipeng0403@gmail.com", "country": "United States"}]
 
 
-# DAILY_REPORT_RECIPIENTS = ["jerry.lao@wpt.com", "Hong.Kaing@wpt.com", "Andrew.Song@wpt.com",
-#                            "wangjc.Jason@ourgame.com", "zhudan@ourgame.com", "fujie@ourgame.com",
-#                            "xuqi@ourgame.com", 'fanhp@ourgame.com', 'zhenglei@ourgame.com']
+DAILY_REPORT_RECIPIENTS = ["jerry.lao@wpt.com", "Hong.Kaing@wpt.com", "Andrew.Song@wpt.com",
+                           "wangjc.Jason@ourgame.com", "zhudan@ourgame.com", "fujie@ourgame.com",
+                           "xuqi@ourgame.com", 'fanhp@ourgame.com', 'zhenglei@ourgame.com']
 
 
-DAILY_REPORT_RECIPIENTS = ['fanhp@ourgame.com']
+# DAILY_REPORT_RECIPIENTS = ['fanhp@ourgame.com']
 
 
 
