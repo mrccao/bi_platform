@@ -157,6 +157,9 @@ def daily_report_game_table_statistic():
                  on_hour; 
             """
 
+
+    sql = sql.encode('utf-8')
+
     result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
 
     column_names_attached = dedup([col[0] for col in result_proxy.cursor.description])
@@ -225,6 +228,7 @@ def daily_report_game_table_statistic():
         GROUP BY stakes_level,
                  on_day; 
     """
+    sql = sql.encode('utf-8')
 
     result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
     column_names = dedup([col[0] for col in result_proxy.cursor.description])
