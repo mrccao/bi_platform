@@ -1,42 +1,75 @@
-<br/>
-<br/>
-<div style="text-align: center;">
-    <b style="font-family: helvetica, arial, sans-serif; font-size: 20px; font-style: normal; font-variant-caps: normal; text-align: center;"> {{ title }}</b>
-</div>
-<br/>
-<table style="width: 100%; padding: 0; margin: 0;" cellspacing="0">
-    <tr>
-        {% for column_name in column_names %}
-            <th style=" color: #4f6b72; border-right: 1px solid #C1DAD7;
-            border-bottom: 1px solid #C1DAD7; border-top: 1px solid #C1DAD7;font-weight: 600;
+{% if DAU %}
+    <br/>
+    <br/>
+    <div style="text-align: center;">
+        <b style="font-family: helvetica, arial, sans-serif; font-size: 20px; font-style: normal; font-variant-caps: normal; text-align: center;"> {{ title }}</b>
+    </div>
+    <br/>
+    <table style="width: 100%; padding: 0; margin: 0;" cellspacing="0">
+        <tr>
+            {% for column_name in column_names %}
+                <th style=" color: #4f6b72; border-right: 1px solid #c1dad7;
+            border-bottom: 1px solid #c1dad7; border-top: 1px solid #c1dad7;font-weight: 600;
              letter-spacing: 2px;  text-align: left;
-             padding: 6px 6px 6px 12px; background: #CAE8EA no-repeat;">{{ column_name }}</th>
-        {% endfor %}
-    </tr>
-
-    {{ yesterday_data_style | safe }}
-
-    {% for each_day_data in report_data %}
-        <tr> {% for metric in  each_day_data %}
-            <td style=" border-right: 1px solid #C1DAD7; border-bottom: 1px solid #C1DAD7; background: #fff; font-size:15px;font-weight: 400; padding: 6px 6px 6px 12px; color: #0e0e0e;">{{ metric }}</td>
-        {% endfor %}
+             padding: 6px 6px 6px 12px; background: #cae8ea no-repeat;">{{ column_name }}</th>
+            {% endfor %}
         </tr>
-    {% endfor %}
-</table>
 
-<br/>
+        {{ yesterday_data_style | safe }}
 
-<p style="font-size: 16px">For more details , Please check the <b style="font-size: 14px">{{ filename }} </b> attached .
+        {% for each_day_data in report_data %}
+            <tr> {% for metric in  each_day_data %}
+                <td style=" border-right: 1px solid #c1dad7; border-bottom: 1px solid #c1dad7; background: #fff; font-size:15px;font-weight: 400; padding: 6px 6px 6px 12px; color: #0e0e0e;">{{ metric }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <br/>
+
+{% elif game_table_statistic %}
+
     <br/>
     <br/>
-    Report generated on {{ generated_at }}.
+    <div style="text-align: center;">
+        <b style="font-family: helvetica, arial, sans-serif; font-size: 20px; font-style: normal; font-variant-caps: normal; text-align: center;"> {{ title }}</b>
+    </div>
+    <br/>
+    <table style="width: 100%; padding: 0; margin: 0;" cellspacing="0">
+        <tr>
+            {% for column_name in column_names %}
+                <th style=" color: #4f6b72; border-right: 1px solid #c1dad7;
+            border-bottom: 1px solid #c1dad7; border-top: 1px solid #c1dad7;font-weight: 600;
+             letter-spacing: 2px;  text-align: left;
+             padding: 6px 6px 6px 12px; background: #cae8ea no-repeat;">{{ column_name }}</th>
+            {% endfor %}
+        </tr>
+
+
+        {% for each_hour_data in report_data %}
+            <tr> {% for metric in  each_hour_data %}
+                <td style=" border-right: 1px solid #c1dad7; border-bottom: 1px solid #c1dad7; background: #fff; font-size:15px;font-weight: 400; padding: 6px 6px 6px 12px; color: #0e0e0e;">{{ metric }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br/>
+
+{% endif %}
+
+
+<p style="font-size: 16px">for more details , please check the <b style="font-size: 14px">{{ filename }} </b>
+    attached .
+    <br/>
+    <br/>
+    report generated on {{ generated_at }}.
 </p>
 <td style="padding: 10px 10px 10px 10px;" bgcolor="#ffffff">
     <table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" height="2"
            style="font-size: 2px; line-height: 2px;">
         <tbody>
         <tr>
-            <td bgcolor="#0070CD">&nbsp;</td>
+            <td bgcolor="#0070cd">&nbsp;</td>
         </tr>
         </tbody>
     </table>
@@ -46,13 +79,12 @@
 <br/>
 <div style="text-align: right;">
     <p style="font-size: 10px; font-family: helvetica, arial, sans-serif;font-style: normal; font-variant-caps: normal; ">
-        WPT BI System
+        wpt bi system
         <br/>
-        1920 Main Street, Suite 1150
+        1920 main street, suite 1150
         <br/>
-        Irvine, CA 92614
+        irvine, ca 92614
         <br/>
-        © 2017 WPT Enterprises,Inc. All Rights Reserved.​
+        © 2017 wpt enterprises,inc. all rights reserved.​
     </p>
 </div>
-
