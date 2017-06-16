@@ -109,7 +109,7 @@ REPLY_TO = {"email": "no-reply@playwpt.com", "name": ""}
 DAILY_REPORT_RECIPIENTS = ["jerry.lao@wpt.com", "Hong.Kaing@wpt.com", "Andrew.Song@wpt.com",
                            "wangjc.Jason@ourgame.com", "zhudan@ourgame.com", "fujie@ourgame.com",
                            "xuqi@ourgame.com", 'fanhp@ourgame.com', 'zhenglei@ourgame.com',
-                           "mclean.karr@wpt.com" ]
+                           "mclean.karr@wpt.com"]
 
 
 # DAILY_REPORT_RECIPIENTS = ['fanhp@ourgame.com']
