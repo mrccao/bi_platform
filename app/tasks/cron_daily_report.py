@@ -85,8 +85,8 @@ def daily_report_dau():
 
     title = 'Daily Report – DAU Related'
     email_subject = today + '_DAU_REPORT'
-    filename = today + '_DAU_REPORT.csv'
-    path = os.path.join('/home/', filename)
+    filename = 'DAU_REPORT.csv'
+    path = os.path.join(app.config["REPORT_FILE_FOLDER"], filename)
 
     result = pd.DataFrame(pd.DataFrame(last_thirty_days_data, columns=column_names))
 

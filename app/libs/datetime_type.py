@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import arrow
 from flask import current_app as app
 from sqlalchemy import types
@@ -28,7 +26,11 @@ class OGInsertableAwareDateTime(types.TypeDecorator):
     #         return arrow.get(value).replace(hours=-8).to(app.config['APP_TIMEZONE'])
     def process_bind_param(self, value, _):
         if value is not None:
-            return arrow.get(value).replace(hours=-8)
+            try:
+                time = arrow.get(value).replace(hours=-8)
+            except OverflowError :
+                time = None
+            return time
 
     def process_result_value(self, value, _):
         if value is not None:
