@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 from flask import current_app as app
+from numpy import array
 from sqlalchemy import text
 
-from app.constants import DAILY_DAU_REPORT_RECIPIENTS
+from app.constants import DAILY_REPORT_RECIPIENTS
 from app.extensions import db
 from app.tasks import celery
 from app.tasks.mail import send_mail
@@ -65,8 +66,6 @@ def daily_report_dau():
          format(row['ARPPU'], '0.2f'),
          format(row['ARPDAU'], '0.2f')] for row in db.engine.execute(text(sql), today=today)]
 
-    from numpy import array
-
     report_data = last_thirty_days_data_formatted[1:7]
 
     yesterday_data = array(last_thirty_days_data[0])[1:]
@@ -93,7 +92,144 @@ def daily_report_dau():
     with open(path, 'w+') as f:
         result.to_csv(f, sep='\t', encoding='utf-8')
 
-    send_mail(to=DAILY_DAU_REPORT_RECIPIENTS, subject=email_subject, template='cron_daily_report', attachment=path,
+    send_mail(to=DAILY_REPORT_RECIPIENTS, subject=email_subject, template='cron_daily_report', attachment=path,
               attachment_content_type='text/csv', filename=filename, column_names=column_names,
               report_data=report_data, title=title, generated_at=generated_at,
-              yesterday_data_style=yesterday_data_style)
+              yesterday_data_style=yesterday_data_style, DAU=True)
+
+
+@celery.task
+def daily_report_game_table_statistic():
+    now = current_time(app.config['APP_TIMEZONE'])
+    today = now.format('YYYY-MM-DD')
+    generated_at = now.format('YYYY-MM-DD HH:mm:ss')
+    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+
+    sql = """
+                SELECT
+                 CASE mi.blindname
+                          WHEN '1-2WPT盲注' THEN 'Beginner1'
+                          WHEN 'WPT-2-4' THEN 'Beginner2'
+                          WHEN 'WPT-3-6' THEN 'Beginner3'
+                          WHEN 'cgz_5/10' THEN 'Beginner4'
+                          WHEN '万能豆 10\20 新' THEN 'Amateur1'
+                          WHEN 'cgz_50/100' THEN 'Amateur2'
+                          WHEN 'cgz_100/200' THEN 'Amateur3'
+                          WHEN 'cgz_250/500' THEN 'Amateur4'
+                          WHEN 'cgz_500/1000' THEN 'Pro1'
+                          WHEN '万能豆 1000/2000' THEN 'Pro2'
+                          WHEN '万能豆 2500/5000' THEN 'Pro3'
+                          WHEN 'cgz_5000/10000' THEN 'Pro4'
+                          WHEN '万能豆 10000/20000 大' THEN 'Elite1'
+                          WHEN 'cgz_2w/4w' THEN 'Elite2'
+                          WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
+                          WHEN 'cgz_10w/20w' THEN 'Elite4'
+                          ELSE mi.blindname
+                 END AS template_name,
+                 CASE mi.blindname ​
+                          WHEN '1-2WPT盲注' THEN '1/2'
+                          WHEN 'WPT-2-4' THEN '2/4'
+                          WHEN 'WPT-3-6' THEN '3/6'
+                          WHEN 'cgz_5/10' THEN '5/10'
+                          WHEN '万能豆 10\20 新' THEN '10/20'
+                          WHEN 'cgz_50/100' THEN '50/100'
+                          WHEN 'cgz_100/200' THEN '100/200'
+                          WHEN 'cgz_250/500' THEN '250/500'
+                          WHEN 'cgz_500/1000' THEN '500/1000'
+                          WHEN '万能豆 1000/2000' THEN '1000/2000'
+                          WHEN '万能豆 2500/5000' THEN '2500/5000'
+                          WHEN 'cgz_5000/10000' THEN '5000/10000'
+                          WHEN '万能豆 10000/20000 大' THEN '10000/20000'
+                          WHEN 'cgz_2w/4w' THEN '20000/40000'
+                          WHEN '万能豆 50000/100000 紫' THEN '50000/100000'
+                          WHEN 'cgz_10w/20w' THEN '100000/200000'
+                          ELSE mi.blindname
+                 END                                                                         AS stakes_level,
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d %H') AS on_hour,
+                 COUNT(DISTINCT cgz.username)                                                AS uniq_players,
+                 COUNT(DISTINCT cgz.pan_id)                                                  AS uniq_hands_played,
+                 COUNT(cgz.pan_id)                                                           AS total_hands_played
+        FROM     tj_matchinfo mi
+        JOIN     tj_cgz_flow_userpaninfo cgz
+        ON       cgz.matchid=mi.matchid
+        WHERE    DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
+        GROUP BY stakes_level,
+                 on_hour; 
+            """
+
+    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
+
+    column_names_attached = dedup([col[0] for col in result_proxy.cursor.description])
+
+    last_24_hours_data = result_proxy.fetchall()
+
+    title = 'Daily Report – Game Table Statistic Related'
+    email_subject = today + '_Game_Table_Statistic_REPORT'
+    filename = 'STAKES_LEVEL_REPORT.csv'
+
+    path = os.path.join(app.config["REPORT_FILE_FOLDER"], filename)
+    result = pd.DataFrame(pd.DataFrame(last_24_hours_data, columns=column_names_attached))
+
+    with open(path, 'w+') as f:
+        result.to_csv(f, sep='\t', encoding='utf-8')
+
+    sql = """
+    
+          SELECT
+                 CASE mi.blindname
+                          WHEN '1-2WPT盲注' THEN 'Beginner1'
+                          WHEN 'WPT-2-4' THEN 'Beginner2'
+                          WHEN 'WPT-3-6' THEN 'Beginner3'
+                          WHEN 'cgz_5/10' THEN 'Beginner4'
+                          WHEN '万能豆 10\20 新' THEN 'Amateur1'
+                          WHEN 'cgz_50/100' THEN 'Amateur2'
+                          WHEN 'cgz_100/200' THEN 'Amateur3'
+                          WHEN 'cgz_250/500' THEN 'Amateur4'
+                          WHEN 'cgz_500/1000' THEN 'Pro1'
+                          WHEN '万能豆 1000/2000' THEN 'Pro2'
+                          WHEN '万能豆 2500/5000' THEN 'Pro3'
+                          WHEN 'cgz_5000/10000' THEN 'Pro4'
+                          WHEN '万能豆 10000/20000 大' THEN 'Elite1'
+                          WHEN 'cgz_2w/4w' THEN 'Elite2'
+                          WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
+                          WHEN 'cgz_10w/20w' THEN 'Elite4'
+                          ELSE mi.blindname
+                 END AS template_name,
+                 CASE mi.blindname ​
+                          WHEN '1-2WPT盲注' THEN '1/2'
+                          WHEN 'WPT-2-4' THEN '2/4'
+                          WHEN 'WPT-3-6' THEN '3/6'
+                          WHEN 'cgz_5/10' THEN '5/10'
+                          WHEN '万能豆 10\20 新' THEN '10/20'
+                          WHEN 'cgz_50/100' THEN '50/100'
+                          WHEN 'cgz_100/200' THEN '100/200'
+                          WHEN 'cgz_250/500' THEN '250/500'
+                          WHEN 'cgz_500/1000' THEN '500/1000'
+                          WHEN '万能豆 1000/2000' THEN '1000/2000'
+                          WHEN '万能豆 2500/5000' THEN '2500/5000'
+                          WHEN 'cgz_5000/10000' THEN '5000/10000'
+                          WHEN '万能豆 10000/20000 大' THEN '10000/20000'
+                          WHEN 'cgz_2w/4w' THEN '20000/40000'
+                          WHEN '万能豆 50000/100000 紫' THEN '50000/100000'
+                          WHEN 'cgz_10w/20w' THEN '100000/200000'
+                          ELSE mi.blindname
+                 END                                                                         AS stakes_level,
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d')    AS on_day,
+                 COUNT(DISTINCT cgz.username)                                                AS uniq_players,
+                 COUNT(DISTINCT cgz.pan_id)                                                  AS uniq_hands_played,
+                 COUNT(cgz.pan_id)                                                           AS total_hands_played
+        FROM     tj_matchinfo mi
+        JOIN     tj_cgz_flow_userpaninfo cgz
+        ON       cgz.matchid=mi.matchid
+        WHERE    DATE(convert_tz(cgz.time_update, '+08:00', '-04:00'))= :yesterday
+        GROUP BY stakes_level,
+                 on_day; 
+    """
+
+    result_proxy = db.get_engine(db.get_app(), bind='orig_wpt_ods').execute(text(sql), yesterday=yesterday)
+    column_names = dedup([col[0] for col in result_proxy.cursor.description])
+    yesterday_data = result_proxy.fetchall()
+
+    send_mail(to=DAILY_REPORT_RECIPIENTS, subject=email_subject, template='cron_daily_report', attachment=path,
+              attachment_content_type='text/csv', filename=filename, column_names=column_names,
+              report_data=yesterday_data, title=title, generated_at=generated_at, game_table_statistic=True)
