@@ -16,11 +16,10 @@ def daily_report_dau():
     now = current_time(app.config['APP_TIMEZONE'])
     today = now.format('YYYY-MM-DD')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
-
-    generated_at = now.format('YYYY-MM-DD HH:mm:ss')
+    generated_at = now.format('MM-DD-YYYY HH:mm:ss')
 
     sql = """
-         SELECT DATE_FORMAT(a.on_day, '%Y-%m-%d')           AS on_day,
+         SELECT DATE_FORMAT(a.on_day, '%m/%d/%y')           AS on_day,
                a.new_reg,
                a.new_reg_game_dau,
                a.new_reg_game_dau / a.new_reg              AS reg_to_dau,
@@ -83,14 +82,14 @@ def daily_report_dau():
         yesterday) + yesterday_data_style + '<tr>'
 
     title = 'Daily Report – DAU Related'
-    email_subject = today + '_DAU_REPORT'
+    email_subject = now.format('MM-DD-YYYY') + '_DAU_REPORT'
     filename = 'DAU_REPORT.csv'
     path = os.path.join(app.config["REPORT_FILE_FOLDER"], filename)
 
     result = pd.DataFrame(pd.DataFrame(last_thirty_days_data, columns=column_names))
 
     with open(path, 'w+') as f:
-        result.to_csv(f, sep='\t', encoding='utf-8')
+        result.to_csv(f, sep=',', encoding='utf-8')
 
     send_mail(to=DAILY_REPORT_RECIPIENTS, subject=email_subject, template='cron_daily_report', attachment=path,
               attachment_content_type='text/csv', filename=filename, column_names=column_names,
@@ -101,13 +100,12 @@ def daily_report_dau():
 @celery.task
 def daily_report_game_table_statistic():
     now = current_time(app.config['APP_TIMEZONE'])
-    today = now.format('YYYY-MM-DD')
-    generated_at = now.format('YYYY-MM-DD HH:mm:ss')
     yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    generated_at = now.format('MM-DD-YYYY HH:mm:ss')
 
     sql = """
           SELECT
-                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d %H') AS on_hour,
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%m/%d/%y %H') AS on_hour,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN 'Beginner1'
                           WHEN 'WPT-2-4' THEN 'Beginner2'
@@ -126,7 +124,7 @@ def daily_report_game_table_statistic():
                           WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
-                 END AS template_name,
+                 END AS table_name,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'
@@ -164,18 +162,18 @@ def daily_report_game_table_statistic():
     last_24_hours_data = result_proxy.fetchall()
 
     title = 'Daily Report – Game Table Statistic Related'
-    email_subject = today + '_Game_Table_Statistic_REPORT'
+    email_subject = now.format('MM-DD-YYYY') + '_Game_Table_Statistic_REPORT'
     filename = 'STAKES_LEVEL_REPORT.csv'
 
     path = os.path.join(app.config["REPORT_FILE_FOLDER"], filename)
     result = pd.DataFrame(pd.DataFrame(last_24_hours_data, columns=column_names_attached))
 
     with open(path, 'w+', encoding='utf-8') as f:
-        result.to_csv(f, encoding='utf-8')
+        result.to_csv(f, sep=',', encoding='utf-8')
 
     sql = """
           SELECT
-                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%y-%m-%d')    AS on_day,
+                 date_format(convert_tz(cgz.time_update, '+08:00', '-04:00'), '%m/%d/%y')    AS on_day,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN 'Beginner1'
                           WHEN 'WPT-2-4' THEN 'Beginner2'
@@ -194,7 +192,7 @@ def daily_report_game_table_statistic():
                           WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
-                 END AS template_name,
+                 END AS table_name,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'

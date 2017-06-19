@@ -7,9 +7,10 @@ from app.tasks.bi_user import process_bi_user
 from app.tasks.bi_user_bill import process_bi_user_bill
 from app.tasks.bi_user_bill_detail import process_bi_user_bill_detail
 from app.tasks.bi_user_currency import process_bi_user_currency
-from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
-from app.tasks.sync_wpt_bi import process_wpt_bi_user_statistic
 from app.tasks.cron_daily_report import daily_report_dau, daily_report_game_table_statistic
+from app.tasks.promotion import process_promotion_facebook_notification, process_promotion_email
+from app.tasks.sendgrid import get_campaigns
+from app.tasks.sync_wpt_bi import process_wpt_bi_user_statistic
 
 
 @celery.task
@@ -55,4 +56,6 @@ def daily_report():
     daily_report_game_table_statistic()
 
 
-
+@celery.task
+def get_campaign_cached():
+    get_campaigns()
