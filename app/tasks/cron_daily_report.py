@@ -15,7 +15,7 @@ from app.utils import current_time, dedup
 def daily_report_dau():
     now = current_time(app.config['APP_TIMEZONE'])
     today = now.format('YYYY-MM-DD')
-    yesterday = now.replace(days=-1).format('YYYY-MM-DD')
+    yesterday = now.replace(days=-1).format('MM/DD/YY')
     generated_at = now.format('MM-DD-YYYY HH:mm:ss')
 
     sql = """
@@ -111,36 +111,36 @@ def daily_report_game_table_statistic():
                           WHEN 'WPT-2-4' THEN 'Beginner2'
                           WHEN 'WPT-3-6' THEN 'Beginner3'
                           WHEN 'cgz_5/10' THEN 'Beginner4'
-                          WHEN '万能豆 10\20 新' THEN 'Amateur1'
+                          WHEN '万能豆_10\20_新' THEN 'Amateur1'
                           WHEN 'cgz_50/100' THEN 'Amateur2'
                           WHEN 'cgz_100/200' THEN 'Amateur3'
                           WHEN 'cgz_250/500' THEN 'Amateur4'
                           WHEN 'cgz_500/1000' THEN 'Pro1'
-                          WHEN '万能豆 1000/2000' THEN 'Pro2'
-                          WHEN '万能豆 2500/5000' THEN 'Pro3'
+                          WHEN '万能豆_1000/2000' THEN 'Pro2'
+                          WHEN '万能豆_2500/5000' THEN 'Pro3'
                           WHEN 'cgz_5000/10000' THEN 'Pro4'
-                          WHEN '万能豆 10000/20000 大' THEN 'Elite1'
+                          WHEN '万能豆_10000/20000_大' THEN 'Elite1'
                           WHEN 'cgz_2w/4w' THEN 'Elite2'
-                          WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
+                          WHEN '万能豆_50000/100000_紫' THEN 'Elite3'
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
-                 END AS table_name,
+                 END                                                                          AS table_name,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'
                           WHEN 'WPT-3-6' THEN '3/6'
                           WHEN 'cgz_5/10' THEN '5/10'
-                          WHEN '万能豆 10\20 新' THEN '10/20'
+                          WHEN '万能豆_10\20_新' THEN '10/20'
                           WHEN 'cgz_50/100' THEN '50/100'
                           WHEN 'cgz_100/200' THEN '100/200'
                           WHEN 'cgz_250/500' THEN '250/500'
                           WHEN 'cgz_500/1000' THEN '500/1000'
-                          WHEN '万能豆 1000/2000' THEN '1000/2000'
-                          WHEN '万能豆 2500/5000' THEN '2500/5000'
+                          WHEN '万能豆_1000/2000' THEN '1000/2000'
+                          WHEN '万能豆_2500/5000' THEN '2500/5000'
                           WHEN 'cgz_5000/10000' THEN '5000/10000'
-                          WHEN '万能豆 10000/20000 大' THEN '10000/20000'
+                          WHEN '万能豆_10000/20000_大' THEN '10000/20000'
                           WHEN 'cgz_2w/4w' THEN '20000/40000'
-                          WHEN '万能豆 50000/100000 紫' THEN '50000/100000'
+                          WHEN '万能豆_50000/100000_紫' THEN '50000/100000'
                           WHEN 'cgz_10w/20w' THEN '100000/200000'
                           ELSE mi.blindname
                  END                                                                         AS stakes_level,
@@ -179,36 +179,36 @@ def daily_report_game_table_statistic():
                           WHEN 'WPT-2-4' THEN 'Beginner2'
                           WHEN 'WPT-3-6' THEN 'Beginner3'
                           WHEN 'cgz_5/10' THEN 'Beginner4'
-                          WHEN '万能豆 10\20 新' THEN 'Amateur1'
+                          WHEN '万能豆_10\20_新' THEN 'Amateur1'
                           WHEN 'cgz_50/100' THEN 'Amateur2'
                           WHEN 'cgz_100/200' THEN 'Amateur3'
                           WHEN 'cgz_250/500' THEN 'Amateur4'
                           WHEN 'cgz_500/1000' THEN 'Pro1'
-                          WHEN '万能豆 1000/2000' THEN 'Pro2'
-                          WHEN '万能豆 2500/5000' THEN 'Pro3'
+                          WHEN '万能豆_1000/2000' THEN 'Pro2'
+                          WHEN '万能豆_2500/5000' THEN 'Pro3'
                           WHEN 'cgz_5000/10000' THEN 'Pro4'
-                          WHEN '万能豆 10000/20000 大' THEN 'Elite1'
+                          WHEN '万能豆_10000/20000_大' THEN 'Elite1'
                           WHEN 'cgz_2w/4w' THEN 'Elite2'
-                          WHEN '万能豆 50000/100000 紫' THEN 'Elite3'
+                          WHEN '万能豆_50000/100000_紫' THEN 'Elite3'
                           WHEN 'cgz_10w/20w' THEN 'Elite4'
                           ELSE mi.blindname
-                 END AS table_name,
+                 END                                                                         AS table_name,
                  CASE mi.blindname
                           WHEN '1-2WPT盲注' THEN '1/2'
                           WHEN 'WPT-2-4' THEN '2/4'
                           WHEN 'WPT-3-6' THEN '3/6'
                           WHEN 'cgz_5/10' THEN '5/10'
-                          WHEN '万能豆 10\20 新' THEN '10/20'
+                          WHEN '万能豆_10\20_新' THEN '10/20'
                           WHEN 'cgz_50/100' THEN '50/100'
                           WHEN 'cgz_100/200' THEN '100/200'
                           WHEN 'cgz_250/500' THEN '250/500'
                           WHEN 'cgz_500/1000' THEN '500/1000'
-                          WHEN '万能豆 1000/2000' THEN '1000/2000'
-                          WHEN '万能豆 2500/5000' THEN '2500/5000'
+                          WHEN '万能豆_1000/2000' THEN '1000/2000'
+                          WHEN '万能豆_2500/5000' THEN '2500/5000'
                           WHEN 'cgz_5000/10000' THEN '5000/10000'
-                          WHEN '万能豆 10000/20000 大' THEN '10000/20000'
+                          WHEN '万能豆_10000/20000_大' THEN '10000/20000'
                           WHEN 'cgz_2w/4w' THEN '20000/40000'
-                          WHEN '万能豆 50000/100000 紫' THEN '50000/100000'
+                          WHEN '万能豆_50000/100000_紫' THEN '50000/100000'
                           WHEN 'cgz_10w/20w' THEN '100000/200000'
                           ELSE mi.blindname
                  END                                                                         AS stakes_level,
